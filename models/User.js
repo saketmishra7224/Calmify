@@ -109,6 +109,15 @@ userSchema.pre('save', async function(next) {
   }
 });
 
+// Method to compare password
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  try {
+    return await bcrypt.compare(candidatePassword, this.password);
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Method to generate JWT token
 userSchema.methods.generateToken = function() {
   return jwt.sign(

@@ -1,4 +1,32 @@
 const { PHQ9_QUESTIONS, GAD7_QUESTIONS, calculatePHQ9Score, calculateGAD7Score } = require('./crisisDetection');
+const OpenAI = require('openai');
+
+// Initialize Azure OpenAI client
+const initializeAzureOpenAI = () => {
+  try {
+    if (!process.env.AZURE_OPENAI_API_KEY || !process.env.AZURE_OPENAI_ENDPOINT || !process.env.AZURE_OPENAI_DEPLOYMENT_NAME) {
+      console.log('Azure OpenAI credentials not found, using fallback responses');
+      return null;
+    }
+
+    const client = new OpenAI({
+      apiKey: process.env.AZURE_OPENAI_API_KEY,
+      baseURL: `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/${process.env.AZURE_OPENAI_DEPLOYMENT_NAME}`,
+      defaultQuery: { 'api-version': process.env.AZURE_OPENAI_API_VERSION || '2024-02-15-preview' },
+      defaultHeaders: {
+        'api-key': process.env.AZURE_OPENAI_API_KEY,
+      }
+    });
+
+    console.log('✅ Azure OpenAI client initialized successfully');
+    return client;
+  } catch (error) {
+    console.error('Failed to initialize Azure OpenAI client:', error.message);
+    return null;
+  }
+};
+
+const azureOpenAIClient = initializeAzureOpenAI();
 
 /**
  * AI Chatbot System for Mental Health Support
@@ -160,6 +188,62 @@ const RESPONSES = {
 };
 
 /**
+ * Supportive responses for simple intent-based responses
+ */
+const SUPPORTIVE_RESPONSES = {
+  greeting: [
+    "Hello! I'm here to listen and support you. How are you feeling today?",
+    "Hi there! I'm glad you reached out. What's on your mind?",
+    "Welcome! I'm here to help you feel better. How can I support you today?"
+  ],
+  crisis: [
+    "I'm really concerned about what you're going through. Please reach out to crisis support: Call 988 or text HOME to 741741.",
+    "Your safety is important. Please contact the Crisis Lifeline at 988 or emergency services at 911 if you're in immediate danger.",
+    "Thank you for sharing this with me. Please get immediate support: 988 for crisis help or 911 for emergencies."
+  ],
+  anxiety: [
+    "I understand that anxiety can feel overwhelming. You're not alone in this.",
+    "Anxiety is really difficult to deal with. Have you tried any breathing exercises or grounding techniques?",
+    "It's completely normal to feel anxious sometimes. What's been causing you the most worry lately?"
+  ],
+  depression: [
+    "I hear that you're going through a really tough time. Your feelings are valid.",
+    "Depression can make everything feel harder. You're brave for reaching out.",
+    "You don't have to go through this alone. Have you been able to talk to anyone else about how you're feeling?"
+  ],
+  stress: [
+    "It sounds like you're dealing with a lot of stress right now. That's really challenging.",
+    "Stress can be overwhelming. What's been the biggest source of pressure for you?",
+    "When we're stressed, it's important to take care of ourselves. What helps you feel calmer?"
+  ],
+  support: [
+    "I'm here to listen and support you through whatever you're going through.",
+    "Thank you for trusting me with your feelings. You deserve support and care.",
+    "It takes courage to ask for help. What kind of support would be most helpful right now?"
+  ],
+  encouragement: [
+    "You're stronger than you know, even when things feel impossible.",
+    "It's okay to struggle. Taking things one day at a time is perfectly fine.",
+    "You've made it through difficult times before, and you can get through this too."
+  ],
+  coping: [
+    "Learning healthy coping strategies takes time. What has helped you in the past?",
+    "Some people find breathing exercises, walking, or talking to friends helpful. What resonates with you?",
+    "Coping looks different for everyone. Would you like to explore some techniques together?"
+  ],
+  professional: [
+    "Speaking with a professional counselor can be really helpful. Have you considered that option?",
+    "A therapist or counselor can provide specialized support. I can help you think about how to find one.",
+    "Professional support can make a real difference. Would you like help finding resources in your area?"
+  ],
+  default: [
+    "Thank you for sharing that with me. I'm here to listen and support you.",
+    "I want you to know that your feelings matter and you're not alone.",
+    "It sounds like you're going through something difficult. How can I best support you?"
+  ]
+};
+
+/**
  * Conversation State Management
  */
 class ConversationState {
@@ -245,7 +329,7 @@ class AIChatbot {
       conversation.addMessage(message.message, true);
       
       const intent = conversation.detectIntent(message.message);
-      let response = await this.generateResponse(intent, conversation, message.message);
+      let response = await this.generateAIEnhancedResponse(intent, conversation, message.message);
       
       // Check if we need to escalate
       const shouldEscalate = await this.checkEscalationNeeds(intent, conversation, message.message);
@@ -266,7 +350,156 @@ class AIChatbot {
   }
 
   /**
-   * Generate response based on intent
+   * Generate AI-enhanced response using Azure OpenAI
+   */
+  async generateAIEnhancedResponse(intent, conversation, messageText) {
+    if (!azureOpenAIClient) {
+      // Fallback to rule-based response if Azure OpenAI is not available
+      return this.generateResponse(intent, conversation, messageText);
+    }
+
+    try {
+      const { intent: intentType, confidence } = intent;
+      
+      // For crisis situations, always use immediate rule-based responses
+      if (intentType === 'crisis') {
+        return this.generateCrisisResponse(conversation, messageText);
+      }
+
+      // Build context for Azure OpenAI
+      const systemPrompt = this.buildSystemPrompt(intentType, conversation);
+      const userContext = this.buildUserContext(conversation, messageText);
+
+      const messages = [
+        {
+          role: "system",
+          content: systemPrompt
+        },
+        {
+          role: "user", 
+          content: userContext
+        }
+      ];
+
+      // Add recent conversation history for context
+      const recentHistory = conversation.conversationHistory.slice(-4);
+      for (const historyItem of recentHistory) {
+        if (historyItem.isUser) {
+          messages.push({
+            role: "user",
+            content: historyItem.message
+          });
+        } else {
+          messages.push({
+            role: "assistant", 
+            content: historyItem.message
+          });
+        }
+      }
+
+      const response = await azureOpenAIClient.chat.completions.create({
+        model: process.env.AZURE_OPENAI_DEPLOYMENT_NAME,
+        messages: messages,
+        max_tokens: 300,
+        temperature: 0.7,
+        top_p: 0.9,
+        frequency_penalty: 0.5,
+        presence_penalty: 0.5
+      });
+
+      const aiResponse = response.choices[0]?.message?.content;
+      
+      if (!aiResponse) {
+        return this.generateResponse(intent, conversation, messageText);
+      }
+
+      // Check if the AI response needs crisis escalation
+      const needsEscalation = this.checkResponseForEscalation(aiResponse, messageText);
+
+      return {
+        content: {
+          text: aiResponse,
+          type: 'ai-enhanced'
+        },
+        metadata: {
+          intent: intentType,
+          confidence: confidence,
+          aiGenerated: true,
+          model: 'azure-openai',
+          escalate: needsEscalation,
+          timestamp: new Date()
+        }
+      };
+
+    } catch (error) {
+      console.error('Azure OpenAI API error:', error);
+      // Fallback to rule-based response
+      return this.generateResponse(intent, conversation, messageText);
+    }
+  }
+
+  /**
+   * Build system prompt for Azure OpenAI based on intent
+   */
+  buildSystemPrompt(intentType, conversation) {
+    const basePrompt = `You are a compassionate AI mental health support assistant for the Saneyar platform. Your primary goals are:
+    1. Provide empathetic, non-judgmental support
+    2. Validate feelings and experiences
+    3. Offer practical coping strategies
+    4. Recognize when professional help is needed
+    5. NEVER provide medical diagnoses or treatment advice
+    6. Always prioritize user safety
+
+    Important guidelines:
+    - Keep responses concise but warm (2-3 sentences max)
+    - Use supportive, validating language
+    - Offer specific, actionable suggestions when appropriate
+    - If someone mentions self-harm, suicide, or crisis, direct them to crisis resources immediately
+    - Encourage professional help for ongoing mental health concerns
+    `;
+
+    const intentSpecificPrompts = {
+      depression: "The user seems to be experiencing depressive symptoms. Focus on validation, hope, and gentle suggestions for support.",
+      anxiety: "The user appears anxious or worried. Offer calming techniques and reassurance while acknowledging their concerns.",
+      coping: "The user is seeking coping strategies. Provide specific, evidence-based techniques they can try immediately.",
+      assessment: "The user is interested in mental health assessment. Guide them supportively through the process.",
+      escalation: "The user wants to speak with a human counselor. Be supportive of this decision and help facilitate the connection.",
+      information: "The user is seeking information about mental health. Provide accurate, helpful information in an accessible way.",
+      greeting: "Welcome the user warmly and help them feel comfortable sharing what's on their mind."
+    };
+
+    return basePrompt + (intentSpecificPrompts[intentType] || "Provide general emotional support and validation.");
+  }
+
+  /**
+   * Build user context for Azure OpenAI
+   */
+  buildUserContext(conversation, messageText) {
+    let context = `User message: "${messageText}"`;
+    
+    if (conversation.userProfile.isAnonymous) {
+      context += "\nNote: This user is anonymous and may need extra reassurance about privacy.";
+    }
+    
+    if (conversation.escalationFlags.length > 0) {
+      context += "\nNote: This user has previously indicated distress. Be extra supportive.";
+    }
+
+    return context;
+  }
+
+  /**
+   * Check if AI response requires escalation
+   */
+  checkResponseForEscalation(aiResponse, originalMessage) {
+    const crisisKeywords = /(suicide|kill myself|want to die|hurt myself|end it all)/i;
+    const escalationKeywords = /(emergency|crisis|urgent|can't go on|help me)/i;
+    
+    return crisisKeywords.test(originalMessage) || escalationKeywords.test(originalMessage);
+  }
+
+  /**
+   * Generate response based on intent (fallback method)
    */
   async generateResponse(intent, conversation, messageText) {
     const { intent: intentType, confidence } = intent;
@@ -726,7 +959,8 @@ setInterval(() => {
   aiChatbot.cleanupOldConversations();
 }, 60 * 60 * 1000);
 
-module.exports = aiChatbot;
+// Also export the main aiChatbot instance as default
+// module.exports = aiChatbot;
 
 // Keywords and patterns for intent detection
 const INTENT_PATTERNS = {
@@ -739,6 +973,61 @@ const INTENT_PATTERNS = {
   encouragement: /\b(difficult|hard|tough|struggle|can't cope|giving up)\b/i,
   coping: /\b(cope|coping|manage|handle|deal with|strategies|techniques)\b/i,
   professional: /\b(therapist|counselor|professional|therapy|treatment|medication)\b/i
+};
+
+// Simple Azure OpenAI chat function for direct use
+const generateAzureOpenAIResponse = async (userMessage, context = {}) => {
+  if (!azureOpenAIClient) {
+    throw new Error('Azure OpenAI client not initialized');
+  }
+
+  try {
+    const intent = analyzeIntent(userMessage);
+    
+    const systemPrompt = `You are a compassionate AI mental health support assistant. 
+    Provide empathetic, supportive responses that validate feelings and offer hope.
+    Keep responses concise (2-3 sentences) and appropriate for someone seeking mental health support.
+    If the user mentions self-harm or crisis, direct them to crisis resources immediately.
+    Current context: User intent appears to be "${intent}".`;
+
+    const messages = [
+      {
+        role: "system",
+        content: systemPrompt
+      },
+      {
+        role: "user",
+        content: userMessage
+      }
+    ];
+
+    const response = await azureOpenAIClient.chat.completions.create({
+      model: process.env.AZURE_OPENAI_DEPLOYMENT_NAME,
+      messages: messages,
+      max_tokens: 200,
+      temperature: 0.7,
+      top_p: 0.9
+    });
+
+    const aiResponse = response.choices[0]?.message?.content;
+    
+    if (!aiResponse) {
+      throw new Error('No response from Azure OpenAI');
+    }
+
+    return {
+      response: aiResponse,
+      intent: intent,
+      metadata: {
+        model: 'azure-openai',
+        timestamp: new Date()
+      }
+    };
+
+  } catch (error) {
+    console.error('Azure OpenAI error:', error);
+    throw error;
+  }
 };
 
 // Analyze message intent
@@ -889,8 +1178,10 @@ module.exports = {
   analyzeIntent,
   generateResponse,
   generateAIResponse,
+  generateAzureOpenAIResponse,
   shouldRespondToMessage,
   getMentalHealthResources,
   SUPPORTIVE_RESPONSES,
-  INTENT_PATTERNS
+  INTENT_PATTERNS,
+  aiChatbot
 };

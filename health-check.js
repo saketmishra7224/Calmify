@@ -146,7 +146,8 @@ if (process.env.REDIS_URL) {
 // Check external services
 console.log('\n🌐 Checking external service configuration...');
 const externalServices = {
-    'OpenAI API (AI Chatbot)': 'OPENAI_API_KEY',
+    'Azure OpenAI API (AI Chatbot)': 'AZURE_OPENAI_API_KEY',
+    'OpenAI API (Legacy)': 'OPENAI_API_KEY',
     'Twilio SMS': 'TWILIO_ACCOUNT_SID',
     'AWS SNS': 'AWS_ACCESS_KEY_ID',
     'SMTP Email': 'EMAIL_USER'
