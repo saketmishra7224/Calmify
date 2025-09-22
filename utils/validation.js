@@ -98,8 +98,34 @@ const validateSessionCreation = [
     .withMessage('Description must be less than 500 characters')
 ];
 
-// Message validation
+// Message validation - accepts both 'message' and 'content.text' formats
 const validateMessage = [
+  // Check for either 'message' or 'content.text'
+  body()
+    .custom((value, { req }) => {
+      const hasMessage = req.body.message && typeof req.body.message === 'string';
+      const hasContentText = req.body.content && req.body.content.text && typeof req.body.content.text === 'string';
+      
+      if (!hasMessage && !hasContentText) {
+        throw new Error('Message is required (either as "message" or "content.text")');
+      }
+      
+      const messageText = hasMessage ? req.body.message : req.body.content.text;
+      if (messageText.length < 1 || messageText.length > 2000) {
+        throw new Error('Message must be between 1 and 2000 characters');
+      }
+      
+      return true;
+    }),
+  
+  body('content.type')
+    .optional()
+    .isIn(['text', 'image', 'file'])
+    .withMessage('Invalid message type')
+];
+
+// Legacy validation for endpoints that specifically need content.text
+const validateMessageContent = [
   body('content.text')
     .isLength({ min: 1, max: 2000 })
     .withMessage('Message must be between 1 and 2000 characters')
@@ -134,5 +160,6 @@ module.exports = {
   validateProfileUpdate,
   validateSessionCreation,
   validateMessage,
+  validateMessageContent,
   validateCrisisAlert
 };

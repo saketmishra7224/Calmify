@@ -40,13 +40,15 @@ router.post('/register',
 
       await user.save();
 
-      // Generate JWT token
-      const token = user.generateToken();
+      // Generate JWT tokens
+      const token = jwt.generateAccessToken(user);
+      const refreshToken = jwt.generateRefreshToken(user);
 
       res.status(201).json({
         message: 'User registered successfully',
         user: user.toJSON(),
         token,
+        refreshToken,
         role: user.role
       });
     } catch (error) {
@@ -94,13 +96,15 @@ router.post('/login',
       user.isOnline = true;
       await user.save();
 
-      // Generate JWT token
-      const token = user.generateToken();
+      // Generate JWT tokens
+      const token = jwt.generateAccessToken(user);
+      const refreshToken = jwt.generateRefreshToken(user);
 
       res.json({
         message: 'Login successful',
         user: user.toJSON(),
         token,
+        refreshToken,
         role: user.role
       });
     } catch (error) {
@@ -218,13 +222,44 @@ router.post('/refresh',
     try {
       const { refreshToken } = req.body;
 
+      console.log('Refresh token request received');
+      console.log('Token type:', typeof refreshToken);
+      console.log('Token length:', refreshToken ? refreshToken.length : 'N/A');
+      console.log('Token preview:', refreshToken ? refreshToken.substring(0, 50) + '...' : 'N/A');
+
       if (!refreshToken) {
         return res.status(401).json({
           error: 'Refresh token required'
         });
       }
 
-      const decoded = jwt.verifyToken(refreshToken);
+      // Validate token format
+      if (typeof refreshToken !== 'string' || !refreshToken.trim()) {
+        return res.status(401).json({
+          error: 'Invalid refresh token format'
+        });
+      }
+
+      // Check if token has the basic JWT structure (three parts separated by dots)
+      const tokenParts = refreshToken.trim().split('.');
+      if (tokenParts.length !== 3) {
+        console.log('Token parts count:', tokenParts.length);
+        console.log('Token parts:', tokenParts);
+        return res.status(401).json({
+          error: 'Malformed refresh token - invalid structure'
+        });
+      }
+
+      let decoded;
+      try {
+        decoded = jwt.verifyToken(refreshToken);
+      } catch (jwtError) {
+        console.error('JWT verification error:', jwtError.message);
+        return res.status(401).json({
+          error: 'Invalid refresh token',
+          details: jwtError.message
+        });
+      }
       
       if (decoded.type !== 'refresh') {
         return res.status(401).json({
@@ -233,17 +268,20 @@ router.post('/refresh',
       }
 
       const user = await User.findById(decoded.id);
-      if (!user || user.status !== 'active') {
+      if (!user || !user.isActive) {
         return res.status(401).json({
           error: 'Invalid refresh token'
         });
       }
 
-      // Generate new access token
+      // Generate new tokens
       const newAccessToken = jwt.generateAccessToken(user);
+      const newRefreshToken = jwt.generateRefreshToken(user);
 
       res.json({
-        accessToken: newAccessToken
+        token: newAccessToken,
+        refreshToken: newRefreshToken,
+        expiresIn: 3600 // 1 hour in seconds
       });
     } catch (error) {
       console.error('Token refresh error:', error);

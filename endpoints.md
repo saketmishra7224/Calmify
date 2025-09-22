@@ -359,11 +359,58 @@ Reset password using reset token.
 }
 ```
 
+### POST /api/auth/anonymous
+
+Create an anonymous session for guest users.
+
+**Authentication**: Not required
+
+**Request Body**:
+```json
+{
+  "sessionId": "optional_session_id"
+}
+```
+
+**Success Response (200)**:
+```json
+{
+  "success": true,
+  "message": "Anonymous session created",
+  "sessionId": "generated_session_id",
+  "token": "jwt_token_for_anonymous_user"
+}
+```
+
+### POST /api/auth/verify
+
+Verify JWT token validity.
+
+**Authentication**: Required
+
+**Headers**:
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Success Response (200)**:
+```json
+{
+  "valid": true,
+  "user": {
+    "id": "user_id",
+    "username": "john_doe",
+    "email": "john@example.com",
+    "role": "user"
+  }
+}
+```
+
 ---
 
 ## Session Management
 
-### POST /api/sessions
+### POST /api/sessions/create
 
 Create a new support session.
 
@@ -374,24 +421,16 @@ Create a new support session.
 {
   "helperType": "peer",
   "severity": "medium", 
-  "description": "I'm feeling anxious about an upcoming job interview and need someone to talk to",
-  "isAnonymous": false,
-  "preferences": {
-    "ageRange": "20-30",
-    "gender": "any",
-    "language": "en",
-    "experience": "general"
-  },
-  "tags": ["anxiety", "career", "interview"],
-  "scheduledFor": null
+  "title": "Job Interview Anxiety Support",
+  "description": "I'm feeling anxious about an upcoming job interview and need someone to talk to"
 }
 ```
 
 **Field Descriptions**:
 - `helperType`: `peer` | `counselor` | `chatbot`
-- `severity`: `low` | `medium` | `high` | `critical`
-- `isAnonymous`: Whether to hide user identity
-- `scheduledFor`: ISO date string for scheduled sessions (optional)
+- `severity`: `mild` | `moderate` | `severe` | `critical`
+- `title`: Session title (optional)
+- `description`: Description of what support is needed
 
 **Success Response (201)**:
 ```json
@@ -403,31 +442,18 @@ Create a new support session.
     "helperId": null,
     "helperType": "peer",
     "status": "waiting",
-    "severity": "medium",
+    "severity": "moderate",
+    "title": "Job Interview Anxiety Support",
     "description": "I'm feeling anxious about an upcoming job interview",
-    "isAnonymous": false,
-    "preferences": {
-      "ageRange": "20-30",
-      "gender": "any",
-      "language": "en"
-    },
-    "tags": ["anxiety", "career", "interview"],
     "createdAt": "2025-09-22T10:30:00.000Z",
-    "estimatedWaitTime": 300,
-    "queuePosition": 3
-  },
-  "availableHelpers": 5,
-  "emergencyContacts": {
-    "crisis": "988",
-    "emergency": "911",
-    "text": "Text HOME to 741741"
+    "startedAt": null
   }
 }
 ```
 
 ---
 
-### GET /api/sessions
+### GET /api/sessions/my-sessions
 
 Get user's sessions with filtering and pagination.
 
@@ -446,7 +472,7 @@ Get user's sessions with filtering and pagination.
 
 **Example Request**:
 ```http
-GET /api/sessions?status=active&limit=10&page=1&sort=createdAt&order=desc
+GET /api/sessions/my-sessions?status=active&limit=10&page=1&sort=createdAt&order=desc
 ```
 
 **Success Response (200)**:
@@ -605,6 +631,192 @@ Update session details (status, rating, feedback, etc.).
 
 ---
 
+### GET /api/sessions/available
+
+Get available sessions waiting for helpers to accept.
+
+**Authentication**: Required  
+**Authorization**: User must have peer, counselor, or admin role
+
+**Query Parameters**:
+- `helperType`: Filter by helper type (`peer`, `counselor`) 
+- `severity`: Filter by severity (`mild`, `moderate`, `severe`, `critical`)
+- `limit`: Number of sessions to return (default: 10, max: 50)
+
+**Example Request**:
+```http
+GET /api/sessions/available?helperType=peer&severity=moderate&limit=5
+```
+
+**Success Response (200)**:
+```json
+{
+  "sessions": [
+    {
+      "_id": "60f7b1234567890abcdef124",
+      "patientId": {
+        "_id": "60f7b1234567890abcdef123",
+        "username": "johndoe123",
+        "profile": {
+          "firstName": "John",
+          "preferredName": "Johnny"
+        }
+      },
+      "helperType": "peer",
+      "severity": "moderate",
+      "status": "waiting",
+      "title": "Job Interview Anxiety Support",
+      "description": "I'm feeling anxious about an upcoming job interview and need someone to talk to",
+      "createdAt": "2025-09-22T10:30:00.000Z",
+      "waitingMinutes": 15
+    },
+    {
+      "_id": "60f7b1234567890abcdef125",
+      "patientId": {
+        "_id": "60f7b1234567890abcdef126",
+        "username": "user456",
+        "profile": {
+          "firstName": "Maria",
+          "preferredName": "Maria"
+        }
+      },
+      "helperType": "peer", 
+      "severity": "mild",
+      "status": "waiting",
+      "title": "Daily stress management",
+      "description": "Looking for someone to talk through daily stressors",
+      "createdAt": "2025-09-22T10:45:00.000Z",
+      "waitingMinutes": 0
+    }
+  ],
+  "totalWaiting": 2,
+  "instructions": {
+    "joinEndpoint": "POST /api/sessions/{sessionId}/accept",
+    "note": "Use the accept endpoint to take responsibility as the session helper"
+  }
+}
+```
+
+---
+
+### POST /api/sessions/:sessionId/accept
+
+Accept a waiting session as a helper (counselor/peer).
+
+**Authentication**: Required  
+**Authorization**: User must have peer, counselor, or admin role
+
+**Request Body**:
+```json
+{
+  "message": "Hi! I'm here to help and support you through whatever you're experiencing. How are you feeling right now?"
+}
+```
+
+**Field Descriptions**:
+- `message`: Optional welcome message to send to the patient
+
+**Success Response (200)**:
+```json
+{
+  "message": "Session accepted successfully",
+  "session": {
+    "_id": "60f7b1234567890abcdef124",
+    "patientId": {
+      "_id": "60f7b1234567890abcdef123",
+      "username": "johndoe123",
+      "profile": {
+        "firstName": "John",
+        "preferredName": "Johnny"
+      }
+    },
+    "helperId": {
+      "_id": "60f7b1234567890abcdef125",
+      "username": "helper_sarah",
+      "profile": {
+        "firstName": "Sarah"
+      },
+      "role": "peer"
+    },
+    "helperType": "peer",
+    "status": "active",
+    "severity": "moderate",
+    "title": "Job Interview Anxiety Support",
+    "description": "I'm feeling anxious about an upcoming job interview",
+    "startedAt": "2025-09-22T10:35:00.000Z",
+    "createdAt": "2025-09-22T10:30:00.000Z"
+  },
+  "welcomeMessage": {
+    "_id": "60f7b1234567890abcdef130",
+    "message": "Hi! I'm here to help and support you...",
+    "createdAt": "2025-09-22T10:35:05.000Z"
+  },
+  "instructions": {
+    "nextSteps": [
+      "Send a welcome message to introduce yourself",
+      "Ask about their current situation and feelings",
+      "Provide support and active listening",
+      "Use /api/messages to send messages",
+      "Monitor for any crisis indicators"
+    ],
+    "endpoints": {
+      "sendMessage": "POST /api/messages",
+      "getMessages": "GET /api/messages/session/60f7b1234567890abcdef124",
+      "escalate": "POST /api/urgent/escalate"
+    }
+  }
+}
+```
+
+**Error Responses**:
+```json
+// 403 - Not qualified helper
+{
+  "error": "Only peers, counselors, and admins can accept sessions"
+}
+
+// 400 - Session not waiting
+{
+  "error": "Can only accept sessions that are waiting for a helper"
+}
+
+// 409 - Already has helper
+{
+  "error": "Session already has a helper assigned"
+}
+```
+
+---
+
+### POST /api/sessions/:sessionId/decline
+
+Decline a waiting session if unable to accept it.
+
+**Authentication**: Required  
+**Authorization**: User must have peer, counselor, or admin role
+
+**Request Body**:
+```json
+{
+  "reason": "Currently at capacity with other sessions"
+}
+```
+
+**Field Descriptions**:
+- `reason`: Optional reason for declining the session
+
+**Success Response (200)**:
+```json
+{
+  "message": "Session declined successfully",
+  "note": "Session remains available for other helpers to accept",
+  "sessionStatus": "waiting",
+  "declinesCount": 2
+}
+```
+
+---
+
 ### POST /api/sessions/:sessionId/join
 
 Join a session as a helper.
@@ -636,7 +848,7 @@ Join a session as a helper.
 
 ## Message Endpoints
 
-### GET /api/messages/:sessionId
+### GET /api/messages/session/:sessionId
 
 Get messages for a specific session with pagination.
 
@@ -840,7 +1052,7 @@ Delete a message (soft delete for audit purposes).
 
 ## Crisis Management
 
-### POST /api/crisis/alert
+### POST /api/crisis/create
 
 Create a crisis alert when crisis indicators are detected.
 
@@ -930,7 +1142,7 @@ Create a crisis alert when crisis indicators are detected.
 
 ---
 
-### GET /api/crisis/alerts
+### GET /api/crisis/
 
 Get crisis alerts (restricted to counselors and admins).
 
@@ -998,7 +1210,7 @@ Get crisis alerts (restricted to counselors and admins).
 
 ---
 
-### PUT /api/crisis/alerts/:alertId
+### PUT /api/crisis/:alertId
 
 Update crisis alert status and resolution.
 
@@ -1733,7 +1945,7 @@ if (aiData.metadata.crisisDetected) {
 }
 
 // 3. Manual crisis alert can also be created
-const crisisResponse = await fetch('/api/crisis/alert', {
+const crisisResponse = await fetch('/api/crisis/create', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -1755,11 +1967,11 @@ socket.on('crisis-alert', (alertData) => {
 });
 ```
 
-### Helper Joining Session Flow
+### Helper Accepting Session Flow
 
 ```javascript
-// Helper views available sessions
-const availableSessionsResponse = await fetch('/api/sessions?status=waiting&helperType=peer', {
+// Helper views available sessions waiting for help
+const availableSessionsResponse = await fetch('/api/sessions/available?helperType=peer', {
   headers: {
     'Authorization': `Bearer ${helperToken}`
   }
@@ -1767,17 +1979,19 @@ const availableSessionsResponse = await fetch('/api/sessions?status=waiting&help
 
 const { sessions } = await availableSessionsResponse.json();
 
-// Helper joins a session
-const joinResponse = await fetch(`/api/sessions/${sessionId}/join`, {
+// Helper accepts a session (becomes the assigned helper)
+const acceptResponse = await fetch(`/api/sessions/${sessionId}/accept`, {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${helperToken}`
   },
   body: JSON.stringify({
-    message: 'Hi! I\'m here to help and support you through whatever you\'re experiencing.'
+    message: 'Hi! I\'m here to help and support you through whatever you\'re experiencing. How are you feeling right now?'
   })
 });
+
+const { session, welcomeMessage, instructions } = await acceptResponse.json();
 
 // Connect to Socket.io and join session
 const helperSocket = io('http://localhost:5000', {
@@ -1789,6 +2003,24 @@ helperSocket.emit('join-session', { sessionId });
 // Listen for messages
 helperSocket.on('new-message', (messageData) => {
   console.log('New message:', messageData);
+  
+  // Send responses using the message endpoint
+  if (messageData.senderRole === 'patient') {
+    // Helper can respond to patient messages
+    // Use /api/messages endpoint to send replies
+  }
+});
+
+// Alternative: Decline session if unable to help
+const declineResponse = await fetch(`/api/sessions/${sessionId}/decline`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${helperToken}`
+  },
+  body: JSON.stringify({
+    reason: 'Currently at capacity with other sessions'
+  })
 });
 ```
 

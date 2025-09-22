@@ -103,7 +103,7 @@ io.use(async (socket, next) => {
     const decoded = require('jsonwebtoken').verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id).select('-password');
     
-    if (!user || user.status !== 'active') {
+    if (!user || !user.isActive) {
       return next(new Error('Authentication error: Invalid user'));
     }
 

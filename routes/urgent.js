@@ -5,6 +5,131 @@ const crisisDetection = require('../utils/crisisDetection');
 
 const router = express.Router();
 
+// Escalate a session to higher priority or different helper type
+router.post('/escalate',
+  auth.authenticateToken,
+  async (req, res) => {
+    try {
+      const { sessionId, newSeverity, reason, targetHelperType, notes, requestedCounselorId } = req.body;
+
+      if (!sessionId || !newSeverity || !reason) {
+        return res.status(400).json({
+          error: 'Session ID, new severity, and reason are required'
+        });
+      }
+
+      // Find the session
+      const session = await Session.findById(sessionId);
+      if (!session) {
+        return res.status(404).json({
+          error: 'Session not found'
+        });
+      }
+
+      // Verify user has access to escalate this session
+      const isPatient = session.patientId.toString() === req.user._id.toString();
+      const isHelper = session.helperId && session.helperId.toString() === req.user._id.toString();
+      const isCounselor = req.user.role === 'counselor' || req.user.role === 'admin';
+      
+      if (!isPatient && !isHelper && !isCounselor) {
+        return res.status(403).json({
+          error: 'Not authorized to escalate this session'
+        });
+      }
+
+      // Store previous state
+      const previousSeverity = session.severity;
+      const previousHelperType = session.helperType;
+
+      // Update session
+      session.severity = newSeverity;
+      if (targetHelperType) {
+        session.helperType = targetHelperType;
+      }
+      session.status = 'escalated';
+      
+      // Add escalation to history
+      session.escalationHistory.push({
+        escalatedBy: req.user._id,
+        escalatedAt: new Date(),
+        previousSeverity,
+        newSeverity,
+        previousHelperType,
+        newHelperType: targetHelperType || session.helperType,
+        reason,
+        notes
+      });
+
+      await session.save();
+
+      // If escalating to counselor and a specific counselor is requested
+      if (targetHelperType === 'counselor' && requestedCounselorId) {
+        const counselor = await User.findById(requestedCounselorId);
+        if (counselor && counselor.role === 'counselor' && counselor.isActive) {
+          session.helperId = requestedCounselorId;
+          await session.save();
+        }
+      }
+
+      // Create escalation message
+      const escalationMessage = new Message({
+        sessionId: sessionId,
+        senderId: req.user._id,
+        message: `Session escalated: ${reason}. New severity: ${newSeverity}${targetHelperType ? `, Helper type: ${targetHelperType}` : ''}`,
+        senderRole: req.user.role,
+        messageType: 'escalation',
+        metadata: {
+          escalation: {
+            previousSeverity,
+            newSeverity,
+            reason,
+            escalatedBy: req.user._id
+          }
+        }
+      });
+
+      await escalationMessage.save();
+
+      // Estimate response time based on severity
+      const estimatedResponseTime = newSeverity === 'critical' ? 120 : newSeverity === 'high' ? 300 : 600;
+
+      res.json({
+        message: 'Session escalated successfully',
+        escalation: {
+          _id: session.escalationHistory[session.escalationHistory.length - 1]._id,
+          sessionId: sessionId,
+          escalatedBy: req.user._id,
+          escalatedTo: targetHelperType || session.helperType,
+          previousSeverity,
+          newSeverity,
+          reason,
+          createdAt: new Date(),
+          estimatedResponseTime,
+          priority: newSeverity === 'critical' ? 1 : newSeverity === 'high' ? 2 : 3
+        },
+        session: {
+          _id: session._id,
+          status: session.status,
+          severity: session.severity,
+          helperType: session.helperType,
+          queuePosition: newSeverity === 'critical' ? 1 : null
+        },
+        notifications: {
+          crisisTeamAlerted: newSeverity === 'critical',
+          counselorAssigned: requestedCounselorId ? true : false,
+          supervisorNotified: newSeverity === 'critical'
+        }
+      });
+    } catch (error) {
+      console.error('Session escalation error:', error);
+      res.status(500).json({
+        error: 'Failed to escalate session',
+        details: error.message
+      });
+    }
+  }
+);
+
 // Trigger crisis alert to all available helpers
 router.post('/alert',
   auth.authenticateToken,

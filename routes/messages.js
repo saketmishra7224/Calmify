@@ -84,7 +84,24 @@ router.post('/',
   validation.validate(validation.validateMessage),
   async (req, res) => {
     try {
-      const { sessionId, content, replyTo } = req.body;
+      const { sessionId, content, message: messageText, replyTo } = req.body;
+
+      // Normalize message content - accept either 'message' or 'content.text'
+      let normalizedContent;
+      if (messageText) {
+        // If 'message' field is provided, use it
+        normalizedContent = {
+          text: messageText,
+          type: 'text'
+        };
+      } else if (content) {
+        // If 'content' object is provided, use it as is
+        normalizedContent = content;
+      } else {
+        return res.status(400).json({
+          error: 'Message content is required'
+        });
+      }
 
       // Check if user has access to session
       const session = await Session.findById(sessionId);
@@ -110,23 +127,23 @@ router.post('/',
         });
       }
 
-      const message = new Message({
+      const newMessage = new Message({
         session: sessionId,
         sender: req.user._id,
-        content,
+        content: normalizedContent,
         replyTo
       });
 
-      await message.save();
-      await message.populate('sender', 'username profile.firstName profile.lastName role');
+      await newMessage.save();
+      await newMessage.populate('sender', 'username profile.firstName profile.lastName role');
 
       if (replyTo) {
-        await message.populate('replyTo', 'content.text sender');
+        await newMessage.populate('replyTo', 'content.text sender');
       }
 
       res.status(201).json({
         message: 'Message sent successfully',
-        data: message
+        data: newMessage
       });
     } catch (error) {
       console.error('Send message error:', error);

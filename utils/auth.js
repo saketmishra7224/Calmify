@@ -22,7 +22,7 @@ const authenticateToken = async (req, res, next) => {
       });
     }
 
-    if (user.status !== 'active') {
+    if (!user.isActive) {
       return res.status(401).json({ 
         error: 'Account is suspended or inactive' 
       });
@@ -86,7 +86,7 @@ const optionalAuth = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id).select('-password');
     
-    req.user = user && user.status === 'active' ? user : null;
+    req.user = user && user.isActive ? user : null;
     next();
   } catch (error) {
     req.user = null;

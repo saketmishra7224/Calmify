@@ -32,6 +32,8 @@ router.post('/create',
       // For chatbot sessions, start immediately
       if (helperType === 'chatbot') {
         status = 'active';
+        // For chatbot, we can create a virtual helper or leave helperId as null
+        // The AI will handle responses through the /api/ai/chat endpoint
       } else {
         // For human helpers, find available helper
         const availableHelper = await User.findOne({
@@ -43,6 +45,9 @@ router.post('/create',
         if (availableHelper) {
           helperId = availableHelper._id;
           status = 'active';
+        } else {
+          // If no helper available, session stays in waiting status
+          console.log(`No ${helperType} available, session will wait in queue`);
         }
       }
 
@@ -330,6 +335,67 @@ router.get('/queue/:role',
   }
 );
 
+// Get available sessions for helpers to join
+router.get('/available',
+  auth.authenticateToken,
+  async (req, res) => {
+    try {
+      const { helperType, severity, limit = 10 } = req.query;
+
+      // Only helpers can view available sessions
+      if (!['peer', 'counselor', 'admin'].includes(req.user.role)) {
+        return res.status(403).json({
+          error: 'Only helpers can view available sessions'
+        });
+      }
+
+      const query = {
+        status: 'waiting',
+        helperId: null
+      };
+
+      // Filter by helper type if specified
+      if (helperType) {
+        query.helperType = helperType;
+      }
+
+      // Filter by severity if specified
+      if (severity) {
+        query.severity = severity;
+      }
+
+      const sessions = await Session.find(query)
+        .populate('patientId', 'username profile')
+        .sort({ 
+          severity: -1,  // Higher severity first
+          createdAt: 1   // Older sessions first within same severity
+        })
+        .limit(parseInt(limit));
+
+      // Add waiting time to each session
+      const sessionsWithWaitTime = sessions.map(session => ({
+        ...session.toObject(),
+        waitingMinutes: Math.round((new Date() - session.createdAt) / (1000 * 60))
+      }));
+
+      res.json({
+        sessions: sessionsWithWaitTime,
+        totalWaiting: sessions.length,
+        instructions: {
+          joinEndpoint: `POST /api/sessions/{sessionId}/join`,
+          note: 'Use the join endpoint to accept a session and start helping'
+        }
+      });
+    } catch (error) {
+      console.error('Get available sessions error:', error);
+      res.status(500).json({
+        error: 'Failed to get available sessions',
+        details: error.message
+      });
+    }
+  }
+);
+
 // Get user's sessions
 router.get('/my-sessions',
   auth.authenticateToken,
@@ -417,6 +483,272 @@ router.get('/available',
       console.error('Get available sessions error:', error);
       res.status(500).json({
         error: 'Failed to get available sessions',
+        details: error.message
+      });
+    }
+  }
+);
+
+// Start chatbot session or convert waiting session to chatbot
+router.post('/:sessionId/start-chatbot',
+  auth.authenticateToken,
+  async (req, res) => {
+    try {
+      const session = await Session.findById(req.params.sessionId);
+      
+      if (!session) {
+        return res.status(404).json({
+          error: 'Session not found'
+        });
+      }
+
+      // Verify user has access to this session
+      const isPatient = session.patientId.toString() === req.user._id.toString();
+      const isCounselorOrAdmin = ['counselor', 'admin'].includes(req.user.role);
+      
+      if (!isPatient && !isCounselorOrAdmin) {
+        return res.status(403).json({
+          error: 'Not authorized to start chatbot for this session'
+        });
+      }
+
+      // Only allow for waiting sessions or sessions that want chatbot help
+      if (session.status !== 'waiting' && session.helperType !== 'chatbot') {
+        return res.status(400).json({
+          error: 'Can only start chatbot for waiting sessions or chatbot sessions'
+        });
+      }
+
+      // Convert to active chatbot session
+      session.helperType = 'chatbot';
+      session.status = 'active';
+      session.startedAt = new Date();
+      session.helperId = null; // Chatbot doesn't need a specific helper ID
+      
+      await session.save();
+      await session.populate('patientId', 'username profile');
+
+      // Create welcome message from chatbot
+      const welcomeMessage = new Message({
+        sessionId: session._id,
+        senderId: req.user._id,
+        message: 'Hello! I\'m here to provide support and guidance. How are you feeling today, and what would you like to talk about?',
+        senderRole: 'chatbot',
+        messageType: 'text',
+        metadata: {
+          aiGenerated: true,
+          intent: 'welcome'
+        }
+      });
+
+      await welcomeMessage.save();
+
+      res.json({
+        message: 'Chatbot session started successfully',
+        session: {
+          _id: session._id,
+          status: session.status,
+          helperType: session.helperType,
+          startedAt: session.startedAt
+        },
+        welcomeMessage: {
+          _id: welcomeMessage._id,
+          message: welcomeMessage.message,
+          createdAt: welcomeMessage.createdAt
+        },
+        instructions: {
+          chatEndpoint: '/api/ai/chat',
+          messageEndpoint: '/api/messages',
+          note: 'You can now send messages and get AI responses immediately'
+        }
+      });
+    } catch (error) {
+      console.error('Start chatbot session error:', error);
+      res.status(500).json({
+        error: 'Failed to start chatbot session',
+        details: error.message
+      });
+    }
+  }
+);
+
+// Accept a waiting session as a helper (counselor/peer)
+router.post('/:sessionId/accept',
+  auth.authenticateToken,
+  async (req, res) => {
+    try {
+      const { message: welcomeMessage } = req.body;
+
+      // Verify user is qualified to be a helper
+      if (!['peer', 'counselor', 'admin'].includes(req.user.role)) {
+        return res.status(403).json({
+          error: 'Only peers, counselors, and admins can accept sessions'
+        });
+      }
+
+      const session = await Session.findById(req.params.sessionId);
+      
+      if (!session) {
+        return res.status(404).json({
+          error: 'Session not found'
+        });
+      }
+
+      if (session.status !== 'waiting') {
+        return res.status(400).json({
+          error: 'Can only accept sessions that are waiting for a helper'
+        });
+      }
+
+      if (session.helperId) {
+        return res.status(409).json({
+          error: 'Session already has a helper assigned'
+        });
+      }
+
+      // Check if helper role matches what's requested (but allow escalation)
+      const canAccept = 
+        session.helperType === req.user.role || 
+        (session.helperType === 'peer' && req.user.role === 'counselor') ||
+        req.user.role === 'admin';
+
+      if (!canAccept) {
+        return res.status(403).json({
+          error: `This session is requesting a ${session.helperType}, but you are a ${req.user.role}`
+        });
+      }
+
+      // Accept the session
+      session.helperId = req.user._id;
+      session.status = 'active';
+      session.startedAt = new Date();
+      
+      // If counselor accepts a peer session, upgrade the helper type
+      if (session.helperType === 'peer' && req.user.role === 'counselor') {
+        session.helperType = 'counselor';
+      }
+
+      await session.save();
+      await session.populate('patientId', 'username profile');
+      await session.populate('helperId', 'username profile role');
+
+      // Create welcome message if provided
+      let welcomeMsg = null;
+      if (welcomeMessage) {
+        const Message = require('../models/Message');
+        welcomeMsg = new Message({
+          sessionId: session._id,
+          senderId: req.user._id,
+          message: welcomeMessage,
+          senderRole: req.user.role,
+          messageType: 'text',
+          metadata: {
+            isWelcomeMessage: true
+          }
+        });
+        await welcomeMsg.save();
+      }
+
+      res.json({
+        message: 'Session accepted successfully',
+        session: {
+          _id: session._id,
+          patientId: session.patientId,
+          helperId: session.helperId,
+          helperType: session.helperType,
+          status: session.status,
+          severity: session.severity,
+          title: session.title,
+          description: session.description,
+          startedAt: session.startedAt,
+          createdAt: session.createdAt
+        },
+        welcomeMessage: welcomeMsg ? {
+          _id: welcomeMsg._id,
+          message: welcomeMsg.message,
+          createdAt: welcomeMsg.createdAt
+        } : null,
+        instructions: {
+          nextSteps: [
+            'Send a welcome message to introduce yourself',
+            'Ask about their current situation and feelings',
+            'Provide support and active listening',
+            'Use /api/messages to send messages',
+            'Monitor for any crisis indicators'
+          ],
+          endpoints: {
+            sendMessage: 'POST /api/messages',
+            getMessages: `GET /api/messages/session/${session._id}`,
+            escalate: 'POST /api/urgent/escalate'
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Accept session error:', error);
+      res.status(500).json({
+        error: 'Failed to accept session',
+        details: error.message
+      });
+    }
+  }
+);
+
+// Decline a waiting session (for helpers who can't accept)
+router.post('/:sessionId/decline',
+  auth.authenticateToken,
+  async (req, res) => {
+    try {
+      const { reason } = req.body;
+
+      if (!['peer', 'counselor', 'admin'].includes(req.user.role)) {
+        return res.status(403).json({
+          error: 'Only helpers can decline sessions'
+        });
+      }
+
+      const session = await Session.findById(req.params.sessionId);
+      
+      if (!session) {
+        return res.status(404).json({
+          error: 'Session not found'
+        });
+      }
+
+      if (session.status !== 'waiting') {
+        return res.status(400).json({
+          error: 'Can only decline sessions that are waiting'
+        });
+      }
+
+      // Add decline record to session metadata
+      if (!session.metadata) {
+        session.metadata = {};
+      }
+      if (!session.metadata.declines) {
+        session.metadata.declines = [];
+      }
+
+      session.metadata.declines.push({
+        helperId: req.user._id,
+        helperRole: req.user.role,
+        reason: reason || 'Helper unavailable',
+        declinedAt: new Date()
+      });
+
+      // Mark session as modified to save metadata
+      session.markModified('metadata');
+      await session.save();
+
+      res.json({
+        message: 'Session declined successfully',
+        note: 'Session remains available for other helpers to accept',
+        sessionStatus: session.status,
+        declinesCount: session.metadata.declines.length
+      });
+    } catch (error) {
+      console.error('Decline session error:', error);
+      res.status(500).json({
+        error: 'Failed to decline session',
         details: error.message
       });
     }
