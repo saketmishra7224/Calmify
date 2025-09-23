@@ -64,7 +64,7 @@ const roleConfigs = {
     items: [
       { title: "Available Sessions", url: "/peer/available", icon: MessageCircle },
       { title: "My Sessions", url: "/my-sessions", icon: Clock },
-      { title: "Session History", url: "/my-sessions", icon: Archive },
+      { title: "Session History", url: "/session-history", icon: Archive },
       { title: "Resources", url: "/peer/resources", icon: BookOpen },
       { title: "Training", url: "/peer/training", icon: Star },
     ]
@@ -134,10 +134,10 @@ export function AppSidebar({ currentRole }: AppSidebarProps) {
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {roleConfig.items.map((item) => {
+              {roleConfig.items.map((item, index) => {
                 const ItemIcon = item.icon;
                 return (
-                  <SidebarMenuItem key={item.url}>
+                  <SidebarMenuItem key={`${item.url}-${item.title}-${index}`}>
                     <SidebarMenuButton asChild>
                       <NavLink
                         to={item.url}

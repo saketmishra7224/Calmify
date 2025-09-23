@@ -58,10 +58,18 @@ class SocketService {
         return;
       }
 
-      const serverUrl = process.env.REACT_APP_SOCKET_URL || process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      // Socket.IO connects to the base server URL, not the API endpoint
+      const baseUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+      // Remove /api suffix if present in VITE_API_URL
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const serverUrl = baseUrl || apiUrl.replace('/api', '');
+      
+      console.log('🔗 Connecting to Socket.IO server:', serverUrl);
       
       this.socket = io(serverUrl, {
-        auth: authData,
+        auth: {
+          token: authData.token
+        },
         transports: ['websocket', 'polling'],
         upgrade: true,
         timeout: 20000,

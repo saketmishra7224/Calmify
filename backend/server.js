@@ -24,9 +24,11 @@ const server = http.createServer(app);
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:8080", 
+  "http://localhost:8081",
   "http://localhost:5173",
   "http://127.0.0.1:3000",
   "http://127.0.0.1:8080",
+  "http://127.0.0.1:8081",
   "http://127.0.0.1:5173"
 ];
 
@@ -284,14 +286,16 @@ io.on('connection', async (socket) => {
         return;
       }
 
-      // Create message
+      // Create message with current timestamp to avoid delays
+      const messageTimestamp = new Date();
       const newMessage = new Message({
         sessionId: sessionId,
         senderId: socket.userId,
         message: message.trim(),
         senderRole: socket.user.role,
         messageType,
-        replyTo
+        replyTo,
+        createdAt: messageTimestamp
       });
 
       await newMessage.save();
@@ -334,11 +338,11 @@ io.on('connection', async (socket) => {
           message: newMessage.message,
           senderRole: newMessage.senderRole,
           messageType: newMessage.messageType,
-          createdAt: newMessage.createdAt,
+          createdAt: messageTimestamp.toISOString(), // Use the timestamp we created when message was received
           replyTo: newMessage.replyTo,
           crisisDetected: !!newMessage.crisisDetection.isCrisis
         },
-        timestamp: new Date()
+        timestamp: messageTimestamp
       });
 
       // Check if AI should respond (for chatbot sessions)

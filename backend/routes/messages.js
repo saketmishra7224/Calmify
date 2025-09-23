@@ -104,7 +104,10 @@ router.post('/',
       }
 
       // Check if user has access to session
-      const session = await Session.findById(sessionId);
+      const session = await Session.findById(sessionId)
+        .populate('patientId', 'username profile role')
+        .populate('helperId', 'username profile role');
+      
       if (!session) {
         return res.status(404).json({
           error: 'Session not found'
@@ -117,28 +120,30 @@ router.post('/',
         });
       }
 
-      const isParticipant = session.participants.some(
-        p => p.user.toString() === req.user._id.toString() && !p.leftAt
-      );
-
-      if (!isParticipant) {
+      // Check if user is either the patient or the helper in this session
+      const isPatient = session.patientId && session.patientId._id.toString() === req.user._id.toString();
+      const isHelper = session.helperId && session.helperId._id.toString() === req.user._id.toString();
+      
+      if (!isPatient && !isHelper) {
         return res.status(403).json({
           error: 'Must be session participant to send messages'
         });
       }
 
       const newMessage = new Message({
-        session: sessionId,
-        sender: req.user._id,
-        content: normalizedContent,
+        sessionId: sessionId,
+        senderId: req.user._id,
+        message: normalizedContent.text || normalizedContent,
+        senderRole: req.user.role || 'patient',
+        messageType: 'text',
         replyTo
       });
 
       await newMessage.save();
-      await newMessage.populate('sender', 'username profile.firstName profile.lastName role');
+      await newMessage.populate('senderId', 'username profile.firstName profile.lastName role');
 
       if (replyTo) {
-        await newMessage.populate('replyTo', 'content.text sender');
+        await newMessage.populate('replyTo', 'message senderId');
       }
 
       res.status(201).json({

@@ -2,24 +2,34 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { useAuth } from '../contexts/AuthContext';
-import { apiService, Session, Message } from '../services/api';
+import { apiService, Session } from '../services/api';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Send, MessageCircle, Clock, User, Star, AlertTriangle } from "lucide-react";
+import { useChatSocket } from '../hooks/useSocket';
 
 export default function SessionDetailsPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const [session, setSession] = useState<Session | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
+
+  const { 
+    messages: socketMessages, 
+    setMessages, 
+    sendMessage: sendSocketMessage, 
+    isConnected 
+  } = useChatSocket(sessionId);
+
+  // Merge socket messages with any optimistic messages, removing duplicates
+  const messages = socketMessages;
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -57,29 +67,32 @@ export default function SessionDetailsPage() {
   };
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !sessionId || sending) return;
+    if (!newMessage.trim() || !sessionId || sending || !isConnected) {
+      console.log('Cannot send message:', { 
+        hasMessage: !!newMessage.trim(), 
+        hasSessionId: !!sessionId, 
+        sending, 
+        isConnected 
+      });
+      return;
+    }
 
+    const messageText = newMessage.trim();
+    
     try {
       setSending(true);
-      const response = await apiService.sendMessage({
-        sessionId,
-        message: newMessage.trim(),
-        messageType: 'text'
-      });
-
-      // Add the new message to the list with proper validation
-      if (response.messageData && response.messageData._id) {
-        // Make sure senderId is properly formatted if it exists
-        const newMessage = {
-          ...response.messageData,
-          senderId: response.messageData.senderId || user?._id || null
-        };
-        setMessages(prev => [...prev, newMessage]);
-      }
       setNewMessage('');
+      
+      console.log('📤 Sending message via Socket.IO:', messageText);
+      
+      // Send via socket
+      sendSocketMessage(sessionId, messageText, 'text');
+      
     } catch (err: any) {
       console.error('Failed to send message:', err);
       setError(err.message || 'Failed to send message');
+      // Restore message on error
+      setNewMessage(messageText);
     } finally {
       setSending(false);
     }
@@ -347,19 +360,34 @@ export default function SessionDetailsPage() {
                       onChange={(e) => setNewMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
                       placeholder="Type your message..."
-                      disabled={sending}
+                      disabled={sending || !isConnected}
                       className="flex-1"
                     />
                     <Button 
                       onClick={handleSendMessage}
-                      disabled={!newMessage.trim() || sending}
+                      disabled={!newMessage.trim() || sending || !isConnected}
                     >
                       {sending ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : !isConnected ? (
+                        'Connecting...'
                       ) : (
                         <Send className="h-4 w-4" />
                       )}
                     </Button>
+                  </div>
+                  
+                  {/* Connection Status */}
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="text-xs text-muted-foreground">
+                      {isConnected ? 'Real-time messaging active' : 'Connecting to chat server...'}
+                    </p>
+                    <div className="flex items-center gap-2 text-xs">
+                      <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+                      <span className="text-muted-foreground">
+                        {isConnected ? 'Connected' : 'Disconnected'}
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}

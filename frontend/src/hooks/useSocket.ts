@@ -105,6 +105,8 @@ export const useSocket = (options: UseSocketOptions = {}): UseSocketReturn => {
       setError(undefined);
       setConnectionState('connecting');
       
+      console.log('🔗 Attempting Socket.IO connection with token:', token.substring(0, 10) + '...');
+      
       await socketService.connect({ token });
       
       // Update state will be handled by onConnect callback
