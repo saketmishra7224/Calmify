@@ -53,7 +53,7 @@ const roleConfigs = {
       { title: "AI Chatbot", url: "/chatbot", icon: MessageCircle },
       { title: "Peer Support", url: "/peer/request", icon: Users },
       { title: "Counselor Sessions", url: "/counselor/request", icon: UserCheck },
-      { title: "Take Assessment", url: "/questionnaire/PHQ-9", icon: FileText },
+      { title: "Take Assessment", url: "/assessment", icon: FileText },
       { title: "Meditation", url: "/meditation", icon: Brain },
       { title: "Crisis Help", url: "/crisis", icon: AlertTriangle },
     ]
@@ -66,7 +66,7 @@ const roleConfigs = {
       { title: "AI Chatbot", url: "/chatbot", icon: MessageCircle },
       { title: "Peer Support", url: "/peer/request", icon: Users },
       { title: "Counselor Sessions", url: "/counselor/request", icon: UserCheck },
-      { title: "Take Assessment", url: "/questionnaire/PHQ-9", icon: FileText },
+      { title: "Take Assessment", url: "/assessment", icon: FileText },
       { title: "Meditation", url: "/meditation", icon: Brain },
       { title: "Crisis Help", url: "/crisis", icon: AlertTriangle },
     ]
