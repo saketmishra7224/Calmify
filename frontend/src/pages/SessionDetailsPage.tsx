@@ -37,7 +37,14 @@ export default function SessionDetailsPage() {
       setLoading(true);
       const response = await apiService.getSession(sessionId!);
       setSession(response.session);
-      setMessages(response.messages || []);
+      
+      // Filter out any messages that might cause rendering issues
+      const validMessages = (response.messages || []).filter(msg => 
+        msg && msg._id && (msg.senderId || msg.senderRole)
+      );
+      
+      console.log('Loaded messages:', validMessages.length);
+      setMessages(validMessages);
     } catch (err: any) {
       console.error('Failed to load session:', err);
       setError(err.message || 'Failed to load session');
@@ -60,8 +67,15 @@ export default function SessionDetailsPage() {
         messageType: 'text'
       });
 
-      // Add the new message to the list
-      setMessages(prev => [...prev, response.messageData]);
+      // Add the new message to the list with proper validation
+      if (response.messageData && response.messageData._id) {
+        // Make sure senderId is properly formatted if it exists
+        const newMessage = {
+          ...response.messageData,
+          senderId: response.messageData.senderId || user?._id || null
+        };
+        setMessages(prev => [...prev, newMessage]);
+      }
       setNewMessage('');
     } catch (err: any) {
       console.error('Failed to send message:', err);
@@ -267,10 +281,18 @@ export default function SessionDetailsPage() {
                   </div>
                 ) : (
                   messages.map((message) => {
-                    const isMyMessage = message.senderId._id === user?._id;
+                    if (!message || message === undefined) {
+                      console.log("Found undefined message in the array");
+                      return null; // Skip rendering this message
+                    }
+                    // Handle both populated and unpopulated senderId
+                    const senderId = message.senderId ? 
+                      (typeof message.senderId === 'string' ? message.senderId : message.senderId._id) 
+                      : undefined;
+                    const isMyMessage = senderId === user?._id;
                     return (
                       <div
-                        key={message._id}
+                        key={message._id || `msg-${Math.random()}`}
                         className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}
                       >
                         <div
@@ -283,9 +305,15 @@ export default function SessionDetailsPage() {
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-xs font-medium">
                               {isMyMessage ? 'You' : (
-                                message.senderId.profile?.preferredName || 
-                                message.senderId.profile?.firstName || 
-                                message.senderId.username
+                                message.senderId && typeof message.senderId === 'object' ? (
+                                  message.senderId.profile?.preferredName || 
+                                  message.senderId.profile?.firstName || 
+                                  message.senderId.username || 'Unknown'
+                                ) : (
+                                  message.senderRole ? 
+                                    message.senderRole.charAt(0).toUpperCase() + message.senderRole.slice(1)
+                                    : 'Unknown User'
+                                )
                               )}
                             </span>
                             <span className="text-xs opacity-70">

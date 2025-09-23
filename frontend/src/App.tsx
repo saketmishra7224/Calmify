@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import ErrorBoundary from "./components/ErrorBoundary";
 import NewHome from "./pages/NewHome";
 import Dashboard from "./pages/Dashboard";
 import LoginPage from "./pages/LoginPage";
@@ -32,7 +33,13 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <ErrorBoundary>
+          <BrowserRouter 
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true
+            }}
+          >
           <Routes>
             <Route path="/" element={<NewHome />} />
             <Route path="/dashboard" element={<Dashboard />} />
@@ -45,18 +52,19 @@ const App = () => (
             <Route path="/peer/request" element={<RequestPeerSupportPage />} />
             <Route path="/counselor/request" element={<RequestCounselorPage />} />
             <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
-            <Route path="/session/:sessionId" element={<SessionDetailsPage />} />
+            <Route path="/session/:sessionId" element={<ErrorBoundary><SessionDetailsPage /></ErrorBoundary>} />
             <Route path="/questionnaire/:type" element={<QuestionnairePage />} />
             <Route path="/assessment" element={<AssessmentPage />} />
             <Route path="/crisis" element={<CrisisPage />} />
             <Route path="/my-sessions" element={<MySessionsPage />} />
             <Route path="/peer/available" element={<PeerAvailablePage />} />
             <Route path="/counselor/available" element={<CounselorAvailablePage />} />
-            <Route path="/sessions/:sessionId" element={<SessionDetailsPage />} />
+            <Route path="/sessions/:sessionId" element={<ErrorBoundary><SessionDetailsPage /></ErrorBoundary>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+        </ErrorBoundary>
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
