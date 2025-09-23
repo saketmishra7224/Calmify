@@ -51,9 +51,22 @@ const roleConfigs = {
     items: [
       { title: "Home", url: "/", icon: Home },
       { title: "AI Chatbot", url: "/chatbot", icon: MessageCircle },
-      { title: "Peer Support", url: "/peer/chats", icon: Users },
-      { title: "Counselor Sessions", url: "/counsellor/sessions", icon: UserCheck },
-      { title: "Mental Health Assessment", url: "/assessment", icon: FileText },
+      { title: "Peer Support", url: "/peer/request", icon: Users },
+      { title: "Counselor Sessions", url: "/counselor/request", icon: UserCheck },
+      { title: "Take Assessment", url: "/assessment", icon: FileText },
+      { title: "Meditation", url: "/meditation", icon: Brain },
+      { title: "Crisis Help", url: "/crisis", icon: AlertTriangle },
+    ]
+  },
+  student: {
+    title: "Student",
+    icon: Users,
+    items: [
+      { title: "Home", url: "/", icon: Home },
+      { title: "AI Chatbot", url: "/chatbot", icon: MessageCircle },
+      { title: "Peer Support", url: "/peer/request", icon: Users },
+      { title: "Counselor Sessions", url: "/counselor/request", icon: UserCheck },
+      { title: "Take Assessment", url: "/assessment", icon: FileText },
       { title: "Meditation", url: "/meditation", icon: Brain },
       { title: "Crisis Help", url: "/crisis", icon: AlertTriangle },
     ]
@@ -63,9 +76,8 @@ const roleConfigs = {
     icon: UserCheck,
     items: [
       { title: "Home", url: "/", icon: Home },
-      { title: "Active Sessions", url: "/peer/chats", icon: MessageCircle },
-      { title: "Session History", url: "/peer/history", icon: Archive },
-      { title: "Crisis Alerts", url: "/peer/alerts", icon: AlertTriangle },
+      { title: "Available Sessions", url: "/peer/chats", icon: MessageCircle },
+      { title: "My History", url: "/peer/history", icon: Archive },
       { title: "Resources", url: "/peer/resources", icon: BookOpen },
       { title: "Training", url: "/peer/training", icon: Star },
     ]
@@ -75,11 +87,11 @@ const roleConfigs = {
     icon: Heart,
     items: [
       { title: "Home", url: "/", icon: Home },
-      { title: "My Sessions", url: "/counsellor/sessions", icon: MessageCircle },
-      { title: "Patient Reports", url: "/counsellor/reports", icon: Archive },
-      { title: "Crisis Alerts", url: "/counsellor/alerts", icon: AlertTriangle },
-      { title: "Schedule", url: "/counsellor/calendar", icon: Calendar },
-      { title: "Notes & Records", url: "/counsellor/notes", icon: FileText },
+      { title: "My Sessions", url: "/counselor/sessions", icon: MessageCircle },
+      { title: "Patient Reports", url: "/counselor/reports", icon: Archive },
+      { title: "Crisis Alerts", url: "/counselor/alerts", icon: AlertTriangle },
+      { title: "Schedule", url: "/counselor/calendar", icon: Calendar },
+      { title: "Notes & Records", url: "/counselor/notes", icon: FileText },
     ]
   },
   admin: {
@@ -88,23 +100,10 @@ const roleConfigs = {
     items: [
       { title: "Dashboard", url: "/admin/analytics", icon: BarChart3 },
       { title: "User Management", url: "/admin/users", icon: Users },
-      { title: "Crisis Management", url: "/admin/crisis", icon: Shield },
-      { title: "Reports", url: "/admin/reports", icon: TrendingUp },
-      { title: "System Settings", url: "/admin/settings", icon: Settings },
-      { title: "Audit Logs", url: "/admin/logs", icon: Archive },
-    ]
-  },
-  student: {
-    title: "Student",
-    icon: Users,
-    items: [
-      { title: "Home", url: "/", icon: Home },
-      { title: "AI Chatbot", url: "/chatbot", icon: MessageCircle },
-      { title: "Peer Support", url: "/peer/chats", icon: Users },
-      { title: "Counselor Sessions", url: "/counsellor/sessions", icon: UserCheck },
-      { title: "Mental Health Assessment", url: "/assessment", icon: FileText },
-      { title: "Meditation", url: "/meditation", icon: Brain },
-      { title: "Crisis Help", url: "/crisis", icon: AlertTriangle },
+      { title: "System Stats", url: "/admin/stats", icon: TrendingUp },
+      { title: "Content Moderation", url: "/admin/moderation", icon: Shield },
+      { title: "Crisis Management", url: "/admin/crisis", icon: AlertTriangle },
+      { title: "Settings", url: "/admin/settings", icon: Settings },
     ]
   }
 };
@@ -112,160 +111,89 @@ const roleConfigs = {
 export function AppSidebar({ currentRole }: AppSidebarProps) {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
-  
-  // Use user's actual role if authenticated, otherwise use currentRole prop
-  const effectiveRole = isAuthenticated && user?.role ? user.role : currentRole;
-  const config = roleConfigs[effectiveRole as keyof typeof roleConfigs] || roleConfigs.student;
+
+  const roleConfig = roleConfigs[currentRole as keyof typeof roleConfigs] || roleConfigs.patient;
+  const IconComponent = roleConfig.icon;
 
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/');
+      navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);
     }
   };
 
   return (
-    <Sidebar className="w-64 border-r bg-gray-100">
-      <SidebarHeader className="p-4 border-b border-gray-200">
-                <div className="flex h-16 items-center gap-3 px-6 border-b border-gray-200">
-          <Brain className="h-8 w-8 text-primary" />
-          <span className="font-semibold text-lg text-gray-800">Calmify</span>
-        </div>
-        <div className="flex items-center justify-between mt-3">
-          <div className="flex items-center gap-2 text-sm text-black">
-            <config.icon className="h-4 w-4" />
-            <span>{config.title}</span>
+    <Sidebar className="w-64 bg-background border-r border-border">
+      <SidebarHeader className="p-4 border-b border-border">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <IconComponent className="h-6 w-6 text-primary" />
           </div>
-          {isAuthenticated && (
-            <Badge variant={user?.isAnonymous ? "secondary" : "default"} className="text-xs">
-              {user?.isAnonymous ? "Anonymous" : "Logged In"}
-            </Badge>
-          )}
-        </div>
-        {isAuthenticated && user && !user.isAnonymous && (
-          <div className="mt-2 text-xs text-muted-foreground">
-            Welcome, {user.profile?.preferredName || user.profile?.firstName || user.username}
+          <div className="flex-1">
+            <h2 className="font-semibold text-foreground">{roleConfig.title}</h2>
+            {user && (
+              <p className="text-xs text-muted-foreground">
+                {user.profile?.preferredName || user.profile?.firstName || user.username}
+              </p>
+            )}
           </div>
-        )}
+        </div>
       </SidebarHeader>
 
-      <SidebarContent className="p-0">
+      <SidebarContent className="flex-1 overflow-y-auto">
         <SidebarGroup>
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {config.items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 px-4 py-3 text-sm transition-colors ${
-                          isActive
-                            ? "bg-primary text-muted-foreground font-medium"
-                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                        }`
-                      }
-                    >
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                      {item.title === "Crisis Help" && (
-                        <AlertTriangle className="h-3 w-3 text-destructive ml-auto" />
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {roleConfig.items.map((item) => {
+                const ItemIcon = item.icon;
+                return (
+                  <SidebarMenuItem key={item.url}>
+                    <SidebarMenuButton asChild>
+                      <NavLink
+                        to={item.url}
+                        className={({ isActive }) =>
+                          `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-200 ${
+                            isActive
+                              ? 'bg-primary text-primary-foreground'
+                              : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                          }`
+                        }
+                      >
+                        <ItemIcon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Quick Actions */}
         <SidebarGroup>
-          <SidebarGroupLabel className="px-4 py-2 text-xs text-muted-foreground uppercase tracking-wider">
-            Quick Actions
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {!isAuthenticated ? (
-                <>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to="/login"
-                        className="flex items-center gap-3 px-4 py-2 text-xs text-black-600 hover:bg-gray-200 hover:text-gray-800 transition-colors"
-                      >
-                        <User className="h-3 w-3" />
-                        <span>Login</span>
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to="/register"
-                        className="flex items-center gap-3 px-4 py-2 text-xs text-gray-600 hover:bg-gray-200 hover:text-gray-800 transition-colors"
-                      >
-                        <Users className="h-3 w-3" />
-                        <span>Register</span>
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </>
-              ) : (
-                <>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to="/assessment"
-                        className="flex items-center gap-3 px-4 py-2 text-xs text-gray-600 hover:bg-gray-200 hover:text-gray-800 transition-colors"
-                      >
-                        <FileText className="h-3 w-3" />
-                        <span>Mental Health Assessment</span>
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <NavLink
-                        to="/crisis"
-                        className="flex items-center gap-3 px-4 py-2 text-xs text-destructive hover:bg-destructive/10 transition-colors"
-                      >
-                        <AlertTriangle className="h-3 w-3" />
-                        <span>Get Help Now</span>
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </>
-              )}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Help & Support */}
-        <SidebarGroup className="mt-auto">
-          <SidebarGroupLabel className="px-4 py-2 text-xs text-muted-foreground uppercase tracking-wider">
-            Support
-          </SidebarGroupLabel>
+          <SidebarGroupLabel>Quick Actions</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <a
-                    href="#help"
-                    className="flex items-center gap-3 px-4 py-2 text-xs text-gray-600 hover:bg-gray-200 hover:text-gray-800 transition-colors"
+                  <NavLink
+                    to="/crisis"
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-200 text-destructive hover:bg-destructive/10"
                   >
-                    <HelpCircle className="h-3 w-3" />
-                    <span>Help & FAQ</span>
-                  </a>
+                    <AlertTriangle className="h-4 w-4" />
+                    <span>Emergency Help</span>
+                  </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <a
                     href="tel:988"
-                    className="flex items-center gap-3 px-4 py-2 text-xs text-destructive hover:bg-destructive/10 transition-colors"
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-200 text-muted-foreground hover:text-foreground hover:bg-accent"
                   >
                     <AlertTriangle className="h-3 w-3" />
                     <span>Crisis Line: 988</span>
@@ -277,7 +205,6 @@ export function AppSidebar({ currentRole }: AppSidebarProps) {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer with user actions */}
       <SidebarFooter className="p-4 border-t border-gray-200">
         {isAuthenticated ? (
           <div className="space-y-2">
@@ -302,7 +229,7 @@ export function AppSidebar({ currentRole }: AppSidebarProps) {
               onClick={() => navigate('/login')}
               className="w-full"
             >
-              Login to Continue
+              Login
             </Button>
           </div>
         )}

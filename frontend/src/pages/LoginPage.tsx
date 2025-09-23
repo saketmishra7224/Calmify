@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Heart, Eye, EyeOff } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, Heart, Eye, EyeOff, User, Users, Stethoscope } from "lucide-react";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -14,7 +15,8 @@ export default function LoginPage() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    rememberMe: false
+    rememberMe: false,
+    preferredRole: '' as 'patient' | 'peer' | 'counselor' | ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -24,7 +26,13 @@ export default function LoginPage() {
     setError('');
     
     try {
-      await login(formData);
+      const loginData = {
+        email: formData.email,
+        password: formData.password,
+        rememberMe: formData.rememberMe,
+        ...(formData.preferredRole && { preferredRole: formData.preferredRole })
+      };
+      await login(loginData);
       navigate('/');
     } catch (err: any) {
       setError(err.message || 'Login failed. Please check your credentials.');
@@ -48,6 +56,39 @@ export default function LoginPage() {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+  };
+
+  const handleRoleChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      preferredRole: value as 'patient' | 'peer' | 'counselor'
+    }));
+  };
+
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case 'patient':
+        return <User className="h-4 w-4" />;
+      case 'peer':
+        return <Users className="h-4 w-4" />;
+      case 'counselor':
+        return <Stethoscope className="h-4 w-4" />;
+      default:
+        return null;
+    }
+  };
+
+  const getRoleDescription = (role: string) => {
+    switch (role) {
+      case 'patient':
+        return 'Seeking support and mental health resources';
+      case 'peer':
+        return 'Providing peer support to others';
+      case 'counselor':
+        return 'Professional mental health counselor';
+      default:
+        return '';
+    }
   };
 
   return (
@@ -92,6 +133,60 @@ export default function LoginPage() {
                   required
                   disabled={isLoading}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="role">I am logging in as</Label>
+                <Select 
+                  value={formData.preferredRole} 
+                  onValueChange={handleRoleChange}
+                  disabled={isLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="patient">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        <div>
+                          <div className="font-medium">Patient</div>
+                          <div className="text-xs text-muted-foreground">
+                            Seeking support and mental health resources
+                          </div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="peer">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        <div>
+                          <div className="font-medium">Peer Supporter</div>
+                          <div className="text-xs text-muted-foreground">
+                            Providing peer support to others
+                          </div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="counselor">
+                      <div className="flex items-center gap-2">
+                        <Stethoscope className="h-4 w-4" />
+                        <div>
+                          <div className="font-medium">Counselor</div>
+                          <div className="text-xs text-muted-foreground">
+                            Professional mental health counselor
+                          </div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                {formData.preferredRole && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    {getRoleIcon(formData.preferredRole)}
+                    <span>{getRoleDescription(formData.preferredRole)}</span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">

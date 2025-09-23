@@ -82,7 +82,7 @@ export default function HomePage() {
                 </div>
 
                 <div className="text-center p-6 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-                     onClick={() => navigate('/peer/chats')}>
+                     onClick={() => navigate('/peer/request')}>
                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                     <MessageCircle className="h-6 w-6 text-primary" />
                   </div>
@@ -91,7 +91,7 @@ export default function HomePage() {
                 </div>
 
                 <div className="text-center p-6 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-                     onClick={() => navigate('/counsellor/sessions')}>
+                     onClick={() => navigate('/counselor/request')}>
                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                     <Clock className="h-6 w-6 text-primary" />
                   </div>

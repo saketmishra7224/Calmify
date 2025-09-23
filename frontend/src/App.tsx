@@ -10,7 +10,9 @@ import RegisterPage from "./pages/RegisterPage";
 import ChatbotPage from "./pages/ChatbotPage";
 import MeditationPage from "./pages/MeditationPage";
 import PeerChatPage from "./pages/PeerChatPage";
-import CounsellorSessionPage from "./pages/CounsellorSessionPage";
+import CounselorSessionPage from "./pages/CounselorSessionPage";
+import RequestPeerSupportPage from "./pages/RequestPeerSupportPage";
+import RequestCounselorPage from "./pages/RequestCounselorPage";
 import AdminAnalyticsPage from "./pages/AdminAnalyticsPage";
 import SessionDetailsPage from "./pages/SessionDetailsPage";
 import QuestionnairePage from "./pages/QuestionnairePage";
@@ -34,7 +36,9 @@ const App = () => (
             <Route path="/chatbot" element={<ChatbotPage />} />
             <Route path="/meditation" element={<MeditationPage />} />
             <Route path="/peer/chats" element={<PeerChatPage />} />
-            <Route path="/counsellor/sessions" element={<CounsellorSessionPage />} />
+            <Route path="/counselor/sessions" element={<CounselorSessionPage />} />
+            <Route path="/peer/request" element={<RequestPeerSupportPage />} />
+            <Route path="/counselor/request" element={<RequestCounselorPage />} />
             <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
             <Route path="/session/:sessionId" element={<SessionDetailsPage />} />
             <Route path="/questionnaire/:type" element={<QuestionnairePage />} />
