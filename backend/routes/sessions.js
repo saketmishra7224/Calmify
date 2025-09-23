@@ -82,6 +82,71 @@ router.post('/create',
   }
 );
 
+// Get available sessions for helpers to join
+router.get('/available',
+  auth.authenticateToken,
+  async (req, res) => {
+    try {
+      const { helperType, severity, limit = 10 } = req.query;
+
+      // Only helpers can view available sessions
+      if (!['peer', 'counselor', 'admin'].includes(req.user.role)) {
+        return res.status(403).json({
+          error: 'Only helpers can view available sessions'
+        });
+      }
+
+      const query = {
+        status: 'waiting',
+        helperId: null
+      };
+
+      // Filter by helper type if specified
+      if (helperType) {
+        query.helperType = helperType;
+      }
+
+      // Filter by severity if specified
+      if (severity) {
+        query.severity = severity;
+      }
+
+      console.log('Available sessions query:', JSON.stringify(query));
+
+      const sessions = await Session.find(query)
+        .populate('patientId', 'username profile anonymousId')
+        .sort({ 
+          severity: -1,  // Higher severity first
+          createdAt: 1   // Older sessions first within same severity
+        })
+        .limit(parseInt(limit));
+
+      console.log(`Found ${sessions.length} available sessions`);
+
+      // Add waiting time to each session
+      const sessionsWithWaitTime = sessions.map(session => ({
+        ...session.toObject(),
+        waitingMinutes: Math.round((new Date() - session.createdAt) / (1000 * 60))
+      }));
+
+      res.json({
+        sessions: sessionsWithWaitTime,
+        totalWaiting: sessions.length,
+        instructions: {
+          acceptEndpoint: `POST /api/sessions/{sessionId}/accept`,
+          note: 'Use the accept endpoint to accept a session and start helping'
+        }
+      });
+    } catch (error) {
+      console.error('Get available sessions error:', error);
+      res.status(500).json({
+        error: 'Failed to get available sessions',
+        details: error.message
+      });
+    }
+  }
+);
+
 // Get session details and message history
 router.get('/:id',
   auth.authenticateToken,
@@ -335,67 +400,6 @@ router.get('/queue/:role',
   }
 );
 
-// Get available sessions for helpers to join
-router.get('/available',
-  auth.authenticateToken,
-  async (req, res) => {
-    try {
-      const { helperType, severity, limit = 10 } = req.query;
-
-      // Only helpers can view available sessions
-      if (!['peer', 'counselor', 'admin'].includes(req.user.role)) {
-        return res.status(403).json({
-          error: 'Only helpers can view available sessions'
-        });
-      }
-
-      const query = {
-        status: 'waiting',
-        helperId: null
-      };
-
-      // Filter by helper type if specified
-      if (helperType) {
-        query.helperType = helperType;
-      }
-
-      // Filter by severity if specified
-      if (severity) {
-        query.severity = severity;
-      }
-
-      const sessions = await Session.find(query)
-        .populate('patientId', 'username profile')
-        .sort({ 
-          severity: -1,  // Higher severity first
-          createdAt: 1   // Older sessions first within same severity
-        })
-        .limit(parseInt(limit));
-
-      // Add waiting time to each session
-      const sessionsWithWaitTime = sessions.map(session => ({
-        ...session.toObject(),
-        waitingMinutes: Math.round((new Date() - session.createdAt) / (1000 * 60))
-      }));
-
-      res.json({
-        sessions: sessionsWithWaitTime,
-        totalWaiting: sessions.length,
-        instructions: {
-          joinEndpoint: `POST /api/sessions/{sessionId}/join`,
-          note: 'Use the join endpoint to accept a session and start helping'
-        }
-      });
-    } catch (error) {
-      console.error('Get available sessions error:', error);
-      res.status(500).json({
-        error: 'Failed to get available sessions',
-        details: error.message
-      });
-    }
-  }
-);
-
 // Get user's sessions
 router.get('/my-sessions',
   auth.authenticateToken,
@@ -441,53 +445,7 @@ router.get('/my-sessions',
   }
 );
 
-// Get available sessions
-router.get('/available',
-  auth.authenticateToken,
-  async (req, res) => {
-    try {
-      const { type, page = 1, limit = 10 } = req.query;
-      const skip = (page - 1) * limit;
 
-      const query = {
-        status: 'active',
-        isPrivate: false,
-        'participants.user': { $ne: req.user._id }
-      };
-
-      if (type) {
-        query.type = type;
-      }
-
-      const sessions = await Session.find(query)
-        .populate('createdBy', 'username profile.firstName profile.lastName role')
-        .populate('participants.user', 'username profile.firstName profile.lastName role')
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(parseInt(limit));
-
-      // Filter sessions that aren't full
-      const availableSessions = sessions.filter(session => 
-        session.participants.filter(p => !p.leftAt).length < session.maxParticipants
-      );
-
-      res.json({
-        sessions: availableSessions,
-        pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total: availableSessions.length
-        }
-      });
-    } catch (error) {
-      console.error('Get available sessions error:', error);
-      res.status(500).json({
-        error: 'Failed to get available sessions',
-        details: error.message
-      });
-    }
-  }
-);
 
 // Start chatbot session or convert waiting session to chatbot
 router.post('/:sessionId/start-chatbot',
