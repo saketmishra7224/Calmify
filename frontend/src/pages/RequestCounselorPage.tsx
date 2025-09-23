@@ -24,7 +24,7 @@ interface Session {
   waitingMinutes?: number;
 }
 
-export default function RequestCounsellorPage() {
+export default function RequestCounselorPage() {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [activeSession, setActiveSession] = useState<Session | null>(null);
@@ -52,13 +52,13 @@ export default function RequestCounsellorPage() {
   const checkActiveSession = async () => {
     try {
       const response = await apiService.getMySessions();
-      const activeCounsellorSession = response.sessions?.find(
+      const activeCounselorSession = response.sessions?.find(
         (session: Session) => 
           session.helperType === 'counselor' && 
           (session.status === 'waiting' || session.status === 'active')
       );
-      if (activeCounsellorSession) {
-        setActiveSession(activeCounsellorSession);
+      if (activeCounselorSession) {
+        setActiveSession(activeCounselorSession);
       }
     } catch (err) {
       console.error('Failed to check active sessions:', err);

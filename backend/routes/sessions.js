@@ -4,12 +4,27 @@ const { auth, validation } = require('../utils');
 
 const router = express.Router();
 
+// Helper function to calculate urgency score
+function calculateUrgencyScore(severity, waitingMinutes) {
+  const severityScores = {
+    'critical': 100,
+    'severe': 75,
+    'moderate': 50,
+    'mild': 25
+  };
+  
+  const baseScore = severityScores[severity] || 25;
+  const waitingBonus = Math.min(waitingMinutes * 0.5, 50); // Max 50 bonus points for waiting
+  
+  return baseScore + waitingBonus;
+}
+
 // Create new chat session
 router.post('/create',
   auth.authenticateToken,
   async (req, res) => {
     try {
-      const { helperType, severity = 'mild', title, description } = req.body;
+      const { helperType, severity = 'mild', title, description, isPrivate = true, maxParticipants = 2 } = req.body;
 
       // Validate helper type
       const validHelperTypes = ['chatbot', 'peer', 'counselor'];
@@ -26,51 +41,84 @@ router.post('/create',
         });
       }
 
-      let helperId = null;
       let status = 'waiting';
+      let helperId = null;
+      let startedAt = null;
 
-      // For chatbot sessions, start immediately
+      // For chatbot sessions, start immediately with no specific helper
       if (helperType === 'chatbot') {
         status = 'active';
-        // For chatbot, we can create a virtual helper or leave helperId as null
-        // The AI will handle responses through the /api/ai/chat endpoint
-      } else {
-        // For human helpers, find available helper
-        const availableHelper = await User.findOne({
-          role: helperType,
-          isActive: true,
-          isOnline: true
-        });
-
-        if (availableHelper) {
-          helperId = availableHelper._id;
-          status = 'active';
-        } else {
-          // If no helper available, session stays in waiting status
-          console.log(`No ${helperType} available, session will wait in queue`);
-        }
+        startedAt = new Date();
+        // helperId remains null for chatbot sessions
       }
+      // For human helpers (peer/counselor), always start in waiting status
+      // They will be assigned when a helper accepts the session
 
       const session = new Session({
         patientId: req.user._id,
-        helperId,
+        helperId, // null for waiting sessions, null for chatbot
         helperType,
         severity,
         status,
         title: title || `${helperType} session`,
         description,
-        startedAt: status === 'active' ? new Date() : null
+        isPrivate,
+        maxParticipants,
+        startedAt
       });
 
       await session.save();
       await session.populate('patientId', 'username profile anonymousId');
-      if (helperId) {
-        await session.populate('helperId', 'username profile role');
+
+      // Provide different responses based on session type
+      let responseMessage = '';
+      let instructions = {};
+
+      if (helperType === 'chatbot') {
+        responseMessage = 'Chatbot session created and started successfully';
+        instructions = {
+          nextSteps: [
+            'You can start chatting immediately',
+            'Use /api/ai/chat to send messages and get AI responses'
+          ],
+          endpoints: {
+            sendMessage: 'POST /api/messages',
+            aiChat: 'POST /api/ai/chat'
+          }
+        };
+      } else {
+        responseMessage = 'Session created successfully and added to helper queue';
+        instructions = {
+          nextSteps: [
+            'Your session is now waiting for an available helper',
+            'You will be notified when a helper accepts your session',
+            'You can check session status using the session ID'
+          ],
+          endpoints: {
+            checkStatus: `GET /api/sessions/${session._id}`,
+            startChatbot: `POST /api/sessions/${session._id}/start-chatbot`
+          },
+          estimatedWaitTime: 'Varies based on helper availability'
+        };
       }
 
       res.status(201).json({
-        message: 'Session created successfully',
-        session
+        message: responseMessage,
+        session: {
+          _id: session._id,
+          patientId: session.patientId,
+          helperId: session.helperId,
+          helperType: session.helperType,
+          severity: session.severity,
+          status: session.status,
+          title: session.title,
+          description: session.description,
+          isPrivate: session.isPrivate,
+          maxParticipants: session.maxParticipants,
+          createdAt: session.createdAt,
+          startedAt: session.startedAt
+        },
+        instructions
       });
     } catch (error) {
       console.error('Session creation error:', error);
@@ -96,44 +144,38 @@ router.get('/available',
         });
       }
 
-      const query = {
-        status: 'waiting',
-        helperId: null
-      };
+      // Use the static method to find pending sessions
+      const sessions = await Session.findPendingSessions(
+        helperType || req.user.role, // Default to user's role if no specific type requested
+        severity,
+        parseInt(limit)
+      );
 
-      // Filter by helper type if specified
-      if (helperType) {
-        query.helperType = helperType;
-      }
-
-      // Filter by severity if specified
-      if (severity) {
-        query.severity = severity;
-      }
-
-      console.log('Available sessions query:', JSON.stringify(query));
-
-      const sessions = await Session.find(query)
-        .populate('patientId', 'username profile anonymousId')
-        .sort({ 
-          severity: -1,  // Higher severity first
-          createdAt: 1   // Older sessions first within same severity
-        })
-        .limit(parseInt(limit));
-
-      console.log(`Found ${sessions.length} available sessions`);
+      console.log(`Found ${sessions.length} available sessions for ${req.user.role}`);
 
       // Add waiting time to each session
-      const sessionsWithWaitTime = sessions.map(session => ({
-        ...session.toObject(),
-        waitingMinutes: Math.round((new Date() - session.createdAt) / (1000 * 60))
-      }));
+      const sessionsWithWaitTime = sessions.map(session => {
+        const waitingMinutes = Math.round((new Date() - session.createdAt) / (1000 * 60));
+        return {
+          ...session.toObject(),
+          waitingMinutes,
+          urgencyScore: calculateUrgencyScore(session.severity, waitingMinutes)
+        };
+      });
+
+      // Sort by urgency score (combines severity and waiting time)
+      sessionsWithWaitTime.sort((a, b) => b.urgencyScore - a.urgencyScore);
 
       res.json({
         sessions: sessionsWithWaitTime,
         totalWaiting: sessions.length,
+        filters: {
+          helperType: helperType || req.user.role,
+          severity: severity || 'all'
+        },
         instructions: {
           acceptEndpoint: `POST /api/sessions/{sessionId}/accept`,
+          declineEndpoint: `POST /api/sessions/{sessionId}/decline`,
           note: 'Use the accept endpoint to accept a session and start helping'
         }
       });
@@ -141,6 +183,119 @@ router.get('/available',
       console.error('Get available sessions error:', error);
       res.status(500).json({
         error: 'Failed to get available sessions',
+        details: error.message
+      });
+    }
+  }
+);
+
+// Get user's sessions (moved before /:id to avoid routing conflicts)
+router.get('/my-sessions',
+  auth.authenticateToken,
+  async (req, res) => {
+    try {
+      const { status = 'all', page = 1, limit = 10, role } = req.query;
+      const skip = (page - 1) * limit;
+
+      let query = {};
+      
+      // For patients, find sessions where they are the patient
+      if (req.user.role === 'patient') {
+        query = { patientId: req.user._id };
+      } 
+      // For helpers, find sessions where they are the helper
+      else if (['peer', 'counselor'].includes(req.user.role)) {
+        query = { helperId: req.user._id };
+      }
+      // For admins, they can see all sessions or filter by role
+      else if (req.user.role === 'admin') {
+        if (role === 'patient') {
+          query = { patientId: req.user._id };
+        } else if (role === 'helper') {
+          query = { helperId: req.user._id };
+        }
+        // If no role specified, admin sees all their sessions (both as patient and helper)
+        if (!role) {
+          query = {
+            $or: [
+              { patientId: req.user._id },
+              { helperId: req.user._id }
+            ]
+          };
+        }
+      }
+
+      // Filter by status if not 'all'
+      if (status !== 'all') {
+        query.status = status;
+      }
+
+      const sessions = await Session.find(query)
+        .populate('patientId', 'username profile anonymousId role')
+        .populate('helperId', 'username profile role')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit));
+
+      const total = await Session.countDocuments(query);
+
+      // Add calculated fields to sessions
+      const sessionsWithMetadata = sessions.map(session => {
+        const sessionObj = session.toObject();
+        
+        // Add duration if session is closed
+        if (sessionObj.endedAt && sessionObj.startedAt) {
+          sessionObj.durationMinutes = Math.round((new Date(sessionObj.endedAt) - new Date(sessionObj.startedAt)) / (1000 * 60));
+        }
+        
+        // Add current waiting time if still waiting
+        if (sessionObj.status === 'waiting') {
+          sessionObj.waitingMinutes = Math.round((new Date() - new Date(sessionObj.createdAt)) / (1000 * 60));
+        }
+        
+        // Add active duration for active sessions
+        if (sessionObj.status === 'active' && sessionObj.startedAt) {
+          sessionObj.activeDurationMinutes = Math.round((new Date() - new Date(sessionObj.startedAt)) / (1000 * 60));
+        }
+        
+        // Add role context for the current user
+        if (sessionObj.patientId._id.toString() === req.user._id.toString()) {
+          sessionObj.userRole = 'patient';
+        } else if (sessionObj.helperId && sessionObj.helperId._id.toString() === req.user._id.toString()) {
+          sessionObj.userRole = 'helper';
+        }
+        
+        return sessionObj;
+      });
+
+      // Calculate summary statistics
+      const summary = {
+        total,
+        waiting: sessions.filter(s => s.status === 'waiting').length,
+        active: sessions.filter(s => s.status === 'active').length,
+        closed: sessions.filter(s => s.status === 'closed').length,
+        escalated: sessions.filter(s => s.status === 'escalated').length
+      };
+
+      res.json({
+        sessions: sessionsWithMetadata,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          pages: Math.ceil(total / limit)
+        },
+        filters: {
+          status: status,
+          role: role || 'all'
+        },
+        summary,
+        userRole: req.user.role
+      });
+    } catch (error) {
+      console.error('Get sessions error:', error);
+      res.status(500).json({
+        error: 'Failed to get sessions',
         details: error.message
       });
     }
@@ -338,7 +493,7 @@ router.post('/:id/close',
   }
 );
 
-// Get pending sessions for peer/counselor queue
+// Get pending sessions for peer/counselor queue  
 router.get('/queue/:role',
   auth.authenticateToken,
   async (req, res) => {
@@ -361,34 +516,46 @@ router.get('/queue/:role',
         });
       }
 
-      const query = {
-        helperType: role,
-        status: 'waiting',
-        helperId: null
-      };
+      // Use the static method for finding pending sessions
+      const pendingSessions = await Session.findPendingSessions(
+        role,
+        severity,
+        parseInt(limit)
+      );
 
-      if (severity) {
-        query.severity = severity;
-      }
+      // Add waiting time and urgency scoring to each session
+      const sessionsWithMetadata = pendingSessions.map(session => {
+        const waitingMinutes = Math.round((new Date() - session.createdAt) / (1000 * 60));
+        const urgencyScore = calculateUrgencyScore(session.severity, waitingMinutes);
+        
+        return {
+          ...session.toObject(),
+          waitingMinutes,
+          urgencyScore,
+          waitingHours: Math.round(waitingMinutes / 60 * 10) / 10 // rounded to 1 decimal
+        };
+      });
 
-      const pendingSessions = await Session.find(query)
-        .populate('patientId', 'username profile anonymousId')
-        .sort({ 
-          severity: -1, // Critical first
-          createdAt: 1  // Older first within same severity
-        })
-        .limit(parseInt(limit));
-
-      // Add waiting time to each session
-      const sessionsWithWaitTime = pendingSessions.map(session => ({
-        ...session.toObject(),
-        waitingMinutes: Math.round((new Date() - session.createdAt) / (1000 * 60))
-      }));
+      // Sort by urgency score
+      sessionsWithMetadata.sort((a, b) => b.urgencyScore - a.urgencyScore);
 
       res.json({
-        queue: sessionsWithWaitTime,
+        queue: sessionsWithMetadata,
         totalPending: pendingSessions.length,
-        role
+        role,
+        queueStats: {
+          critical: pendingSessions.filter(s => s.severity === 'critical').length,
+          severe: pendingSessions.filter(s => s.severity === 'severe').length,
+          moderate: pendingSessions.filter(s => s.severity === 'moderate').length,
+          mild: pendingSessions.filter(s => s.severity === 'mild').length,
+          averageWaitTime: sessionsWithMetadata.length > 0 
+            ? Math.round(sessionsWithMetadata.reduce((sum, s) => sum + s.waitingMinutes, 0) / sessionsWithMetadata.length)
+            : 0
+        },
+        instructions: {
+          acceptSession: 'POST /api/sessions/{sessionId}/accept',
+          declineSession: 'POST /api/sessions/{sessionId}/decline'
+        }
       });
     } catch (error) {
       console.error('Get queue error:', error);
@@ -400,50 +567,9 @@ router.get('/queue/:role',
   }
 );
 
-// Get user's sessions
-router.get('/my-sessions',
-  auth.authenticateToken,
-  async (req, res) => {
-    try {
-      const { status = 'active', page = 1, limit = 10 } = req.query;
-      const skip = (page - 1) * limit;
+// Get user's sessions (improved with better filtering)
 
-      const query = {
-        'participants.user': req.user._id,
-        'participants.leftAt': { $exists: false }
-      };
 
-      if (status !== 'all') {
-        query.status = status;
-      }
-
-      const sessions = await Session.find(query)
-        .populate('createdBy', 'username profile.firstName profile.lastName role')
-        .populate('participants.user', 'username profile.firstName profile.lastName role')
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(parseInt(limit));
-
-      const total = await Session.countDocuments(query);
-
-      res.json({
-        sessions,
-        pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total,
-          pages: Math.ceil(total / limit)
-        }
-      });
-    } catch (error) {
-      console.error('Get sessions error:', error);
-      res.status(500).json({
-        error: 'Failed to get sessions',
-        details: error.message
-      });
-    }
-  }
-);
 
 
 
@@ -554,13 +680,15 @@ router.post('/:sessionId/accept',
 
       if (session.status !== 'waiting') {
         return res.status(400).json({
-          error: 'Can only accept sessions that are waiting for a helper'
+          error: 'Can only accept sessions that are waiting for a helper',
+          currentStatus: session.status
         });
       }
 
       if (session.helperId) {
         return res.status(409).json({
-          error: 'Session already has a helper assigned'
+          error: 'Session already has a helper assigned',
+          helperId: session.helperId
         });
       }
 
@@ -572,28 +700,28 @@ router.post('/:sessionId/accept',
 
       if (!canAccept) {
         return res.status(403).json({
-          error: `This session is requesting a ${session.helperType}, but you are a ${req.user.role}`
+          error: `This session is requesting a ${session.helperType}, but you are a ${req.user.role}`,
+          suggestion: session.helperType === 'counselor' && req.user.role === 'peer' 
+            ? 'This session requires a counselor. Consider declining if you cannot provide the required level of support.'
+            : null
         });
       }
 
-      // Accept the session
-      session.helperId = req.user._id;
-      session.status = 'active';
-      session.startedAt = new Date();
+      // Accept the session using the model method
+      await session.acceptSession(req.user._id);
       
       // If counselor accepts a peer session, upgrade the helper type
       if (session.helperType === 'peer' && req.user.role === 'counselor') {
         session.helperType = 'counselor';
+        await session.save();
       }
 
-      await session.save();
-      await session.populate('patientId', 'username profile');
+      await session.populate('patientId', 'username profile anonymousId');
       await session.populate('helperId', 'username profile role');
 
       // Create welcome message if provided
       let welcomeMsg = null;
       if (welcomeMessage) {
-        const Message = require('../models/Message');
         welcomeMsg = new Message({
           sessionId: session._id,
           senderId: req.user._id,
@@ -619,6 +747,8 @@ router.post('/:sessionId/accept',
           title: session.title,
           description: session.description,
           startedAt: session.startedAt,
+          acceptedAt: session.acceptedAt,
+          waitingTime: session.waitingTime,
           createdAt: session.createdAt
         },
         welcomeMessage: welcomeMsg ? {
@@ -626,6 +756,10 @@ router.post('/:sessionId/accept',
           message: welcomeMsg.message,
           createdAt: welcomeMsg.createdAt
         } : null,
+        statistics: {
+          waitingTimeMinutes: session.waitingTime,
+          priorityLevel: session.severity
+        },
         instructions: {
           nextSteps: [
             'Send a welcome message to introduce yourself',
@@ -637,7 +771,8 @@ router.post('/:sessionId/accept',
           endpoints: {
             sendMessage: 'POST /api/messages',
             getMessages: `GET /api/messages/session/${session._id}`,
-            escalate: 'POST /api/urgent/escalate'
+            escalate: `PUT /api/sessions/${session._id}/escalate`,
+            close: `POST /api/sessions/${session._id}/close`
           }
         }
       });

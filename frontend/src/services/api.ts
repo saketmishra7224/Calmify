@@ -308,6 +308,8 @@ class ApiService {
     return this.handleResponse<any>(response);
   }
 
+
+
   async closeSession(sessionId: string, rating?: number, feedback?: string, notes?: string): Promise<{ session: Session }> {
     const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/close`, {
       method: 'POST',

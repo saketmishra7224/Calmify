@@ -18,6 +18,9 @@ import SessionDetailsPage from "./pages/SessionDetailsPage";
 import QuestionnairePage from "./pages/QuestionnairePage";
 import AssessmentPage from "./pages/AssessmentPage";
 import CrisisPage from "./pages/CrisisPage";
+import MySessionsPage from "./pages/MySessionsPage";
+import PeerAvailablePage from "./pages/PeerAvailablePage";
+import CounselorAvailablePage from "./pages/CounselorAvailablePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +47,10 @@ const App = () => (
             <Route path="/questionnaire/:type" element={<QuestionnairePage />} />
             <Route path="/assessment" element={<AssessmentPage />} />
             <Route path="/crisis" element={<CrisisPage />} />
+            <Route path="/my-sessions" element={<MySessionsPage />} />
+            <Route path="/peer/available" element={<PeerAvailablePage />} />
+            <Route path="/counselor/available" element={<CounselorAvailablePage />} />
+            <Route path="/sessions/:sessionId" element={<SessionDetailsPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

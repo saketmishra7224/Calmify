@@ -49,7 +49,7 @@ const roleConfigs = {
     title: "Patient",
     icon: User,
     items: [
-      { title: "Home", url: "/", icon: Home },
+      { title: "My Sessions", url: "/my-sessions", icon: Clock },
       { title: "AI Chatbot", url: "/chatbot", icon: MessageCircle },
       { title: "Peer Support", url: "/peer/request", icon: Users },
       { title: "Counselor Sessions", url: "/counselor/request", icon: UserCheck },
@@ -62,7 +62,7 @@ const roleConfigs = {
     title: "Student",
     icon: Users,
     items: [
-      { title: "Home", url: "/", icon: Home },
+      { title: "My Sessions", url: "/my-sessions", icon: Clock },
       { title: "AI Chatbot", url: "/chatbot", icon: MessageCircle },
       { title: "Peer Support", url: "/peer/request", icon: Users },
       { title: "Counselor Sessions", url: "/counselor/request", icon: UserCheck },
@@ -75,9 +75,9 @@ const roleConfigs = {
     title: "Peer Volunteer",
     icon: UserCheck,
     items: [
-      { title: "Home", url: "/", icon: Home },
-      { title: "Available Sessions", url: "/peer/chats", icon: MessageCircle },
-      { title: "My History", url: "/peer/history", icon: Archive },
+      { title: "Available Sessions", url: "/peer/available", icon: MessageCircle },
+      { title: "My Sessions", url: "/my-sessions", icon: Clock },
+      { title: "Session History", url: "/peer/history", icon: Archive },
       { title: "Resources", url: "/peer/resources", icon: BookOpen },
       { title: "Training", url: "/peer/training", icon: Star },
     ]
@@ -86,8 +86,8 @@ const roleConfigs = {
     title: "Counselor",
     icon: Heart,
     items: [
-      { title: "Home", url: "/", icon: Home },
-      { title: "My Sessions", url: "/counselor/sessions", icon: MessageCircle },
+      { title: "Available Sessions", url: "/counselor/available", icon: MessageCircle },
+      { title: "My Sessions", url: "/my-sessions", icon: Clock },
       { title: "Patient Reports", url: "/counselor/reports", icon: Archive },
       { title: "Crisis Alerts", url: "/counselor/alerts", icon: AlertTriangle },
       { title: "Schedule", url: "/counselor/calendar", icon: Calendar },

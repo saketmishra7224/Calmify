@@ -281,7 +281,7 @@ export default function CrisisPage() {
               <Button onClick={() => navigate('/peer/chats')}>
                 Talk to Peer Support
               </Button>
-              <Button onClick={() => navigate('/counsellor/sessions')}>
+              <Button onClick={() => navigate('/counselor/request')}>
                 Find Professional Help
               </Button>
             </div>

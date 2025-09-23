@@ -51,7 +51,7 @@ interface Message {
   crisisDetected?: boolean;
 }
 
-export default function CounsellorSessionPage() {
+export default function CounselorSessionPage() {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [availableSessions, setAvailableSessions] = useState<Session[]>([]);
@@ -215,7 +215,7 @@ export default function CounsellorSessionPage() {
 
   if (!isAuthenticated || user?.role !== 'counselor') {
     return (
-      <Layout currentRole="counsellor">
+      <Layout currentRole="counselor">
         <div className="flex items-center justify-center h-full">
           <Alert className="max-w-md">
             <AlertTriangle className="h-4 w-4" />
@@ -229,7 +229,7 @@ export default function CounsellorSessionPage() {
   }
 
   return (
-    <Layout currentRole="counsellor">
+    <Layout currentRole="counselor">
       <div className="flex h-screen bg-background">
         {/* Session List Sidebar */}
         <div className="w-80 bg-white border-r border-border p-4 overflow-y-auto">
