@@ -43,8 +43,8 @@ const roleConfigs = {
     title: "Patient",
     icon: User,
     items: [
-      { title: "My Sessions", url: "/my-sessions", icon: Clock },
       { title: "AI Chatbot", url: "/chatbot", icon: MessageCircle },
+      { title: "My Sessions", url: "/my-sessions", icon: Clock },
       { title: "Peer Support", url: "/peer/request", icon: Users },
       { title: "Counselor Sessions", url: "/counselor/request", icon: UserCheck },
       { title: "Take Assessment", url: "/assessment", icon: FileText },
@@ -56,17 +56,20 @@ const roleConfigs = {
     title: "Peer Volunteer",
     icon: UserCheck,
     items: [
+      { title: "Dashboard", url: "/dashboard", icon: Home },
       { title: "Available Sessions", url: "/peer/available", icon: MessageCircle },
       { title: "My Sessions", url: "/my-sessions", icon: Clock },
       { title: "Session History", url: "/session-history", icon: Archive },
       { title: "Resources", url: "/peer/resources", icon: BookOpen },
       { title: "Training", url: "/peer/training", icon: Star },
+      { title: "Crisis Help", url: "/crisis", icon: AlertTriangle },
     ]
   },
   counselor: {
     title: "Counselor",
     icon: Heart,
     items: [
+      { title: "Dashboard", url: "/dashboard", icon: Home },
       { title: "Available Sessions", url: "/counselor/available", icon: MessageCircle },
       { title: "My Sessions", url: "/my-sessions", icon: Clock },
       { title: "Patient Reports", url: "/counselor/reports", icon: Archive },
@@ -79,7 +82,7 @@ const roleConfigs = {
     title: "Administrator",
     icon: Settings,
     items: [
-      { title: "Dashboard", url: "/admin/analytics", icon: BarChart3 },
+      { title: "Analytics Dashboard", url: "/admin/analytics", icon: BarChart3 },
       { title: "User Management", url: "/admin/users", icon: Users },
       { title: "System Stats", url: "/admin/stats", icon: TrendingUp },
       { title: "Content Moderation", url: "/admin/moderation", icon: Shield },
@@ -110,6 +113,46 @@ export function AppNavbar({ currentRole }: AppNavbarProps) {
     return roleConfig.title;
   };
 
+  const getRoleDisplayName = () => {
+    if (!isAuthenticated || !user) return 'SANEYAR';
+    
+    switch (user.role) {
+      case 'patient':
+        return 'PATIENT';
+      case 'peer':
+        return 'PEER';
+      case 'counselor':
+        return 'COUNSELOR';
+      case 'admin':
+        return 'ADMIN';
+      default:
+        return 'SANEYAR';
+    }
+  };
+
+  const handleHomeClick = () => {
+    if (!isAuthenticated || !user) {
+      navigate('/');
+      return;
+    }
+
+    // Route authenticated users based on their role
+    switch (user.role) {
+      case 'patient':
+        navigate('/chatbot');
+        break;
+      case 'peer':
+      case 'counselor':
+        navigate('/dashboard');
+        break;
+      case 'admin':
+        navigate('/admin/analytics');
+        break;
+      default:
+        navigate('/');
+    }
+  };
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -120,11 +163,11 @@ export function AppNavbar({ currentRole }: AppNavbarProps) {
   };
 
   return (
-    <nav className="bg-background border-b border-border px-4 py-3">
+    <nav className="bg-background border-b border-border px-4 py-3 sticky top-0 z-50">
       <div className="flex items-center justify-between">
         {/* Left side - Logo/Brand */}
         <button
-          onClick={() => navigate('/')}
+          onClick={handleHomeClick}
           className="flex items-center gap-2 sm:gap-3 hover:bg-accent/50 rounded-lg p-2 -m-2 transition-colors duration-200 group"
           title="Click to go to home page"
         >
@@ -133,7 +176,7 @@ export function AppNavbar({ currentRole }: AppNavbarProps) {
           </div>
           <div className="flex-1 hidden sm:block">
             <h2 className="font-semibold text-foreground group-hover:text-primary transition-colors duration-200 text-sm">
-              {getCurrentPageTitle()}
+              {getRoleDisplayName()}
             </h2>
             {user && (
               <p className="text-xs text-muted-foreground group-hover:text-primary/80 transition-colors duration-200">
@@ -143,7 +186,7 @@ export function AppNavbar({ currentRole }: AppNavbarProps) {
           </div>
           <div className="flex-1 sm:hidden">
             <h2 className="font-semibold text-foreground group-hover:text-primary transition-colors duration-200 text-sm">
-              {getCurrentPageTitle()}
+              {getRoleDisplayName()}
             </h2>
           </div>
         </button>

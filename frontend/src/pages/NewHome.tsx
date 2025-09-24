@@ -9,17 +9,6 @@ export default function NewHome() {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
-    // Wait for auth to finish loading before redirecting
-    if (isLoading) return;
-    
-    // Redirect authenticated users to dashboard
-    if (isAuthenticated) {
-      navigate('/dashboard');
-      return;
-    }
-  }, [isAuthenticated, navigate, isLoading]);
-
-  useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
