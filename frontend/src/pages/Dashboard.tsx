@@ -2,7 +2,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, AlertTriangle, Brain, BookOpen, Clock, UserPlus } from "lucide-react";
+import { MessageCircle, AlertTriangle, Brain, BookOpen, Clock, UserPlus, BarChart3, Shield } from "lucide-react";
 
 export default function Dashboard() {
   const [searchParams] = useSearchParams();
@@ -70,43 +70,75 @@ export default function Dashboard() {
           <section className="py-16 bg-white">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
               <h2 className="text-2xl font-bold text-center mb-8">Quick Actions</h2>
-              <div className="grid md:grid-cols-4 gap-6">
-                <div className="text-center p-6 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-                     onClick={handleTakeAssessment}>
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <BookOpen className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2 text-foreground">Take Assessment</h3>
-                  <p className="text-muted-foreground mb-4">PHQ-9 depression screening</p>
-                </div>
+              
+              {/* Admin Actions */}
+              {user?.role === 'admin' && (
+                <>
+                  <div className="mb-8">
+                    <h3 className="text-lg font-semibold text-center mb-4 text-primary">Administrator Dashboard</h3>
+                    <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                      <div className="text-center p-6 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer bg-gradient-to-br from-blue-50 to-blue-100"
+                           onClick={() => navigate('/admin/analytics')}>
+                        <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+                          <BarChart3 className="h-6 w-6 text-primary" />
+                        </div>
+                        <h3 className="text-lg font-semibold mb-2 text-foreground">Analytics Dashboard</h3>
+                        <p className="text-muted-foreground mb-4">View platform metrics, user engagement, and crisis statistics</p>
+                      </div>
 
-                <div className="text-center p-6 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-                     onClick={() => navigate('/peer/request')}>
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <MessageCircle className="h-6 w-6 text-primary" />
+                      <div className="text-center p-6 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer bg-gradient-to-br from-green-50 to-green-100"
+                           onClick={() => navigate('/crisis')}>
+                        <div className="w-12 h-12 bg-green-600/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+                          <Shield className="h-6 w-6 text-green-600" />
+                        </div>
+                        <h3 className="text-lg font-semibold mb-2 text-foreground">Crisis Management</h3>
+                        <p className="text-muted-foreground mb-4">Monitor and manage active crisis alerts</p>
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-foreground">Peer Support</h3>
-                  <p className="text-muted-foreground mb-4">Connect with trained volunteers</p>
-                </div>
+                </>
+              )}
 
-                <div className="text-center p-6 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-                     onClick={() => navigate('/counselor/request')}>
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <Clock className="h-6 w-6 text-primary" />
+              {/* Regular User Actions */}
+              {user?.role !== 'admin' && (
+                <div className="grid md:grid-cols-4 gap-6">
+                  <div className="text-center p-6 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+                       onClick={handleTakeAssessment}>
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                      <BookOpen className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2 text-foreground">Take Assessment</h3>
+                    <p className="text-muted-foreground mb-4">PHQ-9 depression screening</p>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-foreground">Professional Help</h3>
-                  <p className="text-muted-foreground mb-4">Talk to licensed counselors</p>
-                </div>
 
-                <div className="text-center p-6 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-                     onClick={() => navigate('/meditation')}>
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <Brain className="h-6 w-6 text-primary" />
+                  <div className="text-center p-6 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+                       onClick={() => navigate('/peer/request')}>
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                      <MessageCircle className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2 text-foreground">Peer Support</h3>
+                    <p className="text-muted-foreground mb-4">Connect with trained volunteers</p>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-foreground">Meditation</h3>
-                  <p className="text-muted-foreground mb-4">Guided relaxation exercises</p>
+
+                  <div className="text-center p-6 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+                       onClick={() => navigate('/counselor/request')}>
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                      <Clock className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2 text-foreground">Professional Help</h3>
+                    <p className="text-muted-foreground mb-4">Talk to licensed counselors</p>
+                  </div>
+
+                  <div className="text-center p-6 border border-border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+                       onClick={() => navigate('/meditation')}>
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                      <Brain className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2 text-foreground">Meditation</h3>
+                    <p className="text-muted-foreground mb-4">Guided relaxation exercises</p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </section>
         )}
