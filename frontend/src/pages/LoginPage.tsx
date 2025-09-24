@@ -4,6 +4,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+interface ErrorResponse {
+  message: string;
+}
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Heart, Eye, EyeOff, User, Users, Stethoscope } from "lucide-react";
 
@@ -39,8 +43,9 @@ export default function LoginPage() {
       };
       await login(loginData);
       navigate('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'Login failed. Please check your credentials.');
+    } catch (err: unknown) {
+      const error = err as ErrorResponse;
+      setError(error.message || 'Login failed. Please check your credentials.');
     }
   };
 
@@ -50,8 +55,9 @@ export default function LoginPage() {
     try {
       await createAnonymousSession();
       navigate('/chatbot');
-    } catch (err: any) {
-      setError(err.message || 'Anonymous session creation failed.');
+    } catch (err: unknown) {
+      const error = err as ErrorResponse;
+      setError(error.message || 'Anonymous session creation failed.');
     }
   };
 
@@ -114,7 +120,7 @@ export default function LoginPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 bg-[#2BD4BD] rounded-lg flex items-center justify-center shadow-lg">
               <Heart className="w-6 h-6 text-white" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900">Calmify</h1>
@@ -151,7 +157,7 @@ export default function LoginPage() {
                   onChange={handleInputChange}
                   required
                   disabled={isLoading}
-                  className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  className="border-gray-200 focus:border-[#2BD4BD] focus:ring-[#2BD4BD]"
                 />
               </div>
 
@@ -162,7 +168,7 @@ export default function LoginPage() {
                   onValueChange={handleRoleChange}
                   disabled={isLoading}
                 >
-                  <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
+                  <SelectTrigger className="border-gray-200 focus:border-[#2BD4BD] focus:ring-[#2BD4BD]">
                     <SelectValue placeholder="Select your role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -221,7 +227,7 @@ export default function LoginPage() {
                     onChange={handleInputChange}
                     required
                     disabled={isLoading}
-                    className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 pr-10"
+                    className="border-gray-200 focus:border-[#2BD4BD] focus:ring-[#2BD4BD] pr-10"
                   />
                   <Button
                     type="button"
@@ -247,7 +253,7 @@ export default function LoginPage() {
                   type="checkbox"
                   checked={formData.rememberMe}
                   onChange={handleInputChange}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-[#2BD4BD] focus:ring-[#2BD4BD]"
                   disabled={isLoading}
                 />
                 <Label htmlFor="rememberMe" className="text-sm text-gray-600">
@@ -259,7 +265,7 @@ export default function LoginPage() {
             <div className="space-y-4 mt-8">
               <button 
                 type="submit" 
-                className="w-full px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-lg font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="w-full px-8 py-4 bg-[#2BD4BD] text-white text-lg font-semibold rounded-xl hover:bg-[#25C1AB] transition-all hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -303,7 +309,7 @@ export default function LoginPage() {
                 Don't have an account?{' '}
                 <Link 
                   to="/register" 
-                  className="text-blue-600 hover:text-blue-700 hover:underline font-medium"
+                  className="text-[#2BD4BD] hover:text-[#25C1AB] hover:underline font-medium"
                 >
                   Sign up
                 </Link>

@@ -55,7 +55,7 @@ export default function NewHome() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 bg-[#2BD4BD] rounded-lg flex items-center justify-center shadow-lg">
                 <Heart className="w-6 h-6 text-white" />
               </div>
               <span className="text-xl font-bold text-gray-900">Calmify</span>
@@ -93,7 +93,7 @@ export default function NewHome() {
             </div>
             <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-8 leading-tight">
               Your Mental Health,
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2BD4BD] to-[#2BD4BD]">
                 {' '}Supported
               </span>
             </h1>
@@ -104,7 +104,7 @@ export default function NewHome() {
             <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
               <button 
                 onClick={() => navigate('/register')}
-                className="px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-xl hover:bg-blue-700 transition-all hover:shadow-lg transform hover:scale-105 flex items-center space-x-2"
+                className="px-8 py-4 bg-[#2BD4BD] text-white text-lg font-semibold rounded-xl hover:bg-[#25C1AB] transition-all hover:shadow-lg transform hover:scale-105 flex items-center space-x-2"
               >
                 <span>Start Your Journey</span>
                 <ArrowRight className="w-5 h-5" />
@@ -150,7 +150,7 @@ export default function NewHome() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
               <div key={index} className="bg-white rounded-3xl border border-gray-200 p-8 hover:shadow-xl hover:border-blue-300 transition-all group hover:-translate-y-1">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:shadow-lg transition-all">
+                <div className="w-16 h-16 bg-[#2BD4BD] rounded-2xl flex items-center justify-center mb-6 group-hover:shadow-lg transition-all">
                   <feature.icon className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-4">{feature.title}</h3>
@@ -180,7 +180,7 @@ export default function NewHome() {
           <div className="grid md:grid-cols-3 gap-12">
             <div className="text-center group">
               <div className="relative">
-                <div className="w-24 h-24 bg-gradient-to-br from-blue-600 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-6 text-2xl font-bold text-white group-hover:shadow-xl transition-all">
+                <div className="w-24 h-24 bg-[#2BD4BD] rounded-3xl flex items-center justify-center mx-auto mb-6 text-2xl font-bold text-white group-hover:shadow-xl transition-all">
                   1
                 </div>
                 {/* Connecting line */}
@@ -194,7 +194,7 @@ export default function NewHome() {
             
             <div className="text-center group">
               <div className="relative">
-                <div className="w-24 h-24 bg-gradient-to-br from-blue-600 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-6 text-2xl font-bold text-white group-hover:shadow-xl transition-all">
+                <div className="w-24 h-24 bg-[#2BD4BD] rounded-3xl flex items-center justify-center mx-auto mb-6 text-2xl font-bold text-white group-hover:shadow-xl transition-all">
                   2
                 </div>
                 <div className="hidden md:block absolute top-12 left-full w-full h-0.5 bg-gray-200 -z-10"></div>
@@ -206,7 +206,7 @@ export default function NewHome() {
             </div>
             
             <div className="text-center group">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-600 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-6 text-2xl font-bold text-white group-hover:shadow-xl transition-all">
+              <div className="w-24 h-24 bg-[#2BD4BD] rounded-3xl flex items-center justify-center mx-auto mb-6 text-2xl font-bold text-white group-hover:shadow-xl transition-all">
                 3
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Continue Your Journey</h3>
@@ -219,43 +219,43 @@ export default function NewHome() {
       </section>
 
       {/* Trust Section */}
-      <section className="py-20 px-6 bg-blue-900">
+      <section className="py-20 px-6 bg-[#2BD4BD]">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
-              <div className="inline-flex items-center space-x-2 bg-blue-800 px-4 py-2 rounded-full text-sm text-blue-200 mb-6">
+              <div className="inline-flex items-center space-x-2 bg-white/20 px-4 py-2 rounded-full text-sm text-white mb-6">
                 <Lock className="w-4 h-4" />
                 <span>Military-grade encryption</span>
               </div>
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">
                 Your Privacy is Our Promise
               </h2>
-              <p className="text-xl text-blue-100 mb-8 leading-relaxed">
+              <p className="text-xl text-white mb-8 leading-relaxed">
                 Join thousands who have found support, guidance, and healing through our platform. 
                 Your mental health and privacy are our top priorities.
               </p>
               <div className="space-y-4">
-                <div className="flex items-center space-x-3 text-blue-100">
-                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                <div className="flex items-center space-x-3 text-white">
+                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-2 h-2 bg-[#2BD4BD] rounded-full"></div>
                   </div>
                   <span>End-to-end encrypted conversations</span>
                 </div>
-                <div className="flex items-center space-x-3 text-blue-100">
-                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                <div className="flex items-center space-x-3 text-white">
+                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-2 h-2 bg-[#2BD4BD] rounded-full"></div>
                   </div>
                   <span>HIPAA compliant security standards</span>
                 </div>
-                <div className="flex items-center space-x-3 text-blue-100">
-                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                <div className="flex items-center space-x-3 text-white">
+                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-2 h-2 bg-[#2BD4BD] rounded-full"></div>
                   </div>
                   <span>Anonymous sessions available</span>
                 </div>
-                <div className="flex items-center space-x-3 text-blue-100">
-                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                <div className="flex items-center space-x-3 text-white">
+                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-2 h-2 bg-[#2BD4BD] rounded-full"></div>
                   </div>
                   <span>Crisis detection and intervention</span>
                 </div>
@@ -263,7 +263,7 @@ export default function NewHome() {
             </div>
             <div className="bg-white rounded-3xl p-10 shadow-2xl">
               <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-[#2BD4BD] rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <Heart className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Ready to Begin?</h3>
@@ -275,7 +275,7 @@ export default function NewHome() {
               <div className="space-y-4">
                 <button 
                   onClick={() => navigate('/register')}
-                  className="w-full px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-xl hover:bg-blue-700 transition-all hover:shadow-lg"
+                  className="w-full px-8 py-4 bg-[#2BD4BD] text-white text-lg font-semibold rounded-xl hover:bg-[#25C1AB] transition-all hover:shadow-lg"
                 >
                   Start Free Assessment
                 </button>
@@ -301,7 +301,7 @@ export default function NewHome() {
           <div className="grid md:grid-cols-5 gap-8 mb-12">
             <div className="md:col-span-2">
               <div className="flex items-center space-x-3 mb-6">
-                <div className="w-10 h-10 bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-[#2BD4BD] rounded-lg flex items-center justify-center">
                   <Heart className="w-6 h-6 text-white" />
                 </div>
                 <span className="text-xl font-bold text-gray-900">Calmify</span>
