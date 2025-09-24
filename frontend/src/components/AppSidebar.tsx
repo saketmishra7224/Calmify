@@ -64,9 +64,7 @@ const roleConfigs = {
     items: [
       { title: "Available Sessions", url: "/peer/available", icon: MessageCircle },
       { title: "My Sessions", url: "/my-sessions", icon: Clock },
-      { title: "Session History", url: "/session-history", icon: Archive },
       { title: "Resources", url: "/peer/resources", icon: BookOpen },
-      { title: "Training", url: "/peer/training", icon: Star },
     ]
   },
   counselor: {
@@ -75,9 +73,6 @@ const roleConfigs = {
     items: [
       { title: "Available Sessions", url: "/counselor/available", icon: MessageCircle },
       { title: "My Sessions", url: "/my-sessions", icon: Clock },
-      { title: "Patient Reports", url: "/counselor/reports", icon: Archive },
-      { title: "Crisis Alerts", url: "/counselor/alerts", icon: AlertTriangle },
-      { title: "Schedule", url: "/counselor/calendar", icon: Calendar },
       { title: "Notes & Records", url: "/counselor/notes", icon: FileText },
     ]
   },
