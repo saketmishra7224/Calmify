@@ -1,4 +1,5 @@
 import { io, Socket } from 'socket.io-client';
+import { socketDebugger } from '../utils/socketDebug';
 
 interface SocketAuthData {
   token: string;
@@ -47,6 +48,11 @@ class SocketService {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
+  private currentSessionId: string | null = null;
+  private joinSessionPromise: Promise<void> | null = null;
+  private isJoining = false;
+  private lastSessionAction = 0;
+  private sessionActionCooldown = 500; // 500ms cooldown
 
   constructor() {
     this.setupEventListeners();
@@ -107,9 +113,16 @@ class SocketService {
   }
 
   disconnect(): void {
+    // Leave current session before disconnecting
+    if (this.currentSessionId && this.socket?.connected) {
+      this.socket.emit('leave-session', { sessionId: this.currentSessionId });
+    }
+    
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;
+      this.currentSessionId = null;
+      this.isJoining = false;
       console.log('🔌 Socket disconnected manually');
     }
   }
@@ -129,8 +142,42 @@ class SocketService {
       return;
     }
 
+    // Rate limiting
+    const now = Date.now();
+    if (now - this.lastSessionAction < this.sessionActionCooldown) {
+      console.log('📱 Rate limiting: Too many session actions');
+      return;
+    }
+    this.lastSessionAction = now;
+
+    // Prevent duplicate joins for the same session
+    if (this.currentSessionId === sessionId) {
+      console.log(`📱 Already in session: ${sessionId}`);
+      return;
+    }
+
+    // Prevent multiple simultaneous join attempts
+    if (this.isJoining) {
+      console.log(`📱 Join already in progress for session: ${sessionId}`);
+      return;
+    }
+
+    this.isJoining = true;
+
+    // Leave current session if any
+    if (this.currentSessionId) {
+      this.leaveSession(this.currentSessionId);
+    }
+
     this.socket.emit('join-session', { sessionId });
+    this.currentSessionId = sessionId;
+    socketDebugger.logSessionActivity(sessionId, 'join', this.socket.id);
     console.log(`📱 Joining session: ${sessionId}`);
+    
+    // Reset joining flag after a delay
+    setTimeout(() => {
+      this.isJoining = false;
+    }, 1000);
   }
 
   leaveSession(sessionId: string): void {
@@ -139,7 +186,23 @@ class SocketService {
       return;
     }
 
+    // Rate limiting
+    const now = Date.now();
+    if (now - this.lastSessionAction < this.sessionActionCooldown) {
+      console.log('📱 Rate limiting: Too many session actions');
+      return;
+    }
+    this.lastSessionAction = now;
+
+    // Only leave if we're actually in this session
+    if (this.currentSessionId !== sessionId) {
+      console.log(`📱 Not in session ${sessionId}, current session: ${this.currentSessionId}`);
+      return;
+    }
+
     this.socket.emit('leave-session', { sessionId });
+    socketDebugger.logSessionActivity(sessionId, 'leave', this.socket?.id);
+    this.currentSessionId = null;
     console.log(`📱 Leaving session: ${sessionId}`);
   }
 
@@ -262,16 +325,23 @@ class SocketService {
     // Session Events
     this.socket.on('session-joined', (data) => {
       console.log('📱 Session joined:', data);
+      this.isJoining = false; // Reset joining flag on successful join
       this.callbacks.onSessionJoined?.(data);
     });
 
     this.socket.on('user-joined-session', (data) => {
-      console.log('👤 User joined session:', data);
+      // Reduce verbose logging - only log if it's a different user
+      if (data.user._id !== this.socket?.id) {
+        console.log('👤 User joined session:', data.user.username);
+      }
       this.callbacks.onUserJoined?.(data);
     });
 
     this.socket.on('user-left-session', (data) => {
-      console.log('👤 User left session:', data);
+      // Reduce verbose logging - only log if it's a different user
+      if (data.user._id !== this.socket?.id) {
+        console.log('👤 User left session:', data.user.username);
+      }
       this.callbacks.onUserLeft?.(data);
     });
 
@@ -348,12 +418,18 @@ class SocketService {
     return this.socket?.id;
   }
 
+  getCurrentSessionId(): string | null {
+    return this.currentSessionId;
+  }
+
   // Event listener cleanup
   removeAllListeners(): void {
     if (this.socket) {
       this.socket.removeAllListeners();
     }
     this.callbacks = {};
+    this.currentSessionId = null;
+    this.isJoining = false;
   }
 }
 

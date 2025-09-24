@@ -248,6 +248,8 @@ export const useChatSocket = (sessionId?: string) => {
   const [typingUsers, setTypingUsers] = useState<{ [userId: string]: User }>({});
   const [sessionParticipants, setSessionParticipants] = useState<{ patient?: any; helper?: any }>({});
   const [lastActivity, setLastActivity] = useState<Date>();
+  const [isSessionJoined, setIsSessionJoined] = useState(false);
+  const previousSessionId = useRef<string>();
 
   const socket = useSocket({
     onNewMessage: (data) => {
@@ -271,6 +273,7 @@ export const useChatSocket = (sessionId?: string) => {
     onSessionJoined: (data) => {
       console.log('Session joined successfully:', data.sessionId);
       setSessionParticipants(data.participants);
+      setIsSessionJoined(true);
     },
     onUserTyping: (data) => {
       setTypingUsers(prev => {
@@ -314,19 +317,34 @@ export const useChatSocket = (sessionId?: string) => {
 
   // Join session when sessionId changes
   useEffect(() => {
-    if (sessionId && socket.isConnected) {
+    if (sessionId && socket.isConnected && sessionId !== previousSessionId.current) {
+      // Leave previous session if different
+      if (previousSessionId.current) {
+        socket.leaveSession(previousSessionId.current);
+        setIsSessionJoined(false);
+      }
+      
+      // Join new session
       socket.joinSession(sessionId);
+      previousSessionId.current = sessionId;
+      
       return () => {
-        socket.leaveSession(sessionId);
+        if (sessionId) {
+          socket.leaveSession(sessionId);
+          setIsSessionJoined(false);
+        }
       };
     }
   }, [sessionId, socket.isConnected, socket]);
 
   // Clear messages when session changes
   useEffect(() => {
-    setMessages([]);
-    setTypingUsers({});
-    setSessionParticipants({});
+    if (sessionId !== previousSessionId.current) {
+      setMessages([]);
+      setTypingUsers({});
+      setSessionParticipants({});
+      setIsSessionJoined(false);
+    }
   }, [sessionId]);
 
   return {
@@ -336,6 +354,7 @@ export const useChatSocket = (sessionId?: string) => {
     typingUsers,
     sessionParticipants,
     lastActivity,
+    isSessionJoined,
     isTypingIndicatorVisible: Object.keys(typingUsers).length > 0
   };
 };

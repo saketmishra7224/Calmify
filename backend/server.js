@@ -194,9 +194,20 @@ io.on('connection', async (socket) => {
     console.error('Error joining session rooms:', error);
   }
 
+  // Add rate limiting for session operations
+  socket.lastSessionAction = 0;
+  socket.sessionActionCooldown = 500; // 500ms cooldown between session actions
+
   // Handle user joining a session
   socket.on('join-session', async (data) => {
     try {
+      const now = Date.now();
+      if (now - socket.lastSessionAction < socket.sessionActionCooldown) {
+        console.log(`📱 Rate limiting session action for user ${socket.user.username}`);
+        return;
+      }
+      socket.lastSessionAction = now;
+
       const { sessionId } = data;
 
       if (!sessionId) {
@@ -204,6 +215,12 @@ io.on('connection', async (socket) => {
           event: 'join-session',
           message: 'Session ID is required' 
         });
+        return;
+      }
+
+      // Prevent joining the same session multiple times
+      if (socket.currentSession === sessionId) {
+        console.log(`📱 User ${socket.user.username} already in session: ${sessionId}`);
         return;
       }
 
@@ -243,6 +260,22 @@ io.on('connection', async (socket) => {
 
       // Join the session room
       socket.join(`session_${sessionId}`);
+      
+      // Leave previous session if any
+      if (socket.currentSession && socket.currentSession !== sessionId) {
+        socket.leave(`session_${socket.currentSession}`);
+        socket.to(`session_${socket.currentSession}`).emit('user-left-session', {
+          user: {
+            _id: socket.userId,
+            username: socket.user.username,
+            role: socket.user.role
+          },
+          sessionId: socket.currentSession,
+          reason: 'switched_session',
+          timestamp: new Date()
+        });
+      }
+      
       socket.currentSession = sessionId;
       
       // Notify others in the session
@@ -273,7 +306,7 @@ io.on('connection', async (socket) => {
         }
       });
 
-      console.log(`📱 User ${socket.user.username} joined session: ${sessionId}`);
+      console.log(`📱 User ${socket.user.username} joined session: ${sessionId} (participants: ${Object.keys(io.sockets.adapter.rooms.get(`session_${sessionId}`) || {}).length})`);
     } catch (error) {
       console.error('Error joining session:', error);
       socket.emit('error', { 
@@ -774,6 +807,13 @@ io.on('connection', async (socket) => {
   // Handle leaving a session
   socket.on('leave-session', async (data) => {
     try {
+      const now = Date.now();
+      if (now - socket.lastSessionAction < socket.sessionActionCooldown) {
+        console.log(`📱 Rate limiting session action for user ${socket.user.username}`);
+        return;
+      }
+      socket.lastSessionAction = now;
+
       const { sessionId } = data;
 
       if (!sessionId) {
@@ -781,6 +821,12 @@ io.on('connection', async (socket) => {
           event: 'leave-session',
           message: 'Session ID is required' 
         });
+        return;
+      }
+
+      // Only leave if currently in this session
+      if (socket.currentSession !== sessionId) {
+        console.log(`📱 User ${socket.user.username} not in session ${sessionId}, current: ${socket.currentSession}`);
         return;
       }
 
@@ -797,11 +843,9 @@ io.on('connection', async (socket) => {
         timestamp: new Date()
       });
 
-      if (socket.currentSession === sessionId) {
-        socket.currentSession = null;
-      }
+      socket.currentSession = null;
 
-      console.log(`📱 User ${socket.user.username} left session: ${sessionId}`);
+      console.log(`📱 User ${socket.user.username} left session: ${sessionId} (remaining: ${Object.keys(io.sockets.adapter.rooms.get(`session_${sessionId}`) || {}).length})`);
     } catch (error) {
       console.error('Error leaving session:', error);
       socket.emit('error', { 
