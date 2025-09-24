@@ -13,7 +13,7 @@ interface LoginRequest {
   email: string;
   password: string;
   rememberMe?: boolean;
-  preferredRole?: 'patient' | 'peer' | 'counselor';
+  preferredRole?: 'patient' | 'peer' | 'counselor' | 'admin';
 }
 
 interface RegisterRequest {

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Heart, Eye, EyeOff, User, Users, Stethoscope } from "lucide-react";
+import { Loader2, Heart, Eye, EyeOff, User, Users, Stethoscope, Shield } from "lucide-react";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -14,7 +14,7 @@ export default function LoginPage() {
     email: '',
     password: '',
     rememberMe: false,
-    preferredRole: '' as 'patient' | 'peer' | 'counselor' | ''
+    preferredRole: '' as 'patient' | 'peer' | 'counselor' | 'admin' | ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -66,7 +66,7 @@ export default function LoginPage() {
   const handleRoleChange = (value: string) => {
     setFormData(prev => ({
       ...prev,
-      preferredRole: value as 'patient' | 'peer' | 'counselor'
+      preferredRole: value as 'patient' | 'peer' | 'counselor' | 'admin'
     }));
   };
 
@@ -78,6 +78,8 @@ export default function LoginPage() {
         return <Users className="h-4 w-4" />;
       case 'counselor':
         return <Stethoscope className="h-4 w-4" />;
+      case 'admin':
+        return <Shield className="h-4 w-4" />;
       default:
         return null;
     }
@@ -91,6 +93,8 @@ export default function LoginPage() {
         return 'Providing peer support to others';
       case 'counselor':
         return 'Professional mental health counselor';
+      case 'admin':
+        return 'Platform administrator with full access';
       default:
         return '';
     }
@@ -195,6 +199,17 @@ export default function LoginPage() {
                           <div className="font-medium">Counselor</div>
                           <div className="text-xs text-gray-500">
                             Professional mental health counselor
+                          </div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="admin">
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4" />
+                        <div>
+                          <div className="font-medium">Administrator</div>
+                          <div className="text-xs text-gray-500">
+                            Platform administrator with full access
                           </div>
                         </div>
                       </div>
