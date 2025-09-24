@@ -32,6 +32,7 @@ interface SocketCallbacks {
   onSessionJoined?: (data: { sessionId: string; session: any; participants: any }) => void;
   onUserTyping?: (data: { sessionId: string; user: User; isTyping: boolean; timestamp: Date }) => void;
   onSessionEscalated?: (data: { sessionId: string; escalation: any; session: any }) => void;
+  onSessionEscalatedToCounselor?: (data: { sessionId: string; newSessionId: string; escalation: any; message: string }) => void;
   onSessionStatusUpdated?: (data: { sessionId: string; statusChange: any; session: any }) => void;
   onCrisisAlert?: (data: { alert: any; message?: Message; timestamp: Date }) => void;
   onUserStatusUpdated?: (data: { userId: string; username: string; status: string; timestamp: Date }) => void;
@@ -281,6 +282,11 @@ class SocketService {
     this.socket.on('session-escalated', (data) => {
       console.log('⚡ Session escalated:', data);
       this.callbacks.onSessionEscalated?.(data);
+    });
+
+    this.socket.on('session-escalated-to-counselor', (data) => {
+      console.log('⚡ Session escalated to counselor:', data);
+      this.callbacks.onSessionEscalatedToCounselor?.(data);
     });
 
     this.socket.on('session-status-updated', (data) => {

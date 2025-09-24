@@ -65,6 +65,8 @@ export default function PeerChatPage() {
   const [showCloseDialog, setShowCloseDialog] = useState(false);
   const [closeRating, setCloseRating] = useState<number>(0);
   const [closeFeedback, setCloseFeedback] = useState("");
+  const [showEscalateDialog, setShowEscalateDialog] = useState(false);
+  const [escalationReason, setEscalationReason] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -212,16 +214,18 @@ export default function PeerChatPage() {
     }
   };
 
-  const escalateTocounselor = async () => {
+  const escalateToCounselor = async () => {
     if (!currentSession) return;
 
     try {
       setLoading(true);
+      const reason = escalationReason.trim() || 'Session escalated to professional counselor for specialized support';
+      
       // Use Socket.IO to escalate session for real-time notification
       socket.escalateSession(
         currentSession._id,
         'severe',
-        'Session escalated to professional counselor for specialized support',
+        reason,
         'counselor'
       );
       
@@ -229,11 +233,13 @@ export default function PeerChatPage() {
       await apiService.closeSession(
         currentSession._id, 
         undefined, 
-        "Session escalated to professional counselor for specialized support"
+        reason
       );
       
       setCurrentSession(null);
       socket.setMessages([]);
+      setShowEscalateDialog(false);
+      setEscalationReason("");
       await loadAvailableSessions();
     } catch (error) {
       console.error('Failed to escalate session:', error);
@@ -241,6 +247,10 @@ export default function PeerChatPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const openEscalateDialog = () => {
+    setShowEscalateDialog(true);
   };
 
   const openCloseDialog = () => {
@@ -417,8 +427,9 @@ export default function PeerChatPage() {
                     <Button 
                       size="sm" 
                       variant="outline" 
-                      onClick={escalateTocounselor}
-                      className="text-primary"
+                      onClick={openEscalateDialog}
+                      className="text-orange-600 border-orange-300 hover:bg-orange-50"
+                      disabled={loading}
                     >
                       <AlertTriangle className="h-4 w-4 mr-2" />
                       Escalate to Counselor
@@ -427,6 +438,7 @@ export default function PeerChatPage() {
                       size="sm" 
                       variant="destructive"
                       onClick={openCloseDialog}
+                      disabled={loading}
                     >
                       End Session
                     </Button>
@@ -572,6 +584,66 @@ export default function PeerChatPage() {
             </Button>
             <Button onClick={endSession} disabled={loading}>
               End Session
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Escalate to Counselor Dialog */}
+      <Dialog open={showEscalateDialog} onOpenChange={setShowEscalateDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-orange-600">
+              <AlertTriangle className="h-5 w-5" />
+              Escalate to Professional Counselor
+            </DialogTitle>
+            <DialogDescription>
+              This will permanently end your peer support session and immediately connect the patient with a professional counselor for more specialized support.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="escalation-reason">Reason for escalation</Label>
+              <Textarea
+                id="escalation-reason"
+                value={escalationReason}
+                onChange={(e) => setEscalationReason(e.target.value)}
+                placeholder="Please explain why this session needs professional counselor support (e.g., patient needs specialized help, crisis situation, etc.)"
+                rows={4}
+                className="resize-none"
+              />
+            </div>
+            <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+              <h4 className="text-sm font-medium text-orange-800 mb-2">What happens next:</h4>
+              <ul className="text-xs text-orange-700 space-y-1">
+                <li>• Your peer support session will end immediately</li>
+                <li>• The patient will be notified about the escalation</li>
+                <li>• A counselor session request will be created automatically</li>
+                <li>• Available counselors will be notified to accept the session</li>
+                <li>• You cannot resume this session once escalated</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEscalateDialog(false)} disabled={loading}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={escalateToCounselor} 
+              disabled={loading}
+              className="bg-orange-600 hover:bg-orange-700 text-white"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Escalating...
+                </>
+              ) : (
+                <>
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  Escalate to Counselor
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

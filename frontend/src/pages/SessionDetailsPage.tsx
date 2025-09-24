@@ -8,6 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Send, MessageCircle, Clock, User, Star, AlertTriangle } from "lucide-react";
 import { useChatSocket } from '../hooks/useSocket';
 
@@ -20,11 +23,15 @@ export default function SessionDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
+  const [showEscalateDialog, setShowEscalateDialog] = useState(false);
+  const [escalationReason, setEscalationReason] = useState('');
+  const [escalating, setEscalating] = useState(false);
 
   const { 
     messages: socketMessages, 
     setMessages, 
     sendMessage: sendSocketMessage, 
+    escalateSession,
     isConnected 
   } = useChatSocket(sessionId);
 
@@ -102,6 +109,45 @@ export default function SessionDetailsPage() {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    }
+  };
+
+  const openEscalateDialog = () => {
+    setShowEscalateDialog(true);
+  };
+
+  const escalateToCounselor = async () => {
+    if (!session) return;
+
+    try {
+      setEscalating(true);
+      const reason = escalationReason.trim() || 'Session escalated to professional counselor for specialized support';
+      
+      // Use Socket.IO to escalate session for real-time notification
+      escalateSession(
+        session._id,
+        'severe',
+        reason,
+        'counselor'
+      );
+      
+      // Also use API for backup
+      await apiService.closeSession(
+        session._id, 
+        undefined, 
+        reason
+      );
+      
+      setShowEscalateDialog(false);
+      setEscalationReason("");
+      
+      // Navigate back to peer chat or dashboard
+      navigate('/peer/chats');
+    } catch (error) {
+      console.error('Failed to escalate session:', error);
+      setError('Failed to escalate session');
+    } finally {
+      setEscalating(false);
     }
   };
 
@@ -277,10 +323,36 @@ export default function SessionDetailsPage() {
           <div className="lg:col-span-3">
             <Card className="h-[600px] flex flex-col">
               <CardHeader className="border-b">
-                <CardTitle className="flex items-center gap-2">
-                  <MessageCircle className="h-5 w-5" />
-                  {session.title || `${session.helperType} Session`}
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageCircle className="h-5 w-5" />
+                    {session.title || `${session.helperType} Session`}
+                    {session.patientId && (
+                      <span className="text-sm font-normal text-muted-foreground">
+                        with {session.patientId.profile?.preferredName || 
+                             session.patientId.profile?.firstName || 
+                             session.patientId.username}
+                      </span>
+                    )}
+                  </CardTitle>
+                  
+                  {/* Escalation Button - Only show for active peer sessions */}
+                  {user?.role === 'peer' && 
+                   session.helperType === 'peer' && 
+                   session.status === 'active' && 
+                   isHelper && (
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={openEscalateDialog}
+                      className="text-orange-600 border-orange-300 hover:bg-orange-50"
+                      disabled={escalating}
+                    >
+                      <AlertTriangle className="h-4 w-4 mr-2" />
+                      Escalate to Counselor
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
 
               {/* Messages */}
@@ -407,6 +479,66 @@ export default function SessionDetailsPage() {
           </div>
         </div>
       </div>
+
+      {/* Escalate to Counselor Dialog */}
+      <Dialog open={showEscalateDialog} onOpenChange={setShowEscalateDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-orange-600">
+              <AlertTriangle className="h-5 w-5" />
+              Escalate to Professional Counselor
+            </DialogTitle>
+            <DialogDescription>
+              This will permanently end your peer support session and immediately connect the patient with a professional counselor for more specialized support.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="escalation-reason">Reason for escalation</Label>
+              <Textarea
+                id="escalation-reason"
+                value={escalationReason}
+                onChange={(e) => setEscalationReason(e.target.value)}
+                placeholder="Please explain why this session needs professional counselor support (e.g., patient needs specialized help, crisis situation, etc.)"
+                rows={4}
+                className="resize-none"
+              />
+            </div>
+            <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+              <h4 className="text-sm font-medium text-orange-800 mb-2">What happens next:</h4>
+              <ul className="text-xs text-orange-700 space-y-1">
+                <li>• Your peer support session will end immediately</li>
+                <li>• The patient will be notified about the escalation</li>
+                <li>• A counselor session request will be created automatically</li>
+                <li>• Available counselors will be notified to accept the session</li>
+                <li>• You cannot resume this session once escalated</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEscalateDialog(false)} disabled={escalating}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={escalateToCounselor} 
+              disabled={escalating}
+              className="bg-orange-600 hover:bg-orange-700 text-white"
+            >
+              {escalating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Escalating...
+                </>
+              ) : (
+                <>
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  Escalate to Counselor
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }

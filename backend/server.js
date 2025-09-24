@@ -95,12 +95,15 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Database connection
+// Database connection with better handling
 const connectDB = async () => {
   try {
     await mongoose.connect(MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      family: 4
     });
     console.log('✅ MongoDB connected successfully');
   } catch (error) {
@@ -108,6 +111,26 @@ const connectDB = async () => {
     process.exit(1);
   }
 };
+
+// MongoDB connection event handlers
+mongoose.connection.on('connected', () => {
+  console.log('✅ MongoDB connected');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('❌ MongoDB connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('📴 Database connection closed');
+});
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  console.log('🔄 SIGINT received, shutting down gracefully...');
+  await mongoose.connection.close();
+  process.exit(0);
+});
 
 // Socket.io authentication middleware
 io.use(async (socket, next) => {
@@ -180,6 +203,15 @@ io.on('connection', async (socket) => {
         socket.emit('error', { 
           event: 'join-session',
           message: 'Session ID is required' 
+        });
+        return;
+      }
+
+      // Check MongoDB connection before operations
+      if (mongoose.connection.readyState !== 1) {
+        socket.emit('error', { 
+          event: 'join-session',
+          message: 'Database temporarily unavailable. Please try again.' 
         });
         return;
       }
@@ -261,6 +293,15 @@ io.on('connection', async (socket) => {
         socket.emit('error', { 
           event: 'send-message',
           message: 'Session ID and message are required' 
+        });
+        return;
+      }
+
+      // Check MongoDB connection before operations
+      if (mongoose.connection.readyState !== 1) {
+        socket.emit('error', { 
+          event: 'send-message',
+          message: 'Database temporarily unavailable. Please try again.' 
         });
         return;
       }
@@ -428,53 +469,103 @@ io.on('connection', async (socket) => {
         return;
       }
 
-      // Escalate session
-      await session.escalateSession(newSeverity, reason);
+      let newSession = null;
+      
+      // Check if escalating from peer to counselor
+      if (targetHelperType === 'counselor' && session.helperType === 'peer') {
+        // End the current peer session
+        session.status = 'escalated';
+        session.closedAt = new Date();
+        session.escalationReason = reason;
+        await session.save();
 
-      // Try to find new helper if escalating helper type
-      if (targetHelperType && targetHelperType !== session.helperType) {
-        const newHelper = await User.findOne({
-          role: targetHelperType,
-          isActive: true,
-          isOnline: true
+        // Create a new counselor session request
+        newSession = new Session({
+          patientId: session.patientId,
+          helperType: 'counselor',
+          severity: newSeverity,
+          status: 'waiting',
+          title: `Escalated from Peer Support - ${session.title || 'Support Needed'}`,
+          description: `This session was escalated from peer support. Original reason: ${reason}`,
+          escalatedFrom: sessionId,
+          createdAt: new Date()
         });
 
-        if (newHelper) {
-          session.helperId = newHelper._id;
-          session.helperType = targetHelperType;
-          await session.save();
+        await newSession.save();
+        await newSession.populate('patientId', 'username profile anonymousId role');
 
-          // Add new helper to session room
-          const helperSocket = [...io.sockets.sockets.values()]
-            .find(s => s.userId === newHelper._id.toString());
-          
-          if (helperSocket) {
-            helperSocket.join(`session_${sessionId}`);
-          }
+        // Notify all counselors about the new session
+        io.to('crisis_responders').emit('new-session-available', {
+          session: {
+            _id: newSession._id,
+            patientId: newSession.patientId,
+            helperType: newSession.helperType,
+            severity: newSession.severity,
+            status: newSession.status,
+            title: newSession.title,
+            description: newSession.description,
+            createdAt: newSession.createdAt
+          },
+          priority: 'high',
+          escalated: true
+        });
+
+        // Remove helper from current session room
+        const currentHelperSocket = [...io.sockets.sockets.values()]
+          .find(s => s.userId === session.helperId.toString());
+        
+        if (currentHelperSocket) {
+          currentHelperSocket.leave(`session_${sessionId}`);
         }
+
+        console.log(`⚡ Peer session ${sessionId} escalated to counselor. New session: ${newSession._id}`);
+      } else {
+        // Regular escalation without changing helper type
+        await session.escalateSession(newSeverity, reason);
       }
 
-      // Notify all session participants about escalation
-      io.to(`session_${sessionId}`).emit('session-escalated', {
-        sessionId,
-        escalation: {
-          newSeverity,
-          reason,
-          escalatedBy: {
-            _id: socket.userId,
-            username: socket.user.username,
-            role: socket.user.role
+      // Notify session participants about escalation
+      if (targetHelperType === 'counselor' && session.helperType === 'peer') {
+        // Notify patient about escalation to counselor
+        io.to(`session_${sessionId}`).emit('session-escalated-to-counselor', {
+          sessionId,
+          newSessionId: newSession ? newSession._id : null,
+          escalation: {
+            newSeverity,
+            reason,
+            escalatedBy: {
+              _id: socket.userId,
+              username: socket.user.username,
+              role: socket.user.role
+            },
+            targetHelperType,
+            timestamp: new Date()
           },
-          targetHelperType,
-          timestamp: new Date()
-        },
-        session: {
-          _id: session._id,
-          status: session.status,
-          severity: session.severity,
-          helperType: session.helperType
-        }
-      });
+          message: 'Your peer support session has been escalated to a professional counselor for specialized assistance.'
+        });
+      } else {
+        // Regular escalation notification
+        io.to(`session_${sessionId}`).emit('session-escalated', {
+          sessionId,
+          escalation: {
+            newSeverity,
+            reason,
+            escalatedBy: {
+              _id: socket.userId,
+              username: socket.user.username,
+              role: socket.user.role
+            },
+            targetHelperType,
+            timestamp: new Date()
+          },
+          session: {
+            _id: session._id,
+            status: session.status,
+            severity: session.severity,
+            helperType: session.helperType
+          }
+        });
+      }
 
       // Notify crisis responders if escalated to critical
       if (newSeverity === 'critical') {

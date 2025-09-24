@@ -1,162 +1,207 @@
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Layout } from "@/components/Layout";
-import { MediaCard } from "@/components/MediaCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Globe, Loader2 } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Search, Play, Pause, Square, Volume2, VolumeX, RotateCcw, Brain, Heart, Leaf, Sun, Moon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { apiService } from "@/services/api";
 
 interface MeditationResource {
+  id: string;
   title: string;
   description: string;
-  duration?: string;
-  type: string;
-  content: string;
+  duration: string;
+  type: 'audio' | 'video' | 'guided';
+  audioUrl?: string;
+  videoUrl?: string;
+  transcript: string;
   tags: string[];
+  category: string;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
 }
 
-interface SelfHelpResource {
-  title: string;
-  description: string;
-  type: string;
-  content: string;
-  tags: string[];
-}
-
-interface ResourcesData {
-  meditation: MeditationResource[];
-  selfHelp: SelfHelpResource[];
-}
+// Static meditation resources
+const meditationResources: MeditationResource[] = [
+  {
+    id: "1",
+    title: "5-Minute Breathing Exercise",
+    description: "Simple breathing technique to reduce stress and anxiety",
+    duration: "5:00",
+    type: "audio",
+    transcript: "Welcome to this 5-minute breathing exercise. Find a comfortable position and close your eyes. Breathe in slowly for 4 counts, hold for 4 counts, then exhale for 6 counts. Focus on the rhythm of your breath...",
+    tags: ["anxiety", "stress", "breathing"],
+    category: "relaxation",
+    difficulty: "beginner"
+  },
+  {
+    id: "2", 
+    title: "Body Scan Relaxation",
+    description: "Progressive muscle relaxation to release tension",
+    duration: "10:00",
+    type: "guided",
+    transcript: "Let's begin with a full body scan. Start by focusing on your toes. Tense the muscles in your toes for 5 seconds, then release. Feel the tension melting away...",
+    tags: ["relaxation", "sleep", "tension"],
+    category: "sleep",
+    difficulty: "beginner"
+  },
+  {
+    id: "3",
+    title: "Mindful Morning",
+    description: "Start your day with intention and clarity",
+    duration: "8:00", 
+    type: "guided",
+    transcript: "Good morning. Take a moment to notice how you feel right now. What sensations do you notice in your body? What thoughts are present?...",
+    tags: ["morning", "mindfulness", "energy"],
+    category: "energy",
+    difficulty: "intermediate"
+  },
+  {
+    id: "4",
+    title: "Sleep Preparation",
+    description: "Wind down and prepare for restful sleep",
+    duration: "15:00",
+    type: "audio", 
+    transcript: "As we prepare for sleep, let go of the day's worries. Feel your body sinking into comfort. Notice your breathing naturally slowing...",
+    tags: ["sleep", "relaxation", "bedtime"],
+    category: "sleep", 
+    difficulty: "beginner"
+  },
+  {
+    id: "5",
+    title: "Anxiety Relief",
+    description: "Techniques to calm racing thoughts and worries",
+    duration: "12:00",
+    type: "guided",
+    transcript: "When anxiety arises, remember you are safe right now. Let's practice grounding techniques. Notice 5 things you can see, 4 things you can touch...",
+    tags: ["anxiety", "calm", "grounding"],
+    category: "anxiety",
+    difficulty: "intermediate"  
+  },
+  {
+    id: "6",
+    title: "Focus & Concentration",
+    description: "Improve mental clarity and attention",
+    duration: "20:00",
+    type: "guided",
+    transcript: "Concentration meditation helps train the mind. Choose a single point of focus - perhaps your breath at the nostrils...",
+    tags: ["focus", "concentration", "productivity"],
+    category: "focus",
+    difficulty: "advanced"
+  }
+];
 
 export default function MeditationPage() {
   const { user } = useAuth();
-  const [selectedLanguage, setSelectedLanguage] = useState("EN");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedMood, setSelectedMood] = useState<string>("all");
-  const [resources, setResources] = useState<ResourcesData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [currentResource, setCurrentResource] = useState<MeditationResource | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const languages = ["EN", "ES", "HI"];
-  const categories = ["all", "meditation", "selfHelp"];
-  const moods = ["all", "anxiety", "stress", "depression", "relaxation"];
-
-  useEffect(() => {
-    const fetchResources = async () => {
-      try {
-        setLoading(true);
-        // Create a simple GET request to the chatbot resources endpoint
-        const response = await fetch('http://localhost:5000/api/chatbot/resources', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            ...apiService.isAuthenticated() ? { Authorization: `Bearer ${localStorage.getItem('token')}` } : {}
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch resources');
+  const categories = ["all", "relaxation", "sleep", "energy", "anxiety", "focus"];
+  
+  // Simulate audio playback with timer
+  const simulateAudioPlayback = (resource: MeditationResource) => {
+    const totalSeconds = parseInt(resource.duration.replace(":", "")) || 300; // Default 5 minutes
+    setDuration(totalSeconds);
+    
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    
+    intervalRef.current = setInterval(() => {
+      setCurrentTime(prev => {
+        if (prev >= totalSeconds) {
+          setIsPlaying(false);
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          return 0;
         }
-        
-        const data = await response.json();
-        setResources(data);
-      } catch (err: any) {
-        console.error('Failed to fetch resources:', err);
-        setError('Failed to load meditation resources');
-        // Fallback to static data if API fails
-        setResources({
-          meditation: [
-            {
-              title: "5-Minute Breathing Exercise",
-              description: "Simple breathing technique to reduce stress and anxiety",
-              duration: "5 min",
-              type: "audio",
-              content: "Focus on your breath. Inhale for 4 counts, hold for 4, exhale for 6. Repeat 10 times.",
-              tags: ["anxiety", "stress", "breathing"]
-            },
-            {
-              title: "Body Scan Relaxation",
-              description: "Progressive muscle relaxation to release tension",
-              duration: "10 min",
-              type: "guided",
-              content: "Start at your toes and slowly work up your body, tensing and releasing each muscle group.",
-              tags: ["relaxation", "sleep", "tension"]
-            }
-          ],
-          selfHelp: [
-            {
-              title: "Cognitive Behavioral Techniques",
-              description: "Strategies to challenge negative thinking patterns",
-              type: "worksheet",
-              content: "Identify the thought → Examine the evidence → Consider alternatives → Balanced thinking",
-              tags: ["CBT", "thinking", "depression"]
-            }
-          ]
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+        return prev + 1;
+      });
+    }, 1000);
+  };
 
-    fetchResources();
-  }, [selectedCategory, selectedMood]);
-
-  const filteredResources = resources ? [
-    ...resources.meditation.map(r => ({ ...r, category: 'meditation' })),
-    ...resources.selfHelp.map(r => ({ ...r, category: 'selfHelp', duration: undefined }))
-  ].filter(item => {
+  const filteredResources = meditationResources.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          item.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
-    const matchesMood = selectedMood === "all" || item.tags.includes(selectedMood);
-    return matchesSearch && matchesCategory && matchesMood;
-  }) : [];
+    return matchesSearch && matchesCategory;
+  });
 
-  const handleResourceAction = async (resource: any) => {
-    console.log(`Starting resource: ${resource.title}`);
-    // Here you could implement actual resource playback, download, or navigation
-    // For now, we'll just log the action
+  const handlePlayResource = (resource: MeditationResource) => {
+    setCurrentResource(resource);
+    setCurrentTime(0);
+    simulateAudioPlayback(resource);
+    setIsPlaying(true);
+  };
+
+  const handlePlayPause = () => {
+    if (isPlaying) {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    } else if (currentResource) {
+      simulateAudioPlayback(currentResource);
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const handleStop = () => {
+    setIsPlaying(false);
+    setCurrentTime(0);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+  };
+
+  const handleRestart = () => {
+    setCurrentTime(0);
+    if (currentResource) {
+      simulateAudioPlayback(currentResource);
+      setIsPlaying(true);
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'relaxation': return <Leaf className="h-4 w-4" />;
+      case 'sleep': return <Moon className="h-4 w-4" />;
+      case 'energy': return <Sun className="h-4 w-4" />;
+      case 'anxiety': return <Heart className="h-4 w-4" />;
+      case 'focus': return <Brain className="h-4 w-4" />;
+      default: return <Brain className="h-4 w-4" />;
+    }
   };
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         {/* Header */}
         <div className="bg-white border-b px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-semibold flex items-center gap-2">
-                <Globe className="h-6 w-6" />
-                Meditation & Self-Help
+                <Brain className="h-6 w-6 text-primary" />
+                Meditation & Mindfulness
               </h1>
-              <p className="text-gray-600 mt-1">Access guided meditations and self-help resources</p>
-            </div>
-            
-            {/* Language Selector */}
-            <div className="flex gap-1">
-              {languages.map((lang) => (
-                <Button
-                  key={lang}
-                  variant={selectedLanguage === lang ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedLanguage(lang)}
-                  className={selectedLanguage === lang ? "bg-primary hover:bg-primary/90" : ""}
-                >
-                  {lang}
-                </Button>
-              ))}
+              <p className="text-muted-foreground mt-1">Guided meditation sessions for relaxation and mindfulness</p>
             </div>
           </div>
 
           {/* Search and Filters */}
           <div className="flex gap-4 mt-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search resources..."
+                placeholder="Search meditation sessions..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -165,84 +210,39 @@ export default function MeditationPage() {
             <select 
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              className="px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background"
             >
               <option value="all">All Categories</option>
-              <option value="meditation">Meditation</option>
-              <option value="selfHelp">Self-Help</option>
-            </select>
-            <select 
-              value={selectedMood}
-              onChange={(e) => setSelectedMood(e.target.value)}
-              className="px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="all">All Moods</option>
-              <option value="anxiety">Anxiety</option>
-              <option value="stress">Stress</option>
-              <option value="depression">Depression</option>
               <option value="relaxation">Relaxation</option>
+              <option value="sleep">Sleep</option>
+              <option value="energy">Energy</option>
+              <option value="anxiety">Anxiety Relief</option>
+              <option value="focus">Focus & Concentration</option>
             </select>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="p-6">
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <span className="ml-2 text-gray-600">Loading resources...</span>
-            </div>
-          ) : error ? (
-            <div className="text-center py-12">
-              <p className="text-red-600">{error}</p>
-              <Button 
-                onClick={() => window.location.reload()} 
-                variant="outline" 
-                className="mt-4"
-              >
-                Retry
-              </Button>
-            </div>
-          ) : (
-            <>
-              {/* Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="bg-white p-4 rounded-lg border">
-                  <h3 className="font-medium text-gray-700">Total Resources</h3>
-                  <p className="text-2xl font-semibold text-primary">
-                    {resources ? resources.meditation.length + resources.selfHelp.length : 0}
-                  </p>
-                </div>
-                <div className="bg-white p-4 rounded-lg border">
-                  <h3 className="font-medium text-gray-700">Meditation Exercises</h3>
-                  <p className="text-2xl font-semibold text-green-600">
-                    {resources?.meditation.length || 0}
-                  </p>
-                </div>
-                <div className="bg-white p-4 rounded-lg border">
-                  <h3 className="font-medium text-gray-700">Self-Help Tools</h3>
-                  <p className="text-2xl font-semibold text-blue-600">
-                    {resources?.selfHelp.length || 0}
-                  </p>
-                </div>
-              </div>
-
-              {/* Resources Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredResources.map((resource, index) => (
-                  <div key={index} className="bg-white rounded-lg border p-6 hover:shadow-md transition-shadow">
-                    <div className="flex items-start justify-between mb-3">
-                      <Badge variant={resource.category === 'meditation' ? 'default' : 'secondary'}>
-                        {resource.category === 'meditation' ? 'Meditation' : 'Self-Help'}
-                      </Badge>
-                      {resource.duration && (
-                        <span className="text-sm text-gray-500">{resource.duration}</span>
-                      )}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
+          {/* Meditation Resources */}
+          <div className="lg:col-span-2">
+            <h2 className="text-xl font-semibold mb-4">Available Sessions</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredResources.map((resource) => (
+                <Card key={resource.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        {getCategoryIcon(resource.category)}
+                        <Badge variant="secondary" className="text-xs">
+                          {resource.category}
+                        </Badge>
+                      </div>
+                      <span className="text-sm text-muted-foreground">{resource.duration}</span>
                     </div>
-                    
-                    <h3 className="font-semibold text-lg mb-2">{resource.title}</h3>
-                    <p className="text-gray-600 text-sm mb-4">{resource.description}</p>
-                    
+                    <CardTitle className="text-lg">{resource.title}</CardTitle>
+                    <CardDescription>{resource.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
                     <div className="flex flex-wrap gap-1 mb-4">
                       {resource.tags.slice(0, 3).map((tag, tagIndex) => (
                         <Badge key={tagIndex} variant="outline" className="text-xs">
@@ -250,38 +250,121 @@ export default function MeditationPage() {
                         </Badge>
                       ))}
                     </div>
-                    
                     <Button 
-                      onClick={() => handleResourceAction(resource)}
+                      onClick={() => handlePlayResource(resource)}
                       className="w-full"
-                      variant={resource.category === 'meditation' ? 'default' : 'outline'}
+                      variant={currentResource?.id === resource.id ? "secondary" : "default"}
                     >
-                      {resource.type === 'audio' ? 'Play' : 
-                       resource.type === 'video' ? 'Watch' : 
-                       resource.type === 'worksheet' ? 'Download' : 'Start'}
+                      <Play className="h-4 w-4 mr-2" />
+                      {currentResource?.id === resource.id && isPlaying ? "Now Playing" : "Play Session"}
                     </Button>
-                  </div>
-                ))}
-              </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
 
-              {filteredResources.length === 0 && (
-                <div className="text-center py-12">
-                  <p className="text-gray-500">No resources found matching your criteria.</p>
-                  <Button 
-                    onClick={() => {
-                      setSearchQuery("");
-                      setSelectedCategory("all");
-                      setSelectedMood("all");
-                    }}
-                    variant="outline" 
-                    className="mt-4"
-                  >
-                    Clear Filters
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
+            {filteredResources.length === 0 && (
+              <div className="text-center py-12">
+                <Brain className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground mb-4">No meditation sessions found matching your criteria.</p>
+                <Button 
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedCategory("all");
+                  }}
+                  variant="outline"
+                >
+                  Clear Filters
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Audio Player */}
+          <div className="lg:col-span-1">
+            <Card className="sticky top-6">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Heart className="h-5 w-5 text-primary" />
+                  Meditation Player
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {currentResource ? (
+                  <>
+                    <div className="text-center">
+                      <h3 className="font-semibold">{currentResource.title}</h3>
+                      <p className="text-sm text-muted-foreground">{currentResource.description}</p>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="space-y-2">
+                      <div className="w-full bg-secondary rounded-full h-2">
+                        <div 
+                          className="bg-primary h-2 rounded-full transition-all duration-1000" 
+                          style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
+                        />
+                      </div>
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>{formatTime(currentTime)}</span>
+                        <span>{formatTime(duration)}</span>
+                      </div>
+                    </div>
+
+                    {/* Player Controls */}
+                    <div className="flex items-center justify-center gap-4">
+                      <Button size="sm" variant="outline" onClick={handleRestart}>
+                        <RotateCcw className="h-4 w-4" />
+                      </Button>
+                      <Button size="lg" onClick={handlePlayPause}>
+                        {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={handleStop}>
+                        <Square className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    {/* Volume Control */}
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        onClick={() => setIsMuted(!isMuted)}
+                      >
+                        {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                      </Button>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.1"
+                        value={isMuted ? 0 : volume}
+                        onChange={(e) => {
+                          const newVolume = parseFloat(e.target.value);
+                          setVolume(newVolume);
+                          setIsMuted(newVolume === 0);
+                        }}
+                        className="flex-1"
+                      />
+                    </div>
+
+                    {/* Transcript */}
+                    <div className="mt-4">
+                      <h4 className="font-medium mb-2">Guided Instructions:</h4>
+                      <div className="text-sm text-muted-foreground bg-secondary/50 p-3 rounded-md max-h-32 overflow-y-auto">
+                        {currentResource.transcript}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center text-muted-foreground py-8">
+                    <Play className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Select a meditation session to begin</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </Layout>

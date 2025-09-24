@@ -114,19 +114,24 @@ export function AppSidebar({ currentRole }: AppSidebarProps) {
   return (
     <Sidebar className="w-64 bg-background border-r border-border">
       <SidebarHeader className="p-4 border-b border-border">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-3 w-full text-left hover:bg-accent/50 rounded-lg p-2 -m-2 transition-colors duration-200 group"
+          title="Click to go to home page"
+        >
+          <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors duration-200">
             <IconComponent className="h-6 w-6 text-primary" />
           </div>
           <div className="flex-1">
-            <h2 className="font-semibold text-foreground">{roleConfig.title}</h2>
+            <h2 className="font-semibold text-foreground group-hover:text-primary transition-colors duration-200">{roleConfig.title}</h2>
             {user && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground group-hover:text-primary/80 transition-colors duration-200">
                 {user.profile?.preferredName || user.profile?.firstName || user.username}
               </p>
             )}
           </div>
-        </div>
+          <Home className="h-4 w-4 text-muted-foreground group-hover:text-primary opacity-0 group-hover:opacity-100 transition-all duration-200" />
+        </button>
       </SidebarHeader>
 
       <SidebarContent className="flex-1 overflow-y-auto">

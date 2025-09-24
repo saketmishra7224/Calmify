@@ -10,6 +10,7 @@ interface UseSocketOptions {
   onSessionJoined?: (data: { sessionId: string; session: any; participants: any }) => void;
   onUserTyping?: (data: { sessionId: string; user: User; isTyping: boolean; timestamp: Date }) => void;
   onSessionEscalated?: (data: { sessionId: string; escalation: any; session: any }) => void;
+  onSessionEscalatedToCounselor?: (data: { sessionId: string; newSessionId: string; escalation: any; message: string }) => void;
   onSessionStatusUpdated?: (data: { sessionId: string; statusChange: any; session: any }) => void;
   onCrisisAlert?: (data: { alert: any; message?: Message; timestamp: Date }) => void;
   onUserStatusUpdated?: (data: { userId: string; username: string; status: string; timestamp: Date }) => void;
@@ -56,6 +57,7 @@ export const useSocket = (options: UseSocketOptions = {}): UseSocketReturn => {
       onSessionJoined: options.onSessionJoined,
       onUserTyping: options.onUserTyping,
       onSessionEscalated: options.onSessionEscalated,
+      onSessionEscalatedToCounselor: options.onSessionEscalatedToCounselor,
       onSessionStatusUpdated: options.onSessionStatusUpdated,
       onCrisisAlert: options.onCrisisAlert,
       onUserStatusUpdated: options.onUserStatusUpdated,
@@ -83,6 +85,7 @@ export const useSocket = (options: UseSocketOptions = {}): UseSocketReturn => {
     options.onSessionJoined,
     options.onUserTyping,
     options.onSessionEscalated,
+    options.onSessionEscalatedToCounselor,
     options.onSessionStatusUpdated,
     options.onCrisisAlert,
     options.onUserStatusUpdated,
@@ -293,6 +296,11 @@ export const useChatSocket = (sessionId?: string) => {
     },
     onSessionEscalated: (data) => {
       console.log('Session escalated:', data.escalation);
+      setLastActivity(new Date(data.escalation.timestamp));
+    },
+    onSessionEscalatedToCounselor: (data) => {
+      console.log('Session escalated to counselor:', data);
+      // Could show a notification or update UI state
       setLastActivity(new Date(data.escalation.timestamp));
     },
     onSessionStatusUpdated: (data) => {
