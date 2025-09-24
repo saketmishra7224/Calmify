@@ -111,7 +111,7 @@ export default function CrisisPage() {
           {/* Header */}
           <div className="text-center space-y-2">
             <div className="flex items-center justify-center gap-2 mb-4">
-              <Heart className="h-8 w-8 text-destructive" />
+              <Heart className="h-8 w-8 text-[#2BD4BD]" />
               <h1 className="text-3xl font-bold text-foreground">Crisis Support</h1>
             </div>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -122,11 +122,11 @@ export default function CrisisPage() {
           {/* Immediate Actions */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-destructive">
+              <CardTitle className="flex items-center gap-2 text-[#2BD4BD]">
                 <AlertTriangle className="h-5 w-5" />
                 Immediate Actions
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-muted-foreground">
                 If you're in crisis, here are your immediate options
               </CardDescription>
             </CardHeader>
@@ -245,19 +245,19 @@ export default function CrisisPage() {
                     <div className="text-sm text-muted-foreground">Find the nearest hospital</div>
                   </div>
                 </Button>
-                <Button variant="outline" className="h-auto p-4 justify-start">
+                <Button variant="outline" className="h-auto p-4 justify-start hover:bg-[#2BD4BD]/10">
                   <div className="text-left">
                     <div className="font-semibold">Mental Health Centers</div>
                     <div className="text-sm text-muted-foreground">Community mental health services</div>
                   </div>
                 </Button>
-                <Button variant="outline" className="h-auto p-4 justify-start">
+                <Button variant="outline" className="h-auto p-4 justify-start hover:bg-[#2BD4BD]/10">
                   <div className="text-left">
                     <div className="font-semibold">Crisis Centers</div>
                     <div className="text-sm text-muted-foreground">Local crisis intervention</div>
                   </div>
                 </Button>
-                <Button variant="outline" className="h-auto p-4 justify-start">
+                <Button variant="outline" className="h-auto p-4 justify-start hover:bg-[#2BD4BD]/10">
                   <div className="text-left">
                     <div className="font-semibold">Support Groups</div>
                     <div className="text-sm text-muted-foreground">Peer support meetings</div>
@@ -268,20 +268,29 @@ export default function CrisisPage() {
           </Card>
 
           {/* Return to Safety */}
-          <div className="text-center space-y-4 p-6 bg-muted/50 rounded-lg">
-            <h2 className="text-xl font-semibold text-foreground">Remember: This Will Pass</h2>
+          <div className="text-center space-y-4 p-6 bg-[#2BD4BD]/5 border border-[#2BD4BD]/20 rounded-lg">
+            <h2 className="text-xl font-semibold text-[#2BD4BD]">Remember: This Will Pass</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Crisis feelings are temporary. With support and time, things can and do get better. 
               You've taken a brave step by seeking help.
             </p>
             <div className="flex gap-4 justify-center">
-              <Button onClick={() => navigate('/chatbot')} variant="outline">
+              <Button 
+                onClick={() => navigate('/chatbot')} 
+                className="bg-[#2BD4BD] hover:bg-[#25C1AB] text-white transition-colors"
+              >
                 Continue AI Support
               </Button>
-              <Button onClick={() => navigate('/peer/chats')}>
+              <Button 
+                onClick={() => navigate('/peer/chats')} 
+                className="bg-[#2BD4BD] hover:bg-[#25C1AB] text-white transition-colors"
+              >
                 Talk to Peer Support
               </Button>
-              <Button onClick={() => navigate('/counselor/request')}>
+              <Button 
+                onClick={() => navigate('/counselor/request')} 
+                className="bg-[#2BD4BD] hover:bg-[#25C1AB] text-white transition-colors"
+              >
                 Find Professional Help
               </Button>
             </div>
