@@ -114,6 +114,12 @@ class ApiService {
         throw new Error(data.error || data.message || `HTTP error! status: ${response.status}`);
       }
       
+      // If the response has a success flag and data property, return the data
+      if (data.success && data.data !== undefined) {
+        return data.data;
+      }
+      
+      // Otherwise return the entire response
       return data;
     } catch (error) {
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
@@ -724,6 +730,77 @@ class ApiService {
     const result = await this.handleResponse<any>(response);
     // Return the data array directly for easier consumption
     return result.success ? result.data : [];
+  }
+
+  // Admin Analytics APIs
+  async getAdminAnalytics(timeRange: '7d' | '30d' | '90d' = '30d') {
+    const response = await fetch(`${API_BASE_URL}/admin/analytics/overview?timeRange=${timeRange}`, {
+      method: 'GET',
+      headers: this.getAuthHeader(),
+    });
+
+    return this.handleResponse<{
+      totalUsers: number;
+      onlineUsers: number;
+      usersByRole: Record<string, number>;
+      activeSessions: number;
+      completedSessions: number;
+      totalSessions: number;
+      crisisAlerts: number;
+      sessionsByType: {
+        chatbot: number;
+        peer: number;
+        counselor: number;
+      };
+      severityDistribution: {
+        mild: number;
+        moderate: number;
+        severe: number;
+        critical: number;
+      };
+      responseMetrics: {
+        averageResponseTime: number;
+        peakHours: string[];
+        satisfaction: number;
+        totalMessages: number;
+      };
+      timeRange: string;
+      periodStart: string;
+      periodEnd: string;
+    }>(response);
+  }
+
+  async getCrisisAnalytics(timeRange: '7d' | '30d' | '90d' = '30d') {
+    const response = await fetch(`${API_BASE_URL}/admin/analytics/crisis?timeRange=${timeRange}`, {
+      method: 'GET',
+      headers: this.getAuthHeader(),
+    });
+
+    return this.handleResponse<{
+      total: number;
+      resolved: number;
+      pending: number;
+      averageResolutionTime: number;
+    }>(response);
+  }
+
+  async getUserAnalytics(timeRange: '7d' | '30d' | '90d' = '30d') {
+    const response = await fetch(`${API_BASE_URL}/admin/analytics/users?timeRange=${timeRange}`, {
+      method: 'GET',
+      headers: this.getAuthHeader(),
+    });
+
+    return this.handleResponse<{
+      newRegistrations: number;
+      activeUsers: number;
+      registrationTrend: Array<{
+        _id: string;
+        count: number;
+      }>;
+      timeRange: string;
+      periodStart: string;
+      periodEnd: string;
+    }>(response);
   }
 }
 

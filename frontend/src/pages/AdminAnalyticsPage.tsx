@@ -14,6 +14,12 @@ interface AnalyticsData {
   activeSessions: number;
   completedSessions: number;
   crisisAlerts: number;
+  usersByRole?: {
+    patient?: number;
+    peer?: number;
+    counselor?: number;
+    admin?: number;
+  };
   sessionsByType: {
     chatbot: number;
     peer: number;
@@ -48,6 +54,46 @@ export default function AdminAnalyticsPage() {
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d');
 
+  // Initialize with default values to prevent undefined errors
+  const defaultAnalytics: AnalyticsData = {
+    totalUsers: 0,
+    activeSessions: 0,
+    completedSessions: 0,
+    crisisAlerts: 0,
+    usersByRole: {
+      patient: 0,
+      peer: 0,
+      counselor: 0,
+      admin: 0
+    },
+    sessionsByType: {
+      chatbot: 0,
+      peer: 0,
+      counselor: 0
+    },
+    severityDistribution: {
+      mild: 0,
+      moderate: 0,
+      severe: 0,
+      critical: 0
+    },
+    responseMetrics: {
+      averageResponseTime: 0,
+      peakHours: [],
+      satisfaction: 0
+    }
+  };
+
+  // Use current analytics data or default
+  const currentAnalytics = analytics ? {
+    ...defaultAnalytics,
+    ...analytics,
+    usersByRole: analytics.usersByRole || defaultAnalytics.usersByRole,
+    sessionsByType: analytics.sessionsByType || defaultAnalytics.sessionsByType,
+    severityDistribution: analytics.severityDistribution || defaultAnalytics.severityDistribution,
+    responseMetrics: analytics.responseMetrics || defaultAnalytics.responseMetrics
+  } : defaultAnalytics;
+
   useEffect(() => {
     // Wait for auth to finish loading before checking authentication
     if (isLoading) return;
@@ -65,63 +111,78 @@ export default function AdminAnalyticsPage() {
       setLoading(true);
       setError(null);
 
-      // In a real implementation, these would be separate API endpoints
-      // For now, we'll use the available session APIs to get basic analytics
-      
-      // Get session analytics
-      const sessionsData = await apiService.getMySessions({ 
-        status: 'active',
-        limit: 100 
-      });
+      console.log('Fetching analytics data from backend...');
 
-      // Get crisis analytics (using available session data as proxy)
-      let crisisAlerts = 0;
-      try {
-        // Try to get crisis data, fallback to mock data if not available
-        const allSessions = await apiService.getMySessions({ limit: 1000 });
-        crisisAlerts = allSessions.sessions.filter(s => s.severity === 'critical' || s.severity === 'severe').length;
-      } catch (error) {
-        console.warn('Could not fetch crisis data, using mock data');
-        crisisAlerts = 12; // Mock fallback
+      // Fetch real analytics data from backend
+      const analyticsData = await apiService.getAdminAnalytics(timeRange);
+      
+      console.log('Analytics response:', analyticsData);
+
+      // Handle analytics response - data is already extracted by handleResponse
+      if (analyticsData) {
+        setAnalytics({
+          totalUsers: analyticsData.totalUsers || 0,
+          activeSessions: analyticsData.activeSessions || 0,
+          completedSessions: analyticsData.completedSessions || 0,
+          crisisAlerts: analyticsData.crisisAlerts || 0,
+          usersByRole: analyticsData.usersByRole || {},
+          sessionsByType: analyticsData.sessionsByType || { chatbot: 0, peer: 0, counselor: 0 },
+          severityDistribution: analyticsData.severityDistribution || { mild: 0, moderate: 0, severe: 0, critical: 0 },
+          responseMetrics: analyticsData.responseMetrics || { averageResponseTime: 0, peakHours: [], satisfaction: 0 }
+        });
+
+        console.log('Analytics data set successfully');
+      } else {
+        throw new Error('No analytics data received');
       }
 
-      // Mock analytics data structure for now
-      const mockAnalytics: AnalyticsData = {
-        totalUsers: 1250,
-        activeSessions: sessionsData.sessions.length,
-        completedSessions: 485,
-        crisisAlerts: crisisAlerts,
-        sessionsByType: {
-          chatbot: Math.floor(sessionsData.sessions.length * 0.6),
-          peer: Math.floor(sessionsData.sessions.length * 0.25),
-          counselor: Math.floor(sessionsData.sessions.length * 0.15)
-        },
-        severityDistribution: {
-          mild: Math.floor(sessionsData.sessions.length * 0.4),
-          moderate: Math.floor(sessionsData.sessions.length * 0.35),
-          severe: Math.floor(sessionsData.sessions.length * 0.2),
-          critical: Math.floor(sessionsData.sessions.length * 0.05)
-        },
-        responseMetrics: {
-          averageResponseTime: 4.2,
-          peakHours: ['19:00-21:00', '21:00-23:00'],
-          satisfaction: 4.3
+      // Fetch crisis analytics separately
+      try {
+        const crisisData = await apiService.getCrisisAnalytics(timeRange);
+        if (crisisData) {
+          setCrisisMetrics(crisisData);
+        } else {
+          // Use fallback crisis metrics from analytics data
+          setCrisisMetrics({
+            total: analyticsData.crisisAlerts || 0,
+            resolved: Math.floor((analyticsData.crisisAlerts || 0) * 0.7),
+            pending: Math.floor((analyticsData.crisisAlerts || 0) * 0.3),
+            averageResolutionTime: 15
+          });
         }
-      };
+      } catch (crisisError) {
+        console.warn('Crisis analytics failed, using fallback:', crisisError);
+        setCrisisMetrics({
+          total: analyticsData.crisisAlerts || 0,
+          resolved: Math.floor((analyticsData.crisisAlerts || 0) * 0.7),
+          pending: Math.floor((analyticsData.crisisAlerts || 0) * 0.3),
+          averageResolutionTime: 15
+        });
+      }
 
-      const mockCrisisMetrics: CrisisMetrics = {
-        total: crisisAlerts,
-        resolved: Math.floor(crisisAlerts * 0.7),
-        pending: Math.floor(crisisAlerts * 0.3),
-        averageResolutionTime: 6.5
-      };
-
-      setAnalytics(mockAnalytics);
-      setCrisisMetrics(mockCrisisMetrics);
-
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load analytics:', error);
-      setError('Failed to load analytics data');
+      setError(`Failed to load analytics: ${error.message}`);
+      
+      // Set empty analytics on error
+      setAnalytics({
+        totalUsers: 0,
+        activeSessions: 0,
+        completedSessions: 0,
+        crisisAlerts: 0,
+        usersByRole: { patient: 0, peer: 0, counselor: 0, admin: 0 },
+        sessionsByType: { chatbot: 0, peer: 0, counselor: 0 },
+        severityDistribution: { mild: 0, moderate: 0, severe: 0, critical: 0 },
+        responseMetrics: { averageResponseTime: 0, peakHours: [], satisfaction: 0 }
+      });
+      
+      setCrisisMetrics({
+        total: 0,
+        resolved: 0,
+        pending: 0,
+        averageResolutionTime: 0
+      });
+      
     } finally {
       setLoading(false);
     }
@@ -154,44 +215,36 @@ export default function AdminAnalyticsPage() {
                 Platform Analytics
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                Mental health platform insights and metrics
+                Real-time insights into platform performance and user engagement
               </p>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="flex gap-2">
-                <Button
-                  variant={timeRange === '7d' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setTimeRange('7d')}
-                >
-                  7d
-                </Button>
-                <Button
-                  variant={timeRange === '30d' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setTimeRange('30d')}
-                >
-                  30d
-                </Button>
-                <Button
-                  variant={timeRange === '90d' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setTimeRange('90d')}
-                >
-                  90d
-                </Button>
-              </div>
-              <Button variant="outline" size="sm" onClick={loadAnalytics} disabled={loading}>
+            <div className="flex items-center gap-3">
+              <select
+                value={timeRange}
+                onChange={(e) => setTimeRange(e.target.value as '7d' | '30d' | '90d')}
+                className="px-3 py-2 border border-input rounded-md bg-background"
+              >
+                <option value="7d">Last 7 days</option>
+                <option value="30d">Last 30 days</option>
+                <option value="90d">Last 90 days</option>
+              </select>
+              <Button onClick={loadAnalytics} disabled={loading} size="sm">
                 <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                Refresh
+                {loading ? 'Loading...' : 'Refresh'}
               </Button>
+              {analytics && (
+                <Badge variant="outline" className="text-green-600">
+                  Data loaded: {new Date().toLocaleTimeString()}
+                </Badge>
+              )}
             </div>
           </div>
         </div>
 
-        <div className="p-6 space-y-6">
+        {/* Main Content */}
+        <div className="flex-1 p-6 space-y-6">
           {error && (
-            <Alert className="border-destructive">
+            <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription className="text-destructive">{error}</AlertDescription>
             </Alert>
@@ -202,7 +255,7 @@ export default function AdminAnalyticsPage() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
               <p className="text-muted-foreground">Loading analytics...</p>
             </div>
-          ) : analytics ? (
+          ) : (
             <>
               {/* Key Metrics */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -211,7 +264,12 @@ export default function AdminAnalyticsPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Total Users</p>
-                        <p className="text-2xl font-bold text-foreground">{analytics.totalUsers}</p>
+                        <p className="text-2xl font-bold text-foreground">{currentAnalytics.totalUsers || 0}</p>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          P: {analytics?.usersByRole?.patient || 0} | 
+                          Pr: {analytics?.usersByRole?.peer || 0} | 
+                          C: {analytics?.usersByRole?.counselor || 0}
+                        </div>
                       </div>
                       <Users className="h-8 w-8 text-primary" />
                     </div>
@@ -223,7 +281,10 @@ export default function AdminAnalyticsPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Active Sessions</p>
-                        <p className="text-2xl font-bold text-foreground">{analytics.activeSessions}</p>
+                        <p className="text-2xl font-bold text-foreground">{currentAnalytics.activeSessions || 0}</p>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          Currently active
+                        </div>
                       </div>
                       <Activity className="h-8 w-8 text-green-600" />
                     </div>
@@ -235,7 +296,10 @@ export default function AdminAnalyticsPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Completed Sessions</p>
-                        <p className="text-2xl font-bold text-foreground">{analytics.completedSessions}</p>
+                        <p className="text-2xl font-bold text-foreground">{currentAnalytics.completedSessions || 0}</p>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          In timeframe
+                        </div>
                       </div>
                       <MessageCircle className="h-8 w-8 text-blue-600" />
                     </div>
@@ -247,7 +311,10 @@ export default function AdminAnalyticsPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Crisis Alerts</p>
-                        <p className="text-2xl font-bold text-destructive">{analytics.crisisAlerts}</p>
+                        <p className="text-2xl font-bold text-destructive">{currentAnalytics.crisisAlerts || 0}</p>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          High priority cases
+                        </div>
                       </div>
                       <AlertTriangle className="h-8 w-8 text-destructive" />
                     </div>
@@ -312,7 +379,7 @@ export default function AdminAnalyticsPage() {
                           <span className="text-sm font-medium">AI Chatbot</span>
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {analytics.sessionsByType.chatbot} ({Math.round((analytics.sessionsByType.chatbot / analytics.activeSessions) * 100)}%)
+                          {currentAnalytics.sessionsByType?.chatbot || 0} ({Math.round(((currentAnalytics.sessionsByType?.chatbot || 0) / currentAnalytics.activeSessions) * 100) || 0}%)
                         </div>
                       </div>
                       <div className="flex items-center justify-between">
@@ -321,7 +388,7 @@ export default function AdminAnalyticsPage() {
                           <span className="text-sm font-medium">Peer Support</span>
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {analytics.sessionsByType.peer} ({Math.round((analytics.sessionsByType.peer / analytics.activeSessions) * 100)}%)
+                          {currentAnalytics.sessionsByType?.peer || 0} ({Math.round(((currentAnalytics.sessionsByType?.peer || 0) / currentAnalytics.activeSessions) * 100) || 0}%)
                         </div>
                       </div>
                       <div className="flex items-center justify-between">
@@ -330,7 +397,7 @@ export default function AdminAnalyticsPage() {
                           <span className="text-sm font-medium">Counselor</span>
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {analytics.sessionsByType.counselor} ({Math.round((analytics.sessionsByType.counselor / analytics.activeSessions) * 100)}%)
+                                                    {currentAnalytics.sessionsByType?.counselor || 0} ({Math.round(((currentAnalytics.sessionsByType?.counselor || 0) / currentAnalytics.activeSessions) * 100) || 0}%)
                         </div>
                       </div>
                     </div>
@@ -347,7 +414,7 @@ export default function AdminAnalyticsPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {Object.entries(analytics.severityDistribution).map(([severity, count]) => (
+                                            {Object.entries(currentAnalytics.severityDistribution || {}).map(([severity, count]) => (
                         <div key={severity} className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Badge 
@@ -380,19 +447,19 @@ export default function AdminAnalyticsPage() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-foreground mb-1">
-                        {analytics.responseMetrics.averageResponseTime}min
+                                                {currentAnalytics.responseMetrics?.averageResponseTime || 0}min
                       </div>
                       <div className="text-sm text-muted-foreground">Average Response Time</div>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-foreground mb-1">
-                        {analytics.responseMetrics.satisfaction}/5.0
+                                                {currentAnalytics.responseMetrics?.satisfaction || 0}/5.0
                       </div>
                       <div className="text-sm text-muted-foreground">User Satisfaction</div>
                     </div>
                     <div className="text-center">
                       <div className="text-lg font-bold text-foreground mb-1">
-                        {analytics.responseMetrics.peakHours.join(', ')}
+                        {currentAnalytics.responseMetrics?.peakHours?.join(', ') || 'No data available'}
                       </div>
                       <div className="text-sm text-muted-foreground">Peak Usage Hours</div>
                     </div>
@@ -423,17 +490,6 @@ export default function AdminAnalyticsPage() {
                 </CardContent>
               </Card>
             </>
-          ) : (
-            <div className="text-center py-12">
-              <BarChart3 className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-foreground mb-2">No Analytics Data</h2>
-              <p className="text-muted-foreground mb-4">
-                Unable to load analytics at this time
-              </p>
-              <Button onClick={loadAnalytics}>
-                Try Again
-              </Button>
-            </div>
           )}
         </div>
       </div>

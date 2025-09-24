@@ -954,6 +954,7 @@ app.use('/api/responses', routes.responses);
 app.use('/api/results', routes.results);
 app.use('/api/assessment', routes.assessment);
 app.use('/api/notes', routes.notes);
+app.use('/api/admin', routes.admin);
 
 // 404 handler
 app.use('*', (req, res) => {
