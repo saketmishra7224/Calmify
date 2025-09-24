@@ -953,6 +953,7 @@ app.use('/api/questionnaires', routes.questionnaires);
 app.use('/api/responses', routes.responses);
 app.use('/api/results', routes.results);
 app.use('/api/assessment', routes.assessment);
+app.use('/api/notes', routes.notes);
 
 // 404 handler
 app.use('*', (req, res) => {

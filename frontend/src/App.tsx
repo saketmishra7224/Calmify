@@ -23,6 +23,7 @@ import CrisisPage from "./pages/CrisisPage";
 import MySessionsPage from "./pages/MySessionsPage";
 import PeerAvailablePage from "./pages/PeerAvailablePage";
 import CounselorAvailablePage from "./pages/CounselorAvailablePage";
+import CounselorNotesPage from "./pages/CounselorNotesPage";
 import PeerCounselorDashboard from "./pages/PeerCounselorDashboard";
 import NotFound from "./pages/NotFound";
 
@@ -116,6 +117,11 @@ const App = () => (
             <Route path="/counselor/available" element={
               <RoleBasedRoute allowedRoles={['counselor']}>
                 <CounselorAvailablePage />
+              </RoleBasedRoute>
+            } />
+            <Route path="/counselor/notes" element={
+              <RoleBasedRoute allowedRoles={['counselor']}>
+                <CounselorNotesPage />
               </RoleBasedRoute>
             } />
             <Route path="/sessions/:sessionId" element={

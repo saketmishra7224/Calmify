@@ -575,6 +575,156 @@ class ApiService {
 
     return this.handleResponse<any>(response);
   }
+
+  // Notes APIs
+  async getNotes(filters?: {
+    patientId?: string;
+    sessionId?: string;
+    type?: string;
+    priority?: string;
+    status?: string;
+    tags?: string[];
+    fromDate?: string;
+    toDate?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<any> {
+    const params = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          if (Array.isArray(value)) {
+            value.forEach(v => params.append(key, v));
+          } else {
+            params.append(key, value.toString());
+          }
+        }
+      });
+    }
+
+    const response = await fetch(`${API_BASE_URL}/notes?${params}`, {
+      method: 'GET',
+      headers: this.getAuthHeader(),
+    });
+
+    return this.handleResponse<any>(response);
+  }
+
+  async getNote(noteId: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/notes/${noteId}`, {
+      method: 'GET',
+      headers: this.getAuthHeader(),
+    });
+
+    return this.handleResponse<any>(response);
+  }
+
+  async createNote(noteData: {
+    title: string;
+    content: string;
+    patient: string;
+    session?: string;
+    type?: string;
+    priority?: string;
+    tags?: string[];
+    followUpRequired?: boolean;
+    followUpDate?: string;
+    followUpNotes?: string;
+    status?: string;
+  }): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/notes`, {
+      method: 'POST',
+      headers: {
+        ...this.getAuthHeader(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(noteData),
+    });
+
+    return this.handleResponse<any>(response);
+  }
+
+  async updateNote(noteId: string, updates: {
+    title?: string;
+    content?: string;
+    type?: string;
+    priority?: string;
+    tags?: string[];
+    followUpRequired?: boolean;
+    followUpDate?: string;
+    followUpNotes?: string;
+    status?: string;
+  }): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/notes/${noteId}`, {
+      method: 'PUT',
+      headers: {
+        ...this.getAuthHeader(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updates),
+    });
+
+    return this.handleResponse<any>(response);
+  }
+
+  async deleteNote(noteId: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/notes/${noteId}`, {
+      method: 'DELETE',
+      headers: this.getAuthHeader(),
+    });
+
+    return this.handleResponse<any>(response);
+  }
+
+  async getNotesStats(): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/notes/stats/summary`, {
+      method: 'GET',
+      headers: this.getAuthHeader(),
+    });
+
+    return this.handleResponse<any>(response);
+  }
+
+  async getPatientNotes(patientId: string, options?: {
+    page?: number;
+    limit?: number;
+  }): Promise<any> {
+    const params = new URLSearchParams();
+    if (options?.page) params.append('page', options.page.toString());
+    if (options?.limit) params.append('limit', options.limit.toString());
+
+    const response = await fetch(`${API_BASE_URL}/notes/patient/${patientId}?${params}`, {
+      method: 'GET',
+      headers: this.getAuthHeader(),
+    });
+
+    return this.handleResponse<any>(response);
+  }
+
+  async getNoteTags(): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/notes/tags/all`, {
+      method: 'GET',
+      headers: this.getAuthHeader(),
+    });
+
+    return this.handleResponse<any>(response);
+  }
+
+  async searchPatients(query: string, limit?: number): Promise<any> {
+    const params = new URLSearchParams();
+    params.append('query', query);
+    if (limit) params.append('limit', limit.toString());
+
+    const response = await fetch(`${API_BASE_URL}/notes/search-patients?${params}`, {
+      method: 'GET',
+      headers: this.getAuthHeader(),
+    });
+
+    const result = await this.handleResponse<any>(response);
+    // Return the data array directly for easier consumption
+    return result.success ? result.data : [];
+  }
 }
 
 export const apiService = new ApiService();

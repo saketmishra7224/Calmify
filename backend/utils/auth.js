@@ -66,6 +66,9 @@ const requireRole = (...roles) => {
   };
 };
 
+// Middleware for counselor access only
+const requireCounselor = requireRole('counselor');
+
 // Middleware for counselor or admin access
 const requireCounselorOrAdmin = requireRole('counselor', 'admin');
 
@@ -97,6 +100,7 @@ const optionalAuth = async (req, res, next) => {
 module.exports = {
   authenticateToken,
   requireRole,
+  requireCounselor,
   requireCounselorOrAdmin,
   requireAdmin,
   optionalAuth
