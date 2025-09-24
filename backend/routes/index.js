@@ -10,7 +10,6 @@ const responses = require('./responses');
 const results = require('./results');
 const assessment = require('./assessment');
 const notes = require('./notes');
-const admin = require('./admin');
 
 module.exports = {
   auth,
@@ -24,6 +23,5 @@ module.exports = {
   responses,
   results,
   assessment,
-  notes,
-  admin
+  notes
 };

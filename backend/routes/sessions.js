@@ -162,7 +162,7 @@ router.get('/available',
       const sessionsWithWaitTime = sessions.map(session => {
         const waitingMinutes = Math.round((new Date() - session.createdAt) / (1000 * 60));
         return {
-          ...session.toObject(),
+          ...session, // session is already a plain object from aggregate
           waitingMinutes,
           urgencyScore: calculateUrgencyScore(session.severity, waitingMinutes)
         };
@@ -264,9 +264,9 @@ router.get('/my-sessions',
         }
         
         // Add role context for the current user
-        if (sessionObj.patientId._id.toString() === req.user._id.toString()) {
+        if (sessionObj.patientId && sessionObj.patientId._id && sessionObj.patientId._id.toString() === req.user._id.toString()) {
           sessionObj.userRole = 'patient';
-        } else if (sessionObj.helperId && sessionObj.helperId._id.toString() === req.user._id.toString()) {
+        } else if (sessionObj.helperId && sessionObj.helperId._id && sessionObj.helperId._id.toString() === req.user._id.toString()) {
           sessionObj.userRole = 'helper';
         }
         
