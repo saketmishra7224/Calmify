@@ -9,6 +9,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { ChatHeader } from "@/components/ChatHeader";
+import { ChatInput } from "@/components/ChatInput";
 import { 
   Send, 
   User, 
@@ -335,27 +337,27 @@ export default function ChatbotPage() {
 
   return (
     <Layout>
-      <div className="flex h-[calc(100vh-4rem)] bg-background">
+      <div className="flex h-[calc(100vh-4rem)] bg-gradient-to-br from-primary/5 to-background">
         {/* Sidebar - Past Chats */}
-        <div className={`bg-white border-r border-border transition-all duration-300 flex flex-col ${
+        <div className={`bg-gradient-to-b from-primary/5 to-primary/10 backdrop-blur-sm border-r border-primary/20 transition-all duration-300 flex flex-col ${
           sidebarCollapsed ? 'w-0 overflow-hidden' : 'w-80'
         }`}>
           {/* Sidebar Header */}
-          <div className="p-4 border-b border-border flex-shrink-0">
+          <div className="p-4 border-b border-primary/20 flex-shrink-0 bg-white/50 backdrop-blur-sm">
             <div className="flex items-center justify-between mb-3">
               <h2 className="font-semibold text-foreground">Chat History</h2>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="hover:bg-primary/10"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
             </div>
             <Button
               onClick={startNewChat}
-              className="w-full"
-              variant="outline"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
               disabled={loading}
             >
               {loading ? (
@@ -482,39 +484,30 @@ export default function ChatbotPage() {
           )}
 
           {/* Header */}
-          <div className="bg-white border-b border-border p-4 flex justify-between items-center flex-shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                {loadingActiveChat ? (
-                  <RefreshCw className="h-5 w-5 text-primary animate-spin" />
-                ) : (
-                  <Bot className="h-6 w-6 text-primary" />
-                )}
-              </div>
-              <div>
-                <h1 className="text-lg font-semibold text-foreground">Dr. Sarah - AI Psychology Expert</h1>
-                <p className="text-sm text-muted-foreground">
-                  {loadingActiveChat 
-                    ? "Loading conversation..." 
-                    : crisisDetected 
-                    ? "Crisis support mode - I'm here to help" 
-                    : "Compassionate mental health support"}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {currentSessionId !== "current" && (
-                <Badge variant="outline" className="text-xs">
-                  Past Session
-                </Badge>
-              )}
-              {activeChat && currentSessionId === "current" && (
+          <ChatHeader
+            title="Dr. Sarah - AI Psychology Expert"
+            subtitle={loadingActiveChat 
+              ? "Loading conversation..." 
+              : crisisDetected 
+              ? "Crisis support mode - I'm here to help" 
+              : "Compassionate mental health support"}
+            icon={loadingActiveChat ? (
+              <RefreshCw className="h-5 w-5 text-primary animate-spin" />
+            ) : (
+              <Bot className="h-6 w-6 text-primary" />
+            )}
+            badges={[
+              ...(currentSessionId !== "current" ? [{ text: "Past Session", variant: "outline" as const }] : []),
+              ...(crisisDetected ? [{ text: "Crisis", variant: "destructive" as const }] : [])
+            ]}
+            actions={
+              activeChat && currentSessionId === "current" ? (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={closeSession}
                   disabled={loading || !activeChat._id}
-                  className="text-orange-600 hover:bg-orange-50"
+                  className="text-orange-600 hover:bg-orange-50 border-orange-200"
                 >
                   {loading ? (
                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -523,9 +516,9 @@ export default function ChatbotPage() {
                   )}
                   Close Session
                 </Button>
-              )}
-            </div>
-          </div>
+              ) : undefined
+            }
+          />
 
           {/* Crisis Alert */}
           {crisisDetected && (
@@ -560,12 +553,12 @@ export default function ChatbotPage() {
           {/* Messages - Scrollable */}
           <div className="flex-1 overflow-hidden">
             <ScrollArea className="h-full">
-              <div className="p-4 space-y-4">
+              <div className="p-4 space-y-4 bg-gradient-to-b from-primary/5 to-transparent min-h-full">
                 {messages.map((message) => (
                   <div key={message.id} className={`flex ${message.isBot ? 'justify-start' : 'justify-end'}`}>
                     <div className={`flex gap-3 max-w-[80%] ${message.isBot ? 'flex-row' : 'flex-row-reverse'}`}>
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        message.isBot ? 'bg-primary/10' : 'bg-blue-100'
+                        message.isBot ? 'bg-primary/15 border border-primary/20' : 'bg-blue-100 border border-blue-200'
                       }`}>
                         {message.isBot ? (
                           <Bot className="h-4 w-4 text-primary" />
@@ -575,10 +568,10 @@ export default function ChatbotPage() {
                       </div>
                       <Card className={`p-3 ${
                         message.isBot 
-                          ? 'bg-gray-50 border border-border' 
-                          : 'bg-blue-50 border border-blue-200'
+                          ? 'bg-white/90 backdrop-blur-sm border border-primary/10 shadow-sm' 
+                          : 'bg-primary text-primary-foreground border border-primary shadow-sm'
                       } ${message.crisisDetected ? 'border-l-4 border-l-destructive' : ''}`}>
-                        <p className="text-sm text-foreground whitespace-pre-wrap">{message.text}</p>
+                        <p className="text-sm whitespace-pre-wrap">{message.text}</p>
                         
                         {/* Crisis Counselor Booking Button */}
                         {message.crisisDetected && message.crisisInfo?.redirectToCounselor && (
@@ -612,7 +605,9 @@ export default function ChatbotPage() {
                           </div>
                         )}
                         
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className={`text-xs mt-1 ${
+                          message.isBot ? 'text-muted-foreground' : 'text-primary-foreground/70'
+                        }`}>
                           {formatTime(message.timestamp)}
                         </p>
                       </Card>
@@ -624,14 +619,14 @@ export default function ChatbotPage() {
                 {isTyping && (
                   <div className="flex justify-start">
                     <div className="flex gap-3 max-w-[80%]">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/20 flex items-center justify-center flex-shrink-0">
                         <Bot className="h-4 w-4 text-primary" />
                       </div>
-                      <Card className="p-3 bg-gray-50 border border-border">
+                      <Card className="p-3 bg-white/90 backdrop-blur-sm border border-primary/10 shadow-sm">
                         <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                          <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                          <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">Dr. Sarah is typing...</p>
                       </Card>
@@ -645,38 +640,19 @@ export default function ChatbotPage() {
           </div>
 
           {/* Input */}
-          <div className="bg-white border-t border-border p-4 flex-shrink-0">
-            <div className="flex gap-2">
-              <Input
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder={currentSessionId === "current" ? "Share what's on your mind..." : "This is a past session (read-only)"}
-                disabled={isTyping || currentSessionId !== "current" || loadingActiveChat}
-                className="flex-1"
-              />
-              <Button 
-                onClick={sendMessage} 
-                disabled={!inputMessage.trim() || isTyping || currentSessionId !== "current" || loadingActiveChat}
-                size="icon"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="flex items-center justify-between mt-2">
-              <p className="text-xs text-muted-foreground">
-                {currentSessionId === "current" 
-                  ? "This is an AI psychology expert. For emergencies, call 911 or crisis helplines."
-                  : "Viewing past session - switch to current session to continue chatting"
-                }
-              </p>
-              {conversationId && currentSessionId === "current" && (
-                <p className="text-xs text-muted-foreground">
-                  Conversation history maintained
-                </p>
-              )}
-            </div>
-          </div>
+          <ChatInput
+            value={inputMessage}
+            onChange={setInputMessage}
+            onSend={sendMessage}
+            onKeyPress={handleKeyPress}
+            placeholder={currentSessionId === "current" ? "Share what's on your mind..." : "This is a past session (read-only)"}
+            disabled={isTyping || currentSessionId !== "current" || loadingActiveChat}
+            isLoading={isTyping}
+            helpText={currentSessionId === "current" 
+              ? "This is an AI psychology expert. For emergencies, call 911 or crisis helplines."
+              : "Viewing past session - switch to current session to continue chatting"
+            }
+          />
         </div>
       </div>
     </Layout>
