@@ -4,6 +4,8 @@ import { apiService } from "../services/api";
 import { useChatSocket } from "../hooks/useSocket";
 import { Layout } from "@/components/Layout";
 import { ChatBubble } from "@/components/ChatBubble";
+import { ChatHeader } from "@/components/ChatHeader";
+import { ChatInput } from "@/components/ChatInput";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -201,9 +203,9 @@ export default function PeerChatPage() {
     }
   }, [currentSession, isTyping, socket]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewMessage(e.target.value);
-    if (e.target.value.trim()) {
+  const handleInputChange = (value: string) => {
+    setNewMessage(value);
+    if (value.trim()) {
       handleTypingStart();
     } else {
       handleTypingStop();
@@ -310,9 +312,9 @@ export default function PeerChatPage() {
 
   return (
     <Layout currentRole="peer">
-      <div className="flex h-full bg-background">
+      <div className="flex h-full bg-gradient-to-br from-primary/5 to-background">
         {/* Session List Sidebar */}
-        <div className="w-80 bg-white border-r border-border p-4 overflow-y-auto">
+        <div className="w-80 bg-gradient-to-b from-primary/5 to-primary/10 backdrop-blur-sm border-r border-primary/20 p-4 overflow-y-auto">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-foreground">Available Sessions</h2>
@@ -409,23 +411,19 @@ export default function PeerChatPage() {
           {currentSession ? (
             <>
               {/* Header */}
-              <div className="bg-white border-b border-border p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h1 className="text-lg font-semibold text-foreground">
-                      Supporting {currentSession.patientId.profile?.preferredName || 
-                                currentSession.patientId.profile?.firstName || 
-                                currentSession.patientId.username}
-                    </h1>
-                    <div className="flex items-center gap-4 mt-2">
-                      <Badge variant={currentSession.severity === 'critical' ? 'destructive' : 'default'}>
-                        {currentSession.severity} severity
-                      </Badge>
-                      <span className="text-sm text-muted-foreground">
-                        Session #{currentSession._id.slice(-6)}
-                      </span>
-                    </div>
-                  </div>
+              <ChatHeader
+                title={`Supporting ${currentSession.patientId.profile?.preferredName || 
+                                   currentSession.patientId.profile?.firstName || 
+                                   currentSession.patientId.username}`}
+                subtitle={`Session #${currentSession._id.slice(-6)}`}
+                icon={<Users className="h-6 w-6 text-primary" />}
+                badges={[
+                  { 
+                    text: `${currentSession.severity} severity`, 
+                    variant: currentSession.severity === 'critical' ? 'destructive' as const : 'default' as const 
+                  }
+                ]}
+                actions={
                   <div className="flex gap-2">
                     <Button 
                       size="sm" 
@@ -446,16 +444,16 @@ export default function PeerChatPage() {
                       End Session
                     </Button>
                   </div>
-                </div>
-              </div>
+                }
+              />
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-primary/5 to-transparent">
                 {socket.messages.map((message) => (
                   <div key={message._id} className={`flex ${message.senderRole === 'peer' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`flex gap-2 max-w-[80%] ${message.senderRole === 'peer' ? 'flex-row-reverse' : 'flex-row'}`}>
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        message.senderRole === 'peer' ? 'bg-primary/10' : 'bg-blue-100'
+                        message.senderRole === 'peer' ? 'bg-primary/15 border border-primary/20' : 'bg-blue-100 border border-blue-200'
                       }`}>
                         {message.senderRole === 'peer' ? (
                           <Users className="h-4 w-4 text-primary" />
@@ -476,14 +474,14 @@ export default function PeerChatPage() {
                 {socket.isTypingIndicatorVisible && (
                   <div className="flex justify-start">
                     <div className="flex gap-2 max-w-[80%]">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center flex-shrink-0">
                         <User className="h-4 w-4 text-blue-600" />
                       </div>
-                      <div className="bg-gray-100 rounded-lg px-3 py-2">
+                      <div className="bg-white/90 backdrop-blur-sm border border-primary/10 rounded-lg px-3 py-2 shadow-sm">
                         <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                          <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                          <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                         </div>
                       </div>
                     </div>
@@ -494,35 +492,16 @@ export default function PeerChatPage() {
               </div>
 
               {/* Input */}
-              <div className="bg-white border-t border-border p-4">
-                <div className="flex gap-2">
-                  <Input
-                    value={newMessage}
-                    onChange={handleInputChange}
-                    placeholder="Type a supportive message..."
-                    onKeyPress={handleKeyPress}
-                    disabled={!socket.isConnected || loading}
-                    className="flex-1"
-                  />
-                  <Button 
-                    onClick={sendMessage} 
-                    disabled={!newMessage.trim() || !socket.isConnected || loading}
-                  >
-                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                  </Button>
-                </div>
-                <div className="flex items-center justify-between mt-2">
-                  <p className="text-xs text-muted-foreground">
-                    Remember to be supportive, non-judgmental, and refer to professionals when needed.
-                  </p>
-                  <div className="flex items-center gap-2 text-xs">
-                    <div className={`w-2 h-2 rounded-full ${socket.isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-                    <span className="text-muted-foreground">
-                      {socket.isConnected ? 'Connected' : 'Disconnected'}
-                    </span>
-                  </div>
-                </div>
-              </div>
+              <ChatInput
+                value={newMessage}
+                onChange={handleInputChange}
+                onSend={sendMessage}
+                onKeyPress={handleKeyPress}
+                placeholder="Type a supportive message..."
+                disabled={!socket.isConnected || loading}
+                isLoading={loading}
+                helpText="Remember to be supportive, non-judgmental, and refer to professionals when needed."
+              />
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center">

@@ -38,10 +38,10 @@ if (process.env.SOCKET_ORIGIN) {
   allowedOrigins.push(...envOrigins);
 }
 
-// Initialize Socket.io with CORS
+// Initialize Socket.io with CORS - Allow all origins (WARNING: Use only for development/testing)
 const io = socketIo(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: true, // This allows all origins
     methods: ["GET", "POST"],
     credentials: true
   }
@@ -85,9 +85,9 @@ app.use(limiter);
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 
-// CORS configuration
+// CORS configuration - Allow all origins (WARNING: Use only for development/testing)
 app.use(cors({
-  origin: allowedOrigins,
+  origin: true, // This allows all origins
   credentials: true
 }));
 
@@ -114,7 +114,7 @@ const connectDB = async () => {
 
 // MongoDB connection event handlers
 mongoose.connection.on('connected', () => {
-  console.log('✅ MongoDB connected');
+  // Connection established
 });
 
 mongoose.connection.on('error', (err) => {
@@ -122,12 +122,11 @@ mongoose.connection.on('error', (err) => {
 });
 
 mongoose.connection.on('disconnected', () => {
-  console.log('📴 Database connection closed');
+  // Connection lost
 });
 
 // Graceful shutdown
 process.on('SIGINT', async () => {
-  console.log('🔄 SIGINT received, shutting down gracefully...');
   await mongoose.connection.close();
   process.exit(0);
 });
@@ -158,8 +157,6 @@ io.use(async (socket, next) => {
 
 // Socket.io connection handling
 io.on('connection', async (socket) => {
-  console.log(`👤 User connected: ${socket.user.username} (${socket.userId})`);
-
   // Update user online status
   try {
     await User.findByIdAndUpdate(socket.userId, {
@@ -182,13 +179,11 @@ io.on('connection', async (socket) => {
 
     userSessions.forEach(session => {
       socket.join(`session_${session._id}`);
-      console.log(`📱 User ${socket.user.username} auto-joined session room: ${session._id}`);
     });
 
     // Join counselors/admins to crisis alert room
     if (['counselor', 'admin'].includes(socket.user.role)) {
       socket.join('crisis_responders');
-      console.log(`🚨 Crisis responder ${socket.user.username} joined alert room`);
     }
   } catch (error) {
     console.error('Error joining session rooms:', error);
@@ -203,7 +198,6 @@ io.on('connection', async (socket) => {
     try {
       const now = Date.now();
       if (now - socket.lastSessionAction < socket.sessionActionCooldown) {
-        console.log(`📱 Rate limiting session action for user ${socket.user.username}`);
         return;
       }
       socket.lastSessionAction = now;
@@ -220,7 +214,6 @@ io.on('connection', async (socket) => {
 
       // Prevent joining the same session multiple times
       if (socket.currentSession === sessionId) {
-        console.log(`📱 User ${socket.user.username} already in session: ${sessionId}`);
         return;
       }
 
@@ -306,7 +299,6 @@ io.on('connection', async (socket) => {
         }
       });
 
-      console.log(`📱 User ${socket.user.username} joined session: ${sessionId} (participants: ${Object.keys(io.sockets.adapter.rooms.get(`session_${sessionId}`) || {}).length})`);
     } catch (error) {
       console.error('Error joining session:', error);
       socket.emit('error', { 
@@ -456,7 +448,6 @@ io.on('connection', async (socket) => {
         }, Math.random() * 2000 + 1000); // Random delay 1-3 seconds
       }
 
-      console.log(`💬 Message sent in session ${sessionId} by ${socket.user.username}`);
     } catch (error) {
       console.error('Error sending message:', error);
       socket.emit('error', { 
@@ -551,7 +542,6 @@ io.on('connection', async (socket) => {
           currentHelperSocket.leave(`session_${sessionId}`);
         }
 
-        console.log(`⚡ Peer session ${sessionId} escalated to counselor. New session: ${newSession._id}`);
       } else {
         // Regular escalation without changing helper type
         await session.escalateSession(newSeverity, reason);
@@ -611,7 +601,6 @@ io.on('connection', async (socket) => {
         });
       }
 
-      console.log(`⚡ Session ${sessionId} escalated to ${newSeverity} by ${socket.user.username}`);
     } catch (error) {
       console.error('Error escalating session:', error);
       socket.emit('error', { 
@@ -681,7 +670,6 @@ io.on('connection', async (socket) => {
         timestamp: new Date()
       });
 
-      console.log(`🚨 Crisis alert broadcast by ${socket.user.username}`);
     } catch (error) {
       console.error('Error broadcasting crisis alert:', error);
       socket.emit('error', { 
@@ -793,7 +781,6 @@ io.on('connection', async (socket) => {
         }
       });
 
-      console.log(`� Session ${sessionId} status updated from ${oldStatus} to ${status} by ${socket.user.username}`);
     } catch (error) {
       console.error('Error updating session status:', error);
       socket.emit('error', { 
@@ -809,7 +796,6 @@ io.on('connection', async (socket) => {
     try {
       const now = Date.now();
       if (now - socket.lastSessionAction < socket.sessionActionCooldown) {
-        console.log(`📱 Rate limiting session action for user ${socket.user.username}`);
         return;
       }
       socket.lastSessionAction = now;
@@ -826,7 +812,6 @@ io.on('connection', async (socket) => {
 
       // Only leave if currently in this session
       if (socket.currentSession !== sessionId) {
-        console.log(`📱 User ${socket.user.username} not in session ${sessionId}, current: ${socket.currentSession}`);
         return;
       }
 
@@ -845,7 +830,6 @@ io.on('connection', async (socket) => {
 
       socket.currentSession = null;
 
-      console.log(`📱 User ${socket.user.username} left session: ${sessionId} (remaining: ${Object.keys(io.sockets.adapter.rooms.get(`session_${sessionId}`) || {}).length})`);
     } catch (error) {
       console.error('Error leaving session:', error);
       socket.emit('error', { 
@@ -882,7 +866,6 @@ io.on('connection', async (socket) => {
         timestamp: new Date()
       });
 
-      console.log(`👤 User ${socket.user.username} status updated to ${status}`);
     } catch (error) {
       console.error('Error updating user status:', error);
       socket.emit('error', { 
@@ -895,8 +878,6 @@ io.on('connection', async (socket) => {
 
   // Handle disconnection
   socket.on('disconnect', async () => {
-    console.log(`👤 User disconnected: ${socket.user.username} (${socket.userId})`);
-
     try {
       // Update user offline status
       await User.findByIdAndUpdate(socket.userId, {
@@ -978,14 +959,9 @@ app.use((error, req, res, next) => {
 
 // Graceful shutdown handling
 process.on('SIGTERM', async () => {
-  console.log('🔄 SIGTERM received, shutting down gracefully...');
-  
   try {
     await mongoose.connection.close();
-    console.log('📴 Database connection closed');
-    
     server.close(() => {
-      console.log('🔴 Server closed');
       process.exit(0);
     });
   } catch (error) {
@@ -995,14 +971,9 @@ process.on('SIGTERM', async () => {
 });
 
 process.on('SIGINT', async () => {
-  console.log('🔄 SIGINT received, shutting down gracefully...');
-  
   try {
     await mongoose.connection.close();
-    console.log('📴 Database connection closed');
-    
     server.close(() => {
-      console.log('🔴 Server closed');
       process.exit(0);
     });
   } catch (error) {
@@ -1017,11 +988,8 @@ const startServer = async () => {
     await connectDB();
     
     server.listen(PORT, () => {
-      console.log('🚀 Calmify Mental Health Support Platform');
-      console.log(`📡 Server running on port ${PORT}`);
+      console.log(`🚀 Server running on port ${PORT}`);
       console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`💾 Database: ${MONGODB_URI}`);
-      console.log(`🔗 CORS allowed origins: ${allowedOrigins.join(', ')}`);
       console.log('✅ Server started successfully');
     });
   } catch (error) {

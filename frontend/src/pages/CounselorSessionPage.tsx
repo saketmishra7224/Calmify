@@ -4,6 +4,8 @@ import { apiService } from "../services/api";
 import { useChatSocket } from "../hooks/useSocket";
 import { Layout } from "@/components/Layout";
 import { ChatBubble } from "@/components/ChatBubble";
+import { ChatHeader } from "@/components/ChatHeader";
+import { ChatInput } from "@/components/ChatInput";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -209,18 +211,18 @@ export default function CounselorSessionPage() {
 
   return (
     <Layout>
-      <div className="flex h-full bg-gradient-to-b from-white to-gray-50">
+      <div className="flex h-full bg-gradient-to-br from-primary/5 to-background">
         {/* Session List Sidebar */}
-        <div className="w-80 bg-gradient-to-b from-gray-50 to-gray-100 border-r border-gray-200 p-6 overflow-y-auto shadow-lg">
+        <div className="w-80 bg-gradient-to-b from-primary/5 to-primary/10 backdrop-blur-sm border-r border-primary/20 p-6 overflow-y-auto">
           <div className="space-y-6">
             <div className="text-center mb-6">
               <div className="flex items-center justify-center gap-2 mb-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
-                  <FileText className="w-5 h-5 text-white" />
+                <div className="w-8 h-8 bg-primary/15 border border-primary/20 rounded-lg flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-primary" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">Sessions</h2>
+                <h2 className="text-xl font-bold text-foreground">Sessions</h2>
               </div>
-              <p className="text-gray-600 text-sm">Professional Counseling Queue</p>
+              <p className="text-muted-foreground text-sm">Professional Counseling Queue</p>
             </div>
             
             <div className="flex justify-center">
@@ -338,51 +340,35 @@ export default function CounselorSessionPage() {
           {currentSession ? (
             <>
               {/* Header */}
-              <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-200 p-6 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h1 className="text-xl font-bold text-gray-900 mb-2">
-                      Professional Session
-                    </h1>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-                          <User className="h-4 w-4 text-white" />
-                        </div>
-                        <span className="text-gray-700 font-medium">
-                          {currentSession.patientId.profile?.preferredName || 
-                           currentSession.patientId.profile?.firstName || 
-                           currentSession.patientId.username}
-                        </span>
-                      </div>
-                      <Badge className={`${
-                        currentSession.severity === 'critical' ? 'bg-red-100 text-red-700 border-red-200' : 
-                        currentSession.severity === 'severe' ? 'bg-orange-100 text-orange-700 border-orange-200' : 
-                        currentSession.severity === 'moderate' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' : 
-                        'bg-green-100 text-green-700 border-green-200'
-                      }`}>
-                        {currentSession.severity} severity
-                      </Badge>
-                    </div>
-                  </div>
+              <ChatHeader
+                title="Professional Session"
+                subtitle={`Supporting ${currentSession.patientId.profile?.preferredName || 
+                         currentSession.patientId.profile?.firstName || 
+                         currentSession.patientId.username}`}
+                icon={<FileText className="h-6 w-6 text-primary" />}
+                badges={[{
+                  text: `${currentSession.severity} severity`,
+                  variant: currentSession.severity === 'critical' ? 'destructive' : 'default'
+                }]}
+                actions={
                   <Button 
                     size="sm" 
                     onClick={openCloseDialog}
-                    className="bg-red-500 hover:bg-red-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
+                    variant="destructive"
                   >
                     End Session
                   </Button>
-                </div>
-              </div>
+                }
+              />
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-primary/5 to-transparent">
                 {socket.messages.map((message) => (
                   <div key={message._id}>
                     <div className={`flex ${message.senderRole === 'counselor' ? 'justify-end' : 'justify-start'}`}>
                       <div className={`flex gap-2 max-w-[80%] ${message.senderRole === 'counselor' ? 'flex-row-reverse' : 'flex-row'}`}>
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                          message.senderRole === 'counselor' ? 'bg-primary/10' : 'bg-blue-100'
+                          message.senderRole === 'counselor' ? 'bg-primary/15 border border-primary/20' : 'bg-blue-100 border border-blue-200'
                         }`}>
                           {message.senderRole === 'counselor' ? (
                             <FileText className="h-4 w-4 text-primary" />
@@ -404,27 +390,14 @@ export default function CounselorSessionPage() {
               </div>
 
               {/* Input */}
-              <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-t border-gray-200 p-6">
-                <div className="flex gap-3">
-                  <Input
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type your professional response..."
-                    onKeyPress={handleKeyPress}
-                    className="flex-1 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm"
-                  />
-                  <Button 
-                    onClick={sendMessage} 
-                    disabled={!newMessage.trim()}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200 px-6"
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
-                <p className="text-gray-600 text-xs mt-3 text-center">
-                  🔒 Professional counseling session - maintain clinical standards and documentation requirements
-                </p>
-              </div>
+              <ChatInput
+                value={newMessage}
+                onChange={setNewMessage}
+                onSend={sendMessage}
+                onKeyPress={handleKeyPress}
+                placeholder="Type your professional response..."
+                helpText="🔒 Professional counseling session - maintain clinical standards and documentation requirements"
+              />
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-gray-50 to-white">

@@ -159,12 +159,12 @@ export function AppNavbar({ currentRole }: AppNavbarProps) {
   };
 
   return (
-    <nav className="bg-background border-b border-border px-4 py-3 sticky top-0 z-50">
+    <nav className="bg-primary/5 backdrop-blur-sm border-b border-primary/20 px-4 py-3 sticky top-0 z-50">
       <div className="flex items-center justify-between">
         {/* Left side - Logo/Brand */}
         <button
           onClick={handleHomeClick}
-          className="flex items-center gap-2 sm:gap-3 hover:bg-accent/50 rounded-lg p-2 -m-2 transition-colors duration-200 group"
+          className="flex items-center gap-2 sm:gap-3 hover:bg-primary/10 rounded-lg p-2 -m-2 transition-colors duration-200 group"
           title="Click to go to home page"
         >
           <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors duration-200">
