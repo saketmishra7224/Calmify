@@ -859,7 +859,7 @@ If you are experiencing thoughts of self-harm or suicide, please contact emergen
                   Talk to AI Assistant
                 </Button>
                 {['moderate', 'moderately severe', 'severe'].includes(results.overallSeverity) && (
-                  <Button onClick={() => navigate('/peer/chats')} variant="default">
+                  <Button onClick={() => navigate('/peer/available')} variant="default">
                     <Heart className="h-4 w-4 mr-2" />
                     Connect with Support
                   </Button>

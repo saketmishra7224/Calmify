@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { HomeRedirect } from "./components/HomeRedirect";
@@ -11,8 +11,6 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ChatbotPage from "./pages/ChatbotPage";
 import MeditationPage from "./pages/MeditationPage";
-import PeerChatPage from "./pages/PeerChatPage";
-import CounselorSessionPage from "./pages/CounselorSessionPage";
 import RequestPeerSupportPage from "./pages/RequestPeerSupportPage";
 import RequestCounselorPage from "./pages/RequestCounselorPage";
 import AdminAnalyticsPage from "./pages/AdminAnalyticsPage";
@@ -60,16 +58,6 @@ const App = () => (
             <Route path="/meditation" element={
               <RoleBasedRoute>
                 <MeditationPage />
-              </RoleBasedRoute>
-            } />
-            <Route path="/peer/chats" element={
-              <RoleBasedRoute allowedRoles={['peer']}>
-                <PeerChatPage />
-              </RoleBasedRoute>
-            } />
-            <Route path="/counselor/sessions" element={
-              <RoleBasedRoute allowedRoles={['counselor']}>
-                <CounselorSessionPage />
               </RoleBasedRoute>
             } />
             <Route path="/peer/request" element={
@@ -136,6 +124,17 @@ const App = () => (
                   <SessionDetailsPage />
                 </RoleBasedRoute>
               </ErrorBoundary>
+            } />
+            {/* Legacy route redirects */}
+            <Route path="/peer/chats" element={
+              <RoleBasedRoute allowedRoles={['peer']}>
+                <Navigate to="/peer/available" replace />
+              </RoleBasedRoute>
+            } />
+            <Route path="/counselor/sessions" element={
+              <RoleBasedRoute allowedRoles={['counselor']}>
+                <Navigate to="/counselor/available" replace />
+              </RoleBasedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

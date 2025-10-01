@@ -241,7 +241,7 @@ export default function QuestionnairePage() {
                   Talk to AI Assistant
                 </Button>
                 {(results.severity === 'moderate' || results.severity === 'severe' || results.severity === 'critical') && (
-                  <Button onClick={() => navigate('/peer/chats')} variant="default">
+                  <Button onClick={() => navigate('/peer/available')} variant="default">
                     Connect with Support
                   </Button>
                 )}

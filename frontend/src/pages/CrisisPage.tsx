@@ -278,7 +278,7 @@ export default function CrisisPage() {
               <Button onClick={() => navigate('/chatbot')} variant="outline">
                 Continue AI Support
               </Button>
-              <Button onClick={() => navigate('/peer/chats')}>
+              <Button onClick={() => navigate('/peer/available')}>
                 Talk to Peer Support
               </Button>
               <Button onClick={() => navigate('/counselor/request')}>

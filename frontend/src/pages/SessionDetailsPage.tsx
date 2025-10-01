@@ -160,8 +160,8 @@ export default function SessionDetailsPage() {
       setShowEscalateDialog(false);
       setEscalationReason("");
       
-      // Navigate back to peer chat or dashboard
-      navigate('/peer/chats');
+      // Navigate back to peer available sessions
+      navigate('/peer/available');
     } catch (error) {
       console.error('Failed to escalate session:', error);
       setError('Failed to escalate session');
@@ -193,9 +193,9 @@ export default function SessionDetailsPage() {
       
       // Navigate based on user role
       if (user?.role === 'peer') {
-        navigate('/peer/chats');
+        navigate('/peer/available');
       } else if (user?.role === 'counselor') {
-        navigate('/counselor/sessions');
+        navigate('/counselor/available');
       } else {
         navigate('/dashboard');
       }
