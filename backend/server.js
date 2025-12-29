@@ -33,15 +33,29 @@ const allowedOrigins = [
 ];
 
 // Add origins from environment variable if set
+if (process.env.ALLOWED_ORIGINS) {
+  const envOrigins = process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim());
+  allowedOrigins.push(...envOrigins);
+}
+
 if (process.env.SOCKET_ORIGIN) {
   const envOrigins = process.env.SOCKET_ORIGIN.split(',').map(origin => origin.trim());
   allowedOrigins.push(...envOrigins);
 }
 
-// Initialize Socket.io with CORS - Allow all origins (WARNING: Use only for development/testing)
+// Initialize Socket.io with CORS
 const io = socketIo(server, {
   cors: {
-    origin: true, // This allows all origins
+    origin: process.env.NODE_ENV === 'production' 
+      ? (origin, callback) => {
+          if (!origin) return callback(null, true);
+          if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
+            callback(null, true);
+          } else {
+            callback(new Error('Not allowed by CORS'));
+          }
+        }
+      : true, // Allow all origins in development
     methods: ["GET", "POST"],
     credentials: true
   }
@@ -85,9 +99,20 @@ app.use(limiter);
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 
-// CORS configuration - Allow all origins (WARNING: Use only for development/testing)
+// CORS configuration
 app.use(cors({
-  origin: true, // This allows all origins
+  origin: process.env.NODE_ENV === 'production' 
+    ? (origin, callback) => {
+        // Allow requests with no origin (mobile apps, Postman, etc.)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      }
+    : true, // Allow all origins in development
   credentials: true
 }));
 
@@ -919,6 +944,17 @@ app.get('/health', (req, res) => {
     timestamp: new Date(),
     version: '1.0.0',
     environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// API health check endpoint (for Render)
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date(),
+    version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   });
 });
 

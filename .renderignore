@@ -1,0 +1,35 @@
+# Test files
+**/*.test.js
+**/*.spec.js
+**/__tests__/
+**/tests/
+
+# Documentation
+*.md
+!README.md
+
+# Development files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# CI/CD
+.github/
+
+# Local env files (use Render's env vars instead)
+.env.local
+.env.development
+.env.test
+
+# Logs
+logs/
+*.log
+
+# Coverage
+coverage/
+.nyc_output/
