@@ -144,9 +144,11 @@ class ApiService {
       return data;
     } catch (error) {
       console.error('Login API error:', error);
+      // Only show connection error for actual network failures
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
-        throw new Error('Unable to connect to the authentication server. Please ensure the backend is running on http://localhost:5000 and CORS is properly configured.');
+        throw new Error('Unable to connect to the authentication server. Please ensure the backend is running and CORS is properly configured.');
       }
+      // Re-throw the actual error (rate limit, invalid credentials, etc.)
       throw error;
     }
   }

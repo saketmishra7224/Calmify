@@ -77,27 +77,21 @@ app.use(helmet({
   },
 }));
 
-// Rate limiting
+// Rate limiting - only for general API, not auth routes
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 1000, // limit each IP to 1000 requests per windowMs
   message: {
     error: 'Too many requests from this IP, please try again later.'
+  },
+  skip: (req) => {
+    // Skip rate limiting for auth routes
+    return req.path.startsWith('/api/auth');
   }
 });
 
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // limit each IP to 50 login attempts per windowMs
-  message: {
-    error: 'Too many login attempts, please try again later.'
-  }
-});
-
-// Apply rate limiting
+// Apply rate limiting (auth routes are skipped)
 app.use(limiter);
-app.use('/api/auth/login', authLimiter);
-app.use('/api/auth/register', authLimiter);
 
 // CORS configuration
 app.use(cors({
