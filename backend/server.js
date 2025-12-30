@@ -88,7 +88,7 @@ const limiter = rateLimit({
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 login attempts per windowMs
+  max: 50, // limit each IP to 50 login attempts per windowMs
   message: {
     error: 'Too many login attempts, please try again later.'
   }

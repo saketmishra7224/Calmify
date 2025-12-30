@@ -32,7 +32,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 interface AppNavbarProps {
   currentRole: string;
@@ -210,24 +209,12 @@ export function AppNavbar({ currentRole }: AppNavbarProps) {
           </Button>
         </div>
 
-        {/* Right side - Menu Dropdown and Session Status */}
+        {/* Right side - Menu Dropdown */}
         <div className="flex items-center gap-2">
-          {isAuthenticated && (
-            <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground">
-              <Clock className="h-3 w-3" />
-              <span>Session active</span>
-            </div>
-          )}
-          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon">
                 <Menu className="h-5 w-5" />
-                {isAuthenticated && (
-                  <Badge variant="destructive" className="absolute -top-2 -right-2 h-2 w-2 p-0">
-                    <span className="sr-only">Active session</span>
-                  </Badge>
-                )}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" side="bottom" className="w-56 mt-1">

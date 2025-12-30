@@ -195,10 +195,6 @@ export function AppSidebar({ currentRole }: AppSidebarProps) {
       <SidebarFooter className="p-4 border-t border-gray-200">
         {isAuthenticated ? (
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Clock className="h-3 w-3" />
-              <span>Session active</span>
-            </div>
             <Button
               variant="ghost"
               size="sm"
