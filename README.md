@@ -20,7 +20,7 @@
 
 ### 📺 Video Walkthrough
 
-[![Demo Video](https://img.shields.io/badge/▶️_Watch_Demo-YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](YOUR_DEMO_VIDEO_LINK_HERE)
+[![Demo Video](https://img.shields.io/badge/▶️_Watch_Demo-YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=-mbgNO0BbEo)
 
 <!-- Replace YOUR_DEMO_VIDEO_LINK_HERE with your actual video URL -->
 <!-- You can also embed a GIF preview here: -->
@@ -28,58 +28,7 @@
 
 </div>
 
-### Screenshots
 
-<div align="center">
-<table>
-<tr>
-<td width="50%">
-
-** AI Chatbot Interface**
-
-![AI Chatbot](screenshots/chatbot.png)
-<!-- Replace with actual screenshot path -->
-
-*24/7 AI-powered mental health support with crisis detection*
-
-</td>
-<td width="50%">
-
-** Admin Analytics Dashboard**
-
-![Admin Dashboard](screenshots/admin-dashboard.png)
-<!-- Replace with actual screenshot path -->
-
-*Real-time metrics, user statistics, and system monitoring*
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-** Psychological Assessment**
-
-![Assessment](screenshots/assessment.png)
-<!-- Replace with actual screenshot path -->
-
-*PHQ-9, GAD-7, and GHQ standardized screenings*
-
-</td>
-<td width="50%">
-
-** Counselor Session View**
-
-![Counselor Portal](screenshots/counselor-session.png)
-<!-- Replace with actual screenshot path -->
-
-*Professional counseling interface with patient notes*
-
-</td>
-</tr>
-</table>
-</div>
-
----
 
 ## Table of Contents
 
@@ -98,7 +47,7 @@
 
 ## 🎯 Project Overview
 
-**Saneyar** is a comprehensive mental health support platform designed to provide accessible, 24/7 mental health assistance through a combination of AI-powered chatbots, peer support networks, and professional counseling services.
+**Calmify** is a comprehensive mental health support platform designed to provide accessible, 24/7 mental health assistance through a combination of AI-powered chatbots, peer support networks, and professional counseling services.
 
 ### 🌟 Mission Statement
 > *"Making mental health support accessible, immediate, and stigma-free through technology."*
@@ -110,7 +59,7 @@
 - **Crisis hotlines** often have long wait times during peak hours
 
 ### 💡 Our Solution
-Saneyar bridges these gaps by providing:
+Calmify bridges these gaps by providing:
 - **Instant AI-powered support** available 24/7
 - **Real-time crisis detection** with automatic escalation
 - **Peer support networks** for non-clinical conversations
@@ -339,21 +288,7 @@ crisisAlertSchema.index({ severity: 1, status: 1 });  // Priority routing
 
 ---
 
-## 📸 Screenshots & Demo
 
-### Patient Dashboard
-> *AI Chatbot interface with conversation history and crisis resources*
-
-### Counselor Portal
-> *Session management, crisis alerts, and patient notes*
-
-### Admin Analytics
-> *Real-time metrics, user statistics, and system health*
-
-### Assessment Flow
-> *PHQ-9 depression screening with automated scoring*
-
----
 
 ## 🚀 Getting Started
 
@@ -366,8 +301,8 @@ crisisAlertSchema.index({ severity: 1, status: 1 });  // Priority routing
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/saneyar.git
-cd saneyar
+git clone https://github.com/rajatsinghten/calmify.git
+cd calmify
 
 # Backend setup
 cd backend
@@ -405,9 +340,7 @@ npm run test:coverage   # With coverage report
 
 ---
 
-## 📚 API Documentation
 
-Full API documentation is available in [endpoints.md](./backend/endpoints.md)
 
 ### Key Endpoints
 
@@ -454,14 +387,14 @@ socket.on('user-joined', (user) => {});
 
 ## 🏆 Key Accomplishments
 
-- ✅ Built **production-ready** full-stack application from scratch
-- ✅ Implemented **AI-powered conversational system** with Azure OpenAI
-- ✅ Designed **real-time crisis detection** with 95%+ accuracy on test cases
-- ✅ Architected **scalable WebSocket communication** for multi-user sessions
-- ✅ Created **comprehensive RBAC system** with 4 role types and 30+ permissions
-- ✅ Integrated **standardized psychological assessments** (PHQ-9, GAD-7, GHQ)
-- ✅ Implemented **security best practices** (JWT, rate limiting, input sanitization)
-- ✅ Wrote **unit tests** with Jest and comprehensive API documentation
+-  Built **production-ready** full-stack application from scratch
+-  Implemented **AI-powered conversational system** with Azure OpenAI
+-  Designed **real-time crisis detection** with 95%+ accuracy on test cases
+-  Architected **scalable WebSocket communication** for multi-user sessions
+-  Created **comprehensive RBAC system** with 4 role types and 30+ permissions
+-  Integrated **standardized psychological assessments** (PHQ-9, GAD-7, GHQ)
+-  Implemented **security best practices** (JWT, rate limiting, input sanitization)
+-  Wrote **unit tests** with Jest and comprehensive API documentation
 
 ---
 
