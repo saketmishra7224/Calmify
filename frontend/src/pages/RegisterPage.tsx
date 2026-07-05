@@ -34,6 +34,7 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
+  const [submitHovered, setSubmitHovered] = useState(false);
 
   // Redirect if user is already authenticated
   useEffect(() => {
@@ -121,35 +122,35 @@ export default function RegisterPage() {
   // Show loading state while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FAF7F2' }}>
         <div className="flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-          <span className="ml-2 text-gray-600">Loading...</span>
+          <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#8FAE9B' }} />
+          <span className="ml-2" style={{ color: '#6B6B6B' }}>Loading...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FAF7F2' }}>
       <div className="w-full max-w-2xl">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
-              <Heart className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style={{ backgroundColor: '#8FAE9B' }}>
+              <Heart className="w-6 h-6 text-white" strokeWidth={1.5} />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Calmify</h1>
+            <h1 className="text-3xl font-heading font-bold" style={{ color: '#3A3A3A' }}>Calmify</h1>
           </div>
-          <p className="text-gray-600">
+          <p style={{ color: '#6B6B6B' }}>
             Join our supportive community for mental health
           </p>
         </div>
 
-        <div className="bg-white rounded-3xl border border-gray-200 shadow-xl p-8">
+        <div className="rounded-3xl shadow-lg p-8" style={{ backgroundColor: 'rgba(255,255,255,0.75)', border: '1px solid rgba(143,174,155,0.12)', backdropFilter: 'blur(10px)' }}>
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Create Your Account</h2>
-            <p className="text-gray-600">
+            <h2 className="text-2xl font-heading font-bold mb-2" style={{ color: '#3A3A3A' }}>Create Your Account</h2>
+            <p style={{ color: '#6B6B6B' }}>
               Start your journey to better mental health with us
             </p>
           </div>
@@ -164,11 +165,11 @@ export default function RegisterPage() {
 
               {/* Basic Information */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900">Basic Information</h3>
+                <h3 className="text-lg font-heading font-semibold" style={{ color: '#3A3A3A' }}>Basic Information</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="username" className="text-gray-700 font-medium">Username *</Label>
+                    <Label htmlFor="username" className="font-medium" style={{ color: '#4A4A4A' }}>Username *</Label>
                     <Input
                       id="username"
                       name="username"
@@ -177,12 +178,13 @@ export default function RegisterPage() {
                       onChange={handleInputChange}
                       required
                       disabled={isLoading}
-                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                      className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]"
+                      style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-gray-700 font-medium">Email *</Label>
+                    <Label htmlFor="email" className="font-medium" style={{ color: '#4A4A4A' }}>Email *</Label>
                     <Input
                       id="email"
                       name="email"
@@ -192,14 +194,15 @@ export default function RegisterPage() {
                       onChange={handleInputChange}
                       required
                       disabled={isLoading}
-                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                      className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]"
+                      style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="password" className="text-gray-700 font-medium">Password *</Label>
+                    <Label htmlFor="password" className="font-medium" style={{ color: '#4A4A4A' }}>Password *</Label>
                     <div className="relative">
                       <Input
                         id="password"
@@ -210,7 +213,8 @@ export default function RegisterPage() {
                         onChange={handleInputChange}
                         required
                         disabled={isLoading}
-                        className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 pr-10"
+                        className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B] pr-10"
+                        style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                       />
                       <Button
                         type="button"
@@ -226,7 +230,7 @@ export default function RegisterPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword" className="text-gray-700 font-medium">Confirm Password *</Label>
+                    <Label htmlFor="confirmPassword" className="font-medium" style={{ color: '#4A4A4A' }}>Confirm Password *</Label>
                     <div className="relative">
                       <Input
                         id="confirmPassword"
@@ -237,7 +241,8 @@ export default function RegisterPage() {
                         onChange={handleInputChange}
                         required
                         disabled={isLoading}
-                        className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 pr-10"
+                        className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B] pr-10"
+                        style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                       />
                       <Button
                         type="button"
@@ -254,26 +259,26 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="role" className="text-gray-700 font-medium">Role *</Label>
+                  <Label htmlFor="role" className="font-medium" style={{ color: '#4A4A4A' }}>Role *</Label>
                   <Select 
                     value={formData.role} 
                     onValueChange={handleRoleChange} 
                     disabled={isLoading}
                   >
-                    <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
+                    <SelectTrigger className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]" style={{ borderColor: 'rgba(143,174,155,0.15)' }}>
                       <SelectValue placeholder="Select your role" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="patient">
                         <div className="flex flex-col">
                           <span>Patient/Student</span>
-                          <span className="text-xs text-gray-500">Seeking mental health support</span>
+                          <span className="text-xs" style={{ color: '#8A8A8A' }}>Seeking mental health support</span>
                         </div>
                       </SelectItem>
                       <SelectItem value="peer">
                         <div className="flex flex-col">
                           <span>Peer Volunteer</span>
-                          <span className="text-xs text-gray-500">Trained to provide peer support</span>
+                          <span className="text-xs" style={{ color: '#8A8A8A' }}>Trained to provide peer support</span>
                         </div>
                       </SelectItem>
                     </SelectContent>
@@ -283,11 +288,11 @@ export default function RegisterPage() {
 
               {/* Profile Information */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900">Profile Information</h3>
+                <h3 className="text-lg font-heading font-semibold" style={{ color: '#3A3A3A' }}>Profile Information</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="profile.firstName" className="text-gray-700 font-medium">First Name</Label>
+                    <Label htmlFor="profile.firstName" className="font-medium" style={{ color: '#4A4A4A' }}>First Name</Label>
                     <Input
                       id="profile.firstName"
                       name="profile.firstName"
@@ -295,12 +300,13 @@ export default function RegisterPage() {
                       value={formData.profile.firstName}
                       onChange={handleInputChange}
                       disabled={isLoading}
-                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                      className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]"
+                      style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="profile.lastName" className="text-gray-700 font-medium">Last Name</Label>
+                    <Label htmlFor="profile.lastName" className="font-medium" style={{ color: '#4A4A4A' }}>Last Name</Label>
                     <Input
                       id="profile.lastName"
                       name="profile.lastName"
@@ -308,14 +314,15 @@ export default function RegisterPage() {
                       value={formData.profile.lastName}
                       onChange={handleInputChange}
                       disabled={isLoading}
-                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                      className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]"
+                      style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="profile.preferredName" className="text-gray-700 font-medium">Preferred Name</Label>
+                    <Label htmlFor="profile.preferredName" className="font-medium" style={{ color: '#4A4A4A' }}>Preferred Name</Label>
                     <Input
                       id="profile.preferredName"
                       name="profile.preferredName"
@@ -323,12 +330,13 @@ export default function RegisterPage() {
                       value={formData.profile.preferredName}
                       onChange={handleInputChange}
                       disabled={isLoading}
-                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                      className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]"
+                      style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="profile.age" className="text-gray-700 font-medium">Age</Label>
+                    <Label htmlFor="profile.age" className="font-medium" style={{ color: '#4A4A4A' }}>Age</Label>
                     <Input
                       id="profile.age"
                       name="profile.age"
@@ -339,7 +347,8 @@ export default function RegisterPage() {
                       value={formData.profile.age}
                       onChange={handleInputChange}
                       disabled={isLoading}
-                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                      className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]"
+                      style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                     />
                   </div>
                 </div>
@@ -348,16 +357,16 @@ export default function RegisterPage() {
               {/* Emergency Contact */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-semibold text-gray-900">Emergency Contact</h3>
+                  <h3 className="text-lg font-heading font-semibold" style={{ color: '#3A3A3A' }}>Emergency Contact</h3>
                   <Info className="h-4 w-4 text-gray-500" />
                 </div>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm" style={{ color: '#8A8A8A' }}>
                   Optional but recommended for crisis situations
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="profile.emergencyContact.name" className="text-gray-700 font-medium">Contact Name</Label>
+                    <Label htmlFor="profile.emergencyContact.name" className="font-medium" style={{ color: '#4A4A4A' }}>Contact Name</Label>
                     <Input
                       id="profile.emergencyContact.name"
                       name="profile.emergencyContact.name"
@@ -365,12 +374,13 @@ export default function RegisterPage() {
                       value={formData.profile.emergencyContact.name}
                       onChange={handleInputChange}
                       disabled={isLoading}
-                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                      className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]"
+                      style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="profile.emergencyContact.relationship" className="text-gray-700 font-medium">Relationship</Label>
+                    <Label htmlFor="profile.emergencyContact.relationship" className="font-medium" style={{ color: '#4A4A4A' }}>Relationship</Label>
                     <Input
                       id="profile.emergencyContact.relationship"
                       name="profile.emergencyContact.relationship"
@@ -378,13 +388,14 @@ export default function RegisterPage() {
                       value={formData.profile.emergencyContact.relationship}
                       onChange={handleInputChange}
                       disabled={isLoading}
-                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                      className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]"
+                      style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="profile.emergencyContact.phone" className="text-gray-700 font-medium">Contact Phone</Label>
+                  <Label htmlFor="profile.emergencyContact.phone" className="font-medium" style={{ color: '#4A4A4A' }}>Contact Phone</Label>
                   <Input
                     id="profile.emergencyContact.phone"
                     name="profile.emergencyContact.phone"
@@ -393,7 +404,8 @@ export default function RegisterPage() {
                     value={formData.profile.emergencyContact.phone}
                     onChange={handleInputChange}
                     disabled={isLoading}
-                    className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                    className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]"
+                    style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                   />
                 </div>
               </div>
@@ -408,13 +420,13 @@ export default function RegisterPage() {
                       type="checkbox"
                       checked={formData.agreedToTerms}
                       onChange={handleInputChange}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="rounded border-gray-300 text-[#8FAE9B] focus:ring-[#8FAE9B]"
                       disabled={isLoading}
                       required
                     />
-                    <Label htmlFor="agreedToTerms" className="text-sm text-gray-600">
+                    <Label htmlFor="agreedToTerms" className="text-sm" style={{ color: '#6B6B6B' }}>
                       I agree to the{' '}
-                      <Link to="/terms" className="text-blue-600 hover:text-blue-700 hover:underline">
+                      <Link to="/terms" className="text-[#8FAE9B] hover:text-[#7A9B89] hover:underline">
                         Terms of Service
                       </Link>
                     </Label>
@@ -427,13 +439,13 @@ export default function RegisterPage() {
                       type="checkbox"
                       checked={formData.agreedToPrivacy}
                       onChange={handleInputChange}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="rounded border-gray-300 text-[#8FAE9B] focus:ring-[#8FAE9B]"
                       disabled={isLoading}
                       required
                     />
-                    <Label htmlFor="agreedToPrivacy" className="text-sm text-gray-600">
+                    <Label htmlFor="agreedToPrivacy" className="text-sm" style={{ color: '#6B6B6B' }}>
                       I agree to the{' '}
-                      <Link to="/privacy" className="text-blue-600 hover:text-blue-700 hover:underline">
+                      <Link to="/privacy" className="text-[#8FAE9B] hover:text-[#7A9B89] hover:underline">
                         Privacy Policy
                       </Link>
                     </Label>
@@ -445,7 +457,10 @@ export default function RegisterPage() {
             <div className="space-y-4 mt-8">
               <button 
                 type="submit" 
-                className="w-full px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-lg font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="w-full px-8 py-4 text-white text-lg font-semibold rounded-full transition-all duration-300 ease-out hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ backgroundColor: submitHovered ? '#D57A57' : '#E08E6D' }}
+                onMouseEnter={() => setSubmitHovered(true)}
+                onMouseLeave={() => setSubmitHovered(false)}
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -458,11 +473,11 @@ export default function RegisterPage() {
                 )}
               </button>
 
-              <div className="text-center text-sm text-gray-600">
+              <div className="text-center text-sm" style={{ color: '#6B6B6B' }}>
                 Already have an account?{' '}
                 <Link 
                   to="/login" 
-                  className="text-blue-600 hover:text-blue-700 hover:underline font-medium"
+                  className="text-[#8FAE9B] hover:text-[#7A9B89] hover:underline font-medium"
                 >
                   Sign in
                 </Link>

@@ -8,8 +8,7 @@ import { Label } from "@/components/ui/label";
 interface ErrorResponse {
   message: string;
 }
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Heart, Eye, EyeOff, User, Users, Stethoscope } from "lucide-react";
+import { Loader2, Heart, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -17,11 +16,12 @@ export default function LoginPage() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    rememberMe: false,
-    preferredRole: '' as 'patient' | 'peer' | 'counselor' | ''
+    rememberMe: false
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [submitHovered, setSubmitHovered] = useState(false);
+  const [anonHovered, setAnonHovered] = useState(false);
 
   // Redirect if user is already authenticated
   useEffect(() => {
@@ -38,11 +38,10 @@ export default function LoginPage() {
       const loginData = {
         email: formData.email,
         password: formData.password,
-        rememberMe: formData.rememberMe,
-        ...(formData.preferredRole && { preferredRole: formData.preferredRole })
+        rememberMe: formData.rememberMe
       };
       await login(loginData);
-      navigate('/dashboard');
+      navigate('/');
     } catch (err: unknown) {
       const error = err as ErrorResponse;
       setError(error.message || 'Login failed. Please check your credentials.');
@@ -69,71 +68,40 @@ export default function LoginPage() {
     }));
   };
 
-  const handleRoleChange = (value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      preferredRole: value as 'patient' | 'peer' | 'counselor'
-    }));
-  };
 
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case 'patient':
-        return <User className="h-4 w-4" />;
-      case 'peer':
-        return <Users className="h-4 w-4" />;
-      case 'counselor':
-        return <Stethoscope className="h-4 w-4" />;
-      default:
-        return null;
-    }
-  };
-
-  const getRoleDescription = (role: string) => {
-    switch (role) {
-      case 'patient':
-        return 'Seeking support and mental health resources';
-      case 'peer':
-        return 'Providing peer support to others';
-      case 'counselor':
-        return 'Professional mental health counselor';
-      default:
-        return '';
-    }
-  };
 
   // Show loading state while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FAF7F2' }}>
         <div className="flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-          <span className="ml-2 text-gray-600">Loading...</span>
+          <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#8FAE9B' }} />
+          <span className="ml-2" style={{ color: '#6B6B6B' }}>Loading...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FAF7F2' }}>
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-[#2BD4BD] rounded-lg flex items-center justify-center shadow-lg">
-              <Heart className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style={{ backgroundColor: '#8FAE9B' }}>
+              <Heart className="w-6 h-6 text-white" strokeWidth={1.5} />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Calmify</h1>
+            <h1 className="text-3xl font-heading font-bold" style={{ color: '#3A3A3A' }}>Calmify</h1>
           </div>
-          <p className="text-gray-600">
+          <p style={{ color: '#6B6B6B' }}>
             Your safe space for mental health support
           </p>
         </div>
 
-        <div className="bg-white rounded-3xl border border-gray-200 shadow-xl p-8">
+        <div className="rounded-3xl shadow-lg backdrop-blur-sm p-8" style={{ backgroundColor: 'rgba(255,255,255,0.75)', border: '1px solid rgba(143,174,155,0.12)', backdropFilter: 'blur(10px)' }}>
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h2>
-            <p className="text-gray-600">
+            <h2 className="text-2xl font-heading font-bold mb-2" style={{ color: '#3A3A3A' }}>Welcome Back</h2>
+            <p style={{ color: '#6B6B6B' }}>
               Sign in to continue your journey to better mental health
             </p>
           </div>
@@ -147,7 +115,7 @@ export default function LoginPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-700 font-medium">Email</Label>
+                <Label htmlFor="email" className="font-medium" style={{ color: '#4A4A4A' }}>Email</Label>
                 <Input
                   id="email"
                   name="email"
@@ -157,66 +125,15 @@ export default function LoginPage() {
                   onChange={handleInputChange}
                   required
                   disabled={isLoading}
-                  className="border-gray-200 focus:border-[#2BD4BD] focus:ring-[#2BD4BD]"
+                  className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]"
+                  style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="role" className="text-gray-700 font-medium">I am logging in as</Label>
-                <Select 
-                  value={formData.preferredRole} 
-                  onValueChange={handleRoleChange}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger className="border-gray-200 focus:border-[#2BD4BD] focus:ring-[#2BD4BD]">
-                    <SelectValue placeholder="Select your role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="patient">
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        <div>
-                          <div className="font-medium">Patient</div>
-                          <div className="text-xs text-gray-500">
-                            Seeking support and mental health resources
-                          </div>
-                        </div>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="peer">
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4" />
-                        <div>
-                          <div className="font-medium">Peer Supporter</div>
-                          <div className="text-xs text-gray-500">
-                            Providing peer support to others
-                          </div>
-                        </div>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="counselor">
-                      <div className="flex items-center gap-2">
-                        <Stethoscope className="h-4 w-4" />
-                        <div>
-                          <div className="font-medium">Counselor</div>
-                          <div className="text-xs text-gray-500">
-                            Professional mental health counselor
-                          </div>
-                        </div>
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                {formData.preferredRole && (
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    {getRoleIcon(formData.preferredRole)}
-                    <span>{getRoleDescription(formData.preferredRole)}</span>
-                  </div>
-                )}
-              </div>
+
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
+                <Label htmlFor="password" className="font-medium" style={{ color: '#4A4A4A' }}>Password</Label>
                 <div className="relative">
                   <Input
                     id="password"
@@ -227,7 +144,8 @@ export default function LoginPage() {
                     onChange={handleInputChange}
                     required
                     disabled={isLoading}
-                    className="border-gray-200 focus:border-[#2BD4BD] focus:ring-[#2BD4BD] pr-10"
+                    className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B] pr-10"
+                    style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                   />
                   <Button
                     type="button"
@@ -238,9 +156,9 @@ export default function LoginPage() {
                     disabled={isLoading}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-gray-400" />
+                      <EyeOff className="h-4 w-4" style={{ color: '#8A8A8A' }} />
                     ) : (
-                      <Eye className="h-4 w-4 text-gray-400" />
+                      <Eye className="h-4 w-4" style={{ color: '#8A8A8A' }} />
                     )}
                   </Button>
                 </div>
@@ -253,10 +171,11 @@ export default function LoginPage() {
                   type="checkbox"
                   checked={formData.rememberMe}
                   onChange={handleInputChange}
-                  className="rounded border-gray-300 text-[#2BD4BD] focus:ring-[#2BD4BD]"
+                  className="rounded text-[#8FAE9B] focus:ring-[#8FAE9B]"
+                  style={{ borderColor: 'rgba(143,174,155,0.3)' }}
                   disabled={isLoading}
                 />
-                <Label htmlFor="rememberMe" className="text-sm text-gray-600">
+                <Label htmlFor="rememberMe" className="text-sm" style={{ color: '#6B6B6B' }}>
                   Remember me
                 </Label>
               </div>
@@ -265,7 +184,10 @@ export default function LoginPage() {
             <div className="space-y-4 mt-8">
               <button 
                 type="submit" 
-                className="w-full px-8 py-4 bg-[#2BD4BD] text-white text-lg font-semibold rounded-xl hover:bg-[#25C1AB] transition-all hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="w-full px-8 py-4 text-white text-lg font-semibold rounded-full transition-all duration-300 ease-out hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ backgroundColor: submitHovered ? '#D57A57' : '#E08E6D' }}
+                onMouseEnter={() => setSubmitHovered(true)}
+                onMouseLeave={() => setSubmitHovered(false)}
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -280,10 +202,10 @@ export default function LoginPage() {
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-gray-200" />
+                  <span className="w-full" style={{ borderTop: '1px solid rgba(143,174,155,0.15)' }} />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-gray-500">
+                  <span className="px-2" style={{ backgroundColor: '#FAF7F2', color: '#8A8A8A' }}>
                     Or continue with
                   </span>
                 </div>
@@ -291,7 +213,14 @@ export default function LoginPage() {
 
               <button 
                 type="button" 
-                className="w-full px-8 py-4 bg-gray-50 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-8 py-4 font-semibold rounded-full transition-all duration-300 ease-out disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: anonHovered ? 'rgba(143,174,155,0.14)' : 'rgba(143,174,155,0.08)',
+                  border: '2px solid rgba(143,174,155,0.2)',
+                  color: '#4A4A4A'
+                }}
+                onMouseEnter={() => setAnonHovered(true)}
+                onMouseLeave={() => setAnonHovered(false)}
                 onClick={handleAnonymousLogin}
                 disabled={isLoading}
               >
@@ -305,24 +234,16 @@ export default function LoginPage() {
                 )}
               </button>
 
-              <div className="text-center text-sm text-gray-600">
+              <div className="text-center text-sm" style={{ color: '#6B6B6B' }}>
                 Don't have an account?{' '}
                 <Link 
                   to="/register" 
-                  className="text-[#2BD4BD] hover:text-[#25C1AB] hover:underline font-medium"
+                  className="text-[#8FAE9B] hover:text-[#7A9B89] hover:underline font-medium"
                 >
                   Sign up
                 </Link>
               </div>
 
-              <div className="text-center text-xs text-gray-500">
-                <Link 
-                  to="/forgot-password" 
-                  className="hover:text-gray-700 hover:underline"
-                >
-                  Forgot your password?
-                </Link>
-              </div>
             </div>
           </form>
         </div>
