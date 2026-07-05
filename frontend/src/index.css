@@ -2,59 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Calmify Mental Health Platform - Clean Minimal Design System */
+/* Calmify Mental Health Platform — Calm & Trustworthy Design System */
 
 @layer base {
   :root {
-    /* Clean white background */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 15%;
+    /* Warm cream background (#FAF7F2) — H:37 S:47% L:96% */
+    --background: 37 47% 96%;
+    /* Warm dark gray text (#4A4A4A) — H:0 S:0% L:29% */
+    --foreground: 0 0% 29%;
 
-    /* Card styles */
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 15%;
+    /* Card — slightly lighter cream on cream */
+    --card: 40 33% 98%;
+    --card-foreground: 0 0% 29%;
 
-    /* Popover styles */
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 15%;
+    /* Popover */
+    --popover: 40 33% 98%;
+    --popover-foreground: 0 0% 29%;
 
-    /* Teal primary - calming mental health color */
-    --primary: 172 66% 50%;
+    /* Primary — soft sage green (#8FAE9B) — H:147 S:16% L:62% */
+    --primary: 147 16% 62%;
     --primary-foreground: 0 0% 100%;
 
-    /* Light gray secondary */
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 15%;
+    /* Secondary — dusty/muted blue (#7A9BB0) — H:204 S:24% L:58% */
+    --secondary: 204 24% 58%;
+    --secondary-foreground: 0 0% 100%;
 
-    /* Muted backgrounds */
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    /* Muted backgrounds — warm light beige */
+    --muted: 37 25% 92%;
+    --muted-foreground: 0 0% 42%;
 
-    /* Accent matches primary */
-    --accent: 172 66% 50%;
+    /* Accent — soft coral (#E08E6D) — H:18 S:65% L:65% */
+    --accent: 18 65% 65%;
     --accent-foreground: 0 0% 100%;
 
-    /* Emergency red */
+    /* Emergency red — kept for crisis buttons */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Minimal borders */
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 172 66% 50%;
+    /* Borders — warm tone */
+    --border: 37 18% 88%;
+    --input: 37 18% 88%;
+    --ring: 147 16% 62%;
 
-    /* Rounded corners */
-    --radius: 0.5rem;
+    /* Rounded corners — larger for calm feel */
+    --radius: 0.75rem;
 
-    /* Clean sidebar - better contrast */
-    --sidebar-background: 0 0% 96%;
-    --sidebar-foreground: 0 0% 10%;
-    --sidebar-primary: 172 66% 50%;
+    /* Sidebar — warm neutral */
+    --sidebar-background: 37 20% 94%;
+    --sidebar-foreground: 0 0% 22%;
+    --sidebar-primary: 147 16% 62%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 88%;
-    --sidebar-accent-foreground: 0 0% 5%;
-    --sidebar-border: 0 0% 85%;
-    --sidebar-ring: 172 66% 50%;
+    --sidebar-accent: 37 18% 88%;
+    --sidebar-accent-foreground: 0 0% 18%;
+    --sidebar-border: 37 15% 85%;
+    --sidebar-ring: 147 16% 62%;
   }
 }
 
@@ -63,27 +64,29 @@
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+    line-height: 1.3;
   }
 }
 
-/* Additional minimal styling */
+/* Sidebar text utilities */
 .text-sidebar {
   color: hsl(var(--sidebar-foreground));
 }
 
 .text-sidebar-muted {
   color: hsl(var(--muted-foreground));
-}
-
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-  }
 }
