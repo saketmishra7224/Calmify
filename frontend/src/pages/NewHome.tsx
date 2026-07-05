@@ -1,7 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import { Shield, Users, MessageCircle, Brain, Heart, ArrowRight, Clock, Lock, Phone, Star } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Shield, Users, MessageCircle, Brain, Heart, ArrowRight, Clock, Lock, Phone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+
+/* ──────────────────────────────────────────────────────────────
+   Intersection-observer hook for gentle scroll-triggered fades
+   ────────────────────────────────────────────────────────────── */
+function useFadeInOnScroll() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
+      { threshold: 0.15 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, isVisible };
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Design tokens used inline (Tailwind arbitrary values)
+   ────────────────────────────────────────────────────────────── */
+const sage   = '#8FAE9B';
+const dusty  = '#7A9BB0';
+const cream  = '#FAF7F2';
+const warmGray = '#4A4A4A';
+const coral   = '#E08E6D';
+const coralHover = '#D57A57';
 
 export default function NewHome() {
   const navigate = useNavigate();
@@ -15,6 +46,11 @@ export default function NewHome() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Scroll-triggered sections
+  const features_fade = useFadeInOnScroll();
+  const howItWorks_fade = useFadeInOnScroll();
+  const trust_fade = useFadeInOnScroll();
 
   const features = [
     {
@@ -47,34 +83,64 @@ export default function NewHome() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className={`fixed w-full z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white/95 backdrop-blur-md shadow-sm' : 'bg-white/90 backdrop-blur-md'
-      }`}>
+    <div className="min-h-screen" style={{ backgroundColor: cream, color: warmGray }}>
+
+      {/* ───────── Navigation ───────── */}
+      <nav
+        className={`fixed w-full z-50 transition-all duration-500 ease-out ${
+          isScrolled
+            ? 'shadow-md backdrop-blur-xl'
+            : 'backdrop-blur-md'
+        }`}
+        style={{
+          backgroundColor: isScrolled ? 'rgba(250,247,242,0.92)' : 'rgba(250,247,242,0.8)',
+          borderBottom: isScrolled ? '1px solid rgba(143,174,155,0.15)' : '1px solid transparent',
+        }}
+      >
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
+            {/* Logo */}
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-[#2BD4BD] rounded-lg flex items-center justify-center shadow-lg">
-                <Heart className="w-6 h-6 text-white" />
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
+                style={{ backgroundColor: sage }}
+              >
+                <Heart className="w-5 h-5 text-white" strokeWidth={2.5} />
               </div>
-              <span className="text-xl font-bold text-gray-900">Calmify</span>
+              <span className="text-xl font-heading font-bold" style={{ color: '#3A3A3A' }}>
+                Calmify
+              </span>
             </div>
+
+            {/* Nav links */}
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Features</a>
-              <a href="#how-it-works" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">How it Works</a>
-              <a href="#support" className="text-gray-600 hover:text-gray-900 transition-colors font-medium">Support</a>
+              {['Features', 'How it Works', 'Support'].map((item) => (
+                <a
+                  key={item}
+                  href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
+                  className="text-sm font-medium transition-colors duration-300 hover:opacity-100"
+                  style={{ color: warmGray, opacity: 0.7 }}
+                >
+                  {item}
+                </a>
+              ))}
             </div>
-            <div className="flex items-center space-x-4">
-              <button 
+
+            {/* Auth buttons */}
+            <div className="flex items-center space-x-3">
+              <button
                 onClick={() => navigate('/login')}
-                className="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors font-medium"
+                className="px-5 py-2 text-sm font-medium transition-colors duration-300 rounded-full"
+                style={{ color: warmGray }}
               >
                 Sign In
               </button>
-              <button 
+              <button
                 onClick={() => navigate('/register')}
-                className="px-6 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-all hover:shadow-lg"
+                className="px-6 py-2.5 text-sm font-semibold text-white rounded-full transition-all duration-300 hover:shadow-lg active:scale-[0.97]"
+                style={{ backgroundColor: coral }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = coralHover}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = coral}
               >
                 Get Started
               </button>
@@ -83,211 +149,318 @@ export default function NewHome() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="pt-28 pb-20 px-6 bg-gradient-to-b from-white to-gray-50">
-        <div className="max-w-7xl mx-auto text-center">
+      {/* ───────── Hero Section ───────── */}
+      <section className="min-h-screen px-6 relative overflow-hidden flex flex-col justify-center">
+        {/* Soft organic background blobs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+          <div
+            className="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full opacity-[0.12] animate-gentle-float"
+            style={{ backgroundColor: sage }}
+          />
+          <div
+            className="absolute -bottom-24 -left-24 w-[400px] h-[400px] rounded-full opacity-[0.08]"
+            style={{ backgroundColor: dusty, animationDelay: '3s' }}
+          />
+          <div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.06]"
+            style={{ backgroundColor: coral }}
+          />
+        </div>
+
+        <div className="max-w-7xl mx-auto text-center relative z-10 w-full pt-28 pb-12 flex-1 flex flex-col justify-center">
           <div className="max-w-4xl mx-auto">
-            <div className="inline-flex items-center space-x-2 bg-gray-100 px-4 py-2 rounded-full text-sm text-gray-600 mb-8">
-              <Star className="w-4 h-4 text-yellow-500" />
-              <span>Trusted mental health support platform</span>
-            </div>
-            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-8 leading-tight">
+            {/* Headline */}
+            <h1
+              className="text-5xl md:text-7xl font-heading font-extrabold mb-8 leading-[1.1] animate-fade-in-up"
+              style={{ color: '#3A3A3A', animationDelay: '0.15s' }}
+            >
               Your Mental Health,
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2BD4BD] to-[#2BD4BD]">
-                {' '}Supported
-              </span>
+              <span style={{ color: sage }}> Supported</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-600 mb-12 leading-relaxed max-w-3xl mx-auto">
-              Anonymous, professional, and accessible mental health support available 24/7. 
+
+            {/* Subheadline */}
+            <p
+              className="text-lg md:text-xl mb-14 leading-relaxed max-w-3xl mx-auto animate-fade-in-up"
+              style={{ color: '#6B6B6B', animationDelay: '0.3s', lineHeight: '1.8' }}
+            >
+              Anonymous, professional, and accessible mental health support available 24/7.
               Connect with AI, peers, and licensed counselors in a safe, confidential environment.
             </p>
-            <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
-              <button 
+
+            {/* CTA Buttons */}
+            <div
+              className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-5 animate-fade-in-up"
+              style={{ animationDelay: '0.45s' }}
+            >
+              <button
                 onClick={() => navigate('/register')}
-                className="px-8 py-4 bg-[#2BD4BD] text-white text-lg font-semibold rounded-xl hover:bg-[#25C1AB] transition-all hover:shadow-lg transform hover:scale-105 flex items-center space-x-2"
+                className="px-8 py-4 text-white text-base font-semibold rounded-full transition-all duration-300 hover:shadow-xl active:scale-[0.97] flex items-center space-x-2"
+                style={{ backgroundColor: coral }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = coralHover; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = coral; e.currentTarget.style.transform = 'translateY(0)'; }}
               >
                 <span>Start Your Journey</span>
                 <ArrowRight className="w-5 h-5" />
               </button>
-              <button 
+              <button
                 onClick={() => navigate('/crisis')}
-                className="px-8 py-4 bg-red-50 border-2 border-red-200 text-red-600 text-lg font-semibold rounded-xl hover:bg-red-100 transition-all flex items-center space-x-2"
+                className="px-8 py-4 text-base font-semibold rounded-full transition-all duration-300 flex items-center space-x-2"
+                style={{
+                  backgroundColor: 'rgba(220,78,65,0.06)',
+                  border: '2px solid rgba(220,78,65,0.2)',
+                  color: '#C0554A',
+                }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(220,78,65,0.1)'}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(220,78,65,0.06)'}
               >
                 <Phone className="w-5 h-5" />
                 <span>Crisis Support</span>
               </button>
             </div>
           </div>
-          
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20">
+
+          {/* Stats — anchored near the bottom of the viewport */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mt-auto pt-16">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center bg-white rounded-2xl border border-gray-200 py-8 px-6 hover:shadow-lg transition-all">
-                <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{stat.number}</div>
-                <div className="text-gray-500 text-sm uppercase tracking-wider">{stat.label}</div>
+              <div
+                key={index}
+                className="text-center rounded-2xl py-8 px-6 transition-all duration-500 hover:shadow-lg hover:-translate-y-1 animate-fade-in-up"
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.7)',
+                  border: '1px solid rgba(143,174,155,0.15)',
+                  backdropFilter: 'blur(10px)',
+                  animationDelay: `${0.6 + index * 0.1}s`,
+                }}
+              >
+                <div className="text-3xl md:text-4xl font-heading font-extrabold mb-2" style={{ color: sage }}>
+                  {stat.number}
+                </div>
+                <div className="text-xs uppercase tracking-widest font-medium" style={{ color: '#8A8A8A' }}>
+                  {stat.label}
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center space-x-2 bg-gray-100 px-4 py-2 rounded-full text-sm text-gray-600 mb-6">
-              <span>✨ Comprehensive Support</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+      {/* ───────── Features Section ───────── */}
+      <section id="features" className="py-24 px-6" ref={features_fade.ref}>
+        <div
+          className={`max-w-7xl mx-auto transition-all duration-1000 ease-out ${
+            features_fade.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
+          {/* Section header */}
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-heading font-extrabold mb-6" style={{ color: '#3A3A3A' }}>
               Everything You Need for Mental Wellness
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Our platform combines cutting-edge AI technology with human expertise to provide 
+            <p className="text-lg max-w-3xl mx-auto" style={{ color: '#6B6B6B', lineHeight: '1.8' }}>
+              Our platform combines cutting-edge AI technology with human expertise to provide
               personalized, confidential mental health support tailored to your needs.
             </p>
           </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+
+          {/* Feature cards */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-7">
             {features.map((feature, index) => (
-              <div key={index} className="bg-white rounded-3xl border border-gray-200 p-8 hover:shadow-xl hover:border-blue-300 transition-all group hover:-translate-y-1">
-                <div className="w-16 h-16 bg-[#2BD4BD] rounded-2xl flex items-center justify-center mb-6 group-hover:shadow-lg transition-all">
-                  <feature.icon className="w-8 h-8 text-white" />
+              <div
+                key={index}
+                className="rounded-3xl p-8 transition-all duration-500 hover:shadow-xl hover:-translate-y-2 group"
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.75)',
+                  border: '1px solid rgba(143,174,155,0.12)',
+                  backdropFilter: 'blur(10px)',
+                }}
+              >
+                {/* Icon container */}
+                <div
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-all duration-500 group-hover:shadow-md"
+                  style={{ backgroundColor: `${sage}20` }}
+                >
+                  <feature.icon className="w-7 h-7" style={{ color: sage }} strokeWidth={1.5} />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">{feature.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                <h3 className="text-lg font-heading font-bold mb-3" style={{ color: '#3A3A3A' }}>
+                  {feature.title}
+                </h3>
+                <p className="text-sm leading-relaxed" style={{ color: '#6B6B6B', lineHeight: '1.7' }}>
+                  {feature.description}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section id="how-it-works" className="py-20 px-6 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center space-x-2 bg-gray-100 px-4 py-2 rounded-full text-sm text-gray-600 mb-6">
-              <span>🚀 Simple Process</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+      {/* ───────── How It Works Section ───────── */}
+      <section
+        id="how-it-works"
+        className="py-24 px-6"
+        style={{ backgroundColor: 'rgba(255,255,255,0.5)' }}
+        ref={howItWorks_fade.ref}
+      >
+        <div
+          className={`max-w-7xl mx-auto transition-all duration-1000 ease-out ${
+            howItWorks_fade.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-heading font-extrabold mb-6" style={{ color: '#3A3A3A' }}>
               Getting Support is Simple
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Our platform guides you to the right level of support based on your needs, 
+            <p className="text-lg max-w-3xl mx-auto" style={{ color: '#6B6B6B', lineHeight: '1.8' }}>
+              Our platform guides you to the right level of support based on your needs,
               whether you need immediate AI assistance, peer support, or professional counseling.
             </p>
           </div>
-          
-          <div className="grid md:grid-cols-3 gap-12">
-            <div className="text-center group">
-              <div className="relative">
-                <div className="w-24 h-24 bg-[#2BD4BD] rounded-3xl flex items-center justify-center mx-auto mb-6 text-2xl font-bold text-white group-hover:shadow-xl transition-all">
-                  1
+
+          {/* Steps */}
+          <div className="grid md:grid-cols-3 gap-10 max-w-5xl mx-auto">
+            {[
+              {
+                num: '1',
+                title: 'Start Anonymously',
+                desc: 'Begin with our AI chatbot that provides immediate support and assesses your needs while maintaining complete privacy.',
+              },
+              {
+                num: '2',
+                title: 'Get Connected',
+                desc: 'Connect with peer volunteers for empathetic support or licensed counselors for professional therapy and crisis intervention.',
+              },
+              {
+                num: '3',
+                title: 'Continue Your Journey',
+                desc: 'Access ongoing support, meditation resources, assessments, and crisis intervention whenever you need it.',
+              },
+            ].map((step, index) => (
+              <div key={index} className="text-center group">
+                <div className="relative mb-8">
+                  <div
+                    className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto text-2xl font-heading font-extrabold text-white transition-all duration-500 group-hover:shadow-lg group-hover:-translate-y-1"
+                    style={{ backgroundColor: sage }}
+                  >
+                    {step.num}
+                  </div>
+                  {/* Connecting line */}
+                  {index < 2 && (
+                    <div
+                      className="hidden md:block absolute top-10 left-[calc(50%+48px)] h-[2px]"
+                      style={{
+                        width: 'calc(100% - 48px)',
+                        background: `linear-gradient(to right, ${sage}40, ${sage}10)`,
+                      }}
+                    />
+                  )}
                 </div>
-                {/* Connecting line */}
-                <div className="hidden md:block absolute top-12 left-full w-full h-0.5 bg-gray-200 -z-10"></div>
+                <h3 className="text-xl font-heading font-bold mb-4" style={{ color: '#3A3A3A' }}>
+                  {step.title}
+                </h3>
+                <p className="text-sm leading-relaxed" style={{ color: '#6B6B6B', lineHeight: '1.7' }}>
+                  {step.desc}
+                </p>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Start Anonymously</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Begin with our AI chatbot that provides immediate support and assesses your needs while maintaining complete privacy.
-              </p>
-            </div>
-            
-            <div className="text-center group">
-              <div className="relative">
-                <div className="w-24 h-24 bg-[#2BD4BD] rounded-3xl flex items-center justify-center mx-auto mb-6 text-2xl font-bold text-white group-hover:shadow-xl transition-all">
-                  2
-                </div>
-                <div className="hidden md:block absolute top-12 left-full w-full h-0.5 bg-gray-200 -z-10"></div>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Get Connected</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Connect with peer volunteers for empathetic support or licensed counselors for professional therapy and crisis intervention.
-              </p>
-            </div>
-            
-            <div className="text-center group">
-              <div className="w-24 h-24 bg-[#2BD4BD] rounded-3xl flex items-center justify-center mx-auto mb-6 text-2xl font-bold text-white group-hover:shadow-xl transition-all">
-                3
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Continue Your Journey</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Access ongoing support, meditation resources, assessments, and crisis intervention whenever you need it.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Trust Section */}
-      <section className="py-20 px-6 bg-[#2BD4BD]">
-        <div className="max-w-7xl mx-auto">
+      {/* ───────── Trust / CTA Section ───────── */}
+      <section
+        className="py-24 px-6 relative overflow-hidden"
+        style={{ backgroundColor: sage }}
+        ref={trust_fade.ref}
+      >
+        {/* Subtle organic shapes */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <div
+            className="absolute -top-20 -right-20 w-[350px] h-[350px] rounded-full"
+            style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}
+          />
+          <div
+            className="absolute -bottom-16 -left-16 w-[280px] h-[280px] rounded-full"
+            style={{ backgroundColor: 'rgba(255,255,255,0.04)' }}
+          />
+        </div>
+
+        <div
+          className={`max-w-7xl mx-auto relative z-10 transition-all duration-1000 ease-out ${
+            trust_fade.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
           <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left column — trust points */}
             <div>
-              <div className="inline-flex items-center space-x-2 bg-white/20 px-4 py-2 rounded-full text-sm text-white mb-6">
-                <Lock className="w-4 h-4" />
-                <span>Military-grade encryption</span>
-              </div>
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">
+              <h2 className="text-4xl md:text-5xl font-heading font-extrabold text-white mb-8 leading-tight">
                 Your Privacy is Our Promise
               </h2>
-              <p className="text-xl text-white mb-8 leading-relaxed">
-                Join thousands who have found support, guidance, and healing through our platform. 
+              <p className="text-lg text-white/85 mb-10" style={{ lineHeight: '1.8' }}>
+                Join thousands who have found support, guidance, and healing through our platform.
                 Your mental health and privacy are our top priorities.
               </p>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3 text-white">
-                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center flex-shrink-0">
-                    <div className="w-2 h-2 bg-[#2BD4BD] rounded-full"></div>
+              <div className="space-y-5">
+                {[
+                  'End-to-end encrypted conversations',
+                  'HIPAA compliant security standards',
+                  'Anonymous sessions available',
+                  'Crisis detection and intervention',
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center space-x-3 text-white/90">
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 bg-white/20">
+                      <div className="w-2 h-2 bg-white rounded-full" />
+                    </div>
+                    <span className="text-sm font-medium">{item}</span>
                   </div>
-                  <span>End-to-end encrypted conversations</span>
-                </div>
-                <div className="flex items-center space-x-3 text-white">
-                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center flex-shrink-0">
-                    <div className="w-2 h-2 bg-[#2BD4BD] rounded-full"></div>
-                  </div>
-                  <span>HIPAA compliant security standards</span>
-                </div>
-                <div className="flex items-center space-x-3 text-white">
-                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center flex-shrink-0">
-                    <div className="w-2 h-2 bg-[#2BD4BD] rounded-full"></div>
-                  </div>
-                  <span>Anonymous sessions available</span>
-                </div>
-                <div className="flex items-center space-x-3 text-white">
-                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center flex-shrink-0">
-                    <div className="w-2 h-2 bg-[#2BD4BD] rounded-full"></div>
-                  </div>
-                  <span>Crisis detection and intervention</span>
-                </div>
+                ))}
               </div>
             </div>
-            <div className="bg-white rounded-3xl p-10 shadow-2xl">
+
+            {/* Right column — CTA card */}
+            <div
+              className="rounded-3xl p-10 shadow-2xl"
+              style={{ backgroundColor: cream }}
+            >
               <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-[#2BD4BD] rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Heart className="w-8 h-8 text-white" />
+                <div
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
+                  style={{ backgroundColor: `${sage}20` }}
+                >
+                  <Heart className="w-8 h-8" style={{ color: sage }} strokeWidth={1.5} />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Ready to Begin?</h3>
-                <p className="text-gray-600">
+                <h3 className="text-2xl font-heading font-bold mb-2" style={{ color: '#3A3A3A' }}>
+                  Ready to Begin?
+                </h3>
+                <p className="text-sm" style={{ color: '#6B6B6B' }}>
                   Take the first step towards better mental health today.
                 </p>
               </div>
-              
+
               <div className="space-y-4">
-                <button 
+                <button
                   onClick={() => navigate('/register')}
-                  className="w-full px-8 py-4 bg-[#2BD4BD] text-white text-lg font-semibold rounded-xl hover:bg-[#25C1AB] transition-all hover:shadow-lg"
+                  className="w-full px-8 py-4 text-white text-base font-semibold rounded-full transition-all duration-300 hover:shadow-lg active:scale-[0.98]"
+                  style={{ backgroundColor: coral }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = coralHover}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = coral}
                 >
                   Start Free Assessment
                 </button>
-                <button 
+                <button
                   onClick={() => navigate('/crisis')}
-                  className="w-full px-8 py-4 bg-red-50 border-2 border-red-200 text-red-600 font-semibold rounded-xl hover:bg-red-100 transition-all"
+                  className="w-full px-8 py-4 font-semibold rounded-full transition-all duration-300 active:scale-[0.98]"
+                  style={{
+                    backgroundColor: 'rgba(220,78,65,0.06)',
+                    border: '2px solid rgba(220,78,65,0.2)',
+                    color: '#C0554A',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(220,78,65,0.1)'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(220,78,65,0.06)'}
                 >
                   Emergency Support
                 </button>
               </div>
-              
-              <p className="text-sm text-gray-500 mt-6 text-center">
+
+              <p className="text-xs mt-6 text-center" style={{ color: '#8A8A8A' }}>
                 ✨ Completely free • 🔒 100% confidential • ⚡ Available 24/7
               </p>
             </div>
@@ -295,60 +468,80 @@ export default function NewHome() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-16 px-6 bg-gray-50 border-t border-gray-200">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-5 gap-8 mb-12">
-            <div className="md:col-span-2">
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="w-10 h-10 bg-[#2BD4BD] rounded-lg flex items-center justify-center">
-                  <Heart className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-xl font-bold text-gray-900">Calmify</span>
+      {/* ───────── Footer ───────── */}
+      <footer
+        className="pt-20 pb-10 px-6"
+        style={{ backgroundColor: cream, borderTop: `1px solid rgba(143,174,155,0.12)` }}
+      >
+        <div className="max-w-5xl mx-auto">
+          {/* Brand + tagline — centered, breathing room */}
+          <div className="text-center mb-16">
+            <div className="flex items-center justify-center space-x-3 mb-4">
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center"
+                style={{ backgroundColor: sage }}
+              >
+                <Heart className="w-4 h-4 text-white" strokeWidth={2.5} />
               </div>
-              <p className="text-gray-600 mb-6 leading-relaxed">
-                Professional mental health support for everyone. 
-                Your wellbeing matters, and we're here to help every step of the way.
-              </p>
-              <div className="flex items-center space-x-2 text-gray-500 text-sm">
-                <Clock className="w-4 h-4" />
-                <span>24/7 Crisis Support Available</span>
-              </div>
+              <span className="text-lg font-heading font-bold" style={{ color: '#3A3A3A' }}>
+                Calmify
+              </span>
             </div>
-            <div>
-              <h4 className="text-gray-900 font-semibold mb-4">Platform</h4>
-              <ul className="space-y-3 text-gray-600">
-                <li><a href="#" className="hover:text-gray-900 transition-colors">AI Chatbot</a></li>
-                <li><a href="#" className="hover:text-gray-900 transition-colors">Peer Support</a></li>
-                <li><a href="#" className="hover:text-gray-900 transition-colors">Counselling</a></li>
-                <li><a href="#" className="hover:text-gray-900 transition-colors">Crisis Support</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-gray-900 font-semibold mb-4">Resources</h4>
-              <ul className="space-y-3 text-gray-600">
-                <li><a href="#" className="hover:text-gray-900 transition-colors">Meditation Zone</a></li>
-                <li><a href="#" className="hover:text-gray-900 transition-colors">Self-Help Guides</a></li>
-                <li><a href="#" className="hover:text-gray-900 transition-colors">Mental Health Articles</a></li>
-                <li><a href="#" className="hover:text-gray-900 transition-colors">FAQ</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-gray-900 font-semibold mb-4">Support</h4>
-              <ul className="space-y-3 text-gray-600">
-                <li><a href="#" className="hover:text-gray-900 transition-colors">Contact Us</a></li>
-                <li><a href="#" className="hover:text-gray-900 transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-gray-900 transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-gray-900 transition-colors">Accessibility</a></li>
-              </ul>
-            </div>
+            <p className="text-sm max-w-md mx-auto" style={{ color: '#8A8A8A', lineHeight: '1.7' }}>
+              Professional mental health support for everyone.
+              Your wellbeing matters.
+            </p>
           </div>
-          <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-gray-200">
-            <div className="text-gray-500 text-sm mb-4 md:mb-0">
-              © 2025 Calmify. Dedicated to mental health and wellbeing for everyone.
-            </div>
-            <div className="flex items-center space-x-2 text-gray-500 text-sm">
-              <Shield className="w-4 h-4" />
+
+          {/* Link groups — horizontal, spacious */}
+          <div className="flex flex-wrap justify-center gap-x-12 gap-y-8 mb-16">
+            {[
+              {
+                title: 'Platform',
+                links: ['AI Chatbot', 'Peer Support', 'Counselling', 'Crisis Support'],
+              },
+              {
+                title: 'Resources',
+                links: ['Meditation Zone', 'Self-Help Guides', 'Articles', 'FAQ'],
+              },
+              {
+                title: 'Support',
+                links: ['Contact Us', 'Privacy Policy', 'Terms', 'Accessibility'],
+              },
+            ].map((col) => (
+              <div key={col.title} className="min-w-[140px]">
+                <h4 className="text-xs font-heading font-bold uppercase tracking-wider mb-4" style={{ color: '#3A3A3A' }}>
+                  {col.title}
+                </h4>
+                <ul className="space-y-2.5">
+                  {col.links.map((link) => (
+                    <li key={link}>
+                      <a
+                        href="#"
+                        className="text-sm transition-colors duration-300"
+                        style={{ color: '#8A8A8A' }}
+                        onMouseEnter={e => e.currentTarget.style.color = sage}
+                        onMouseLeave={e => e.currentTarget.style.color = '#8A8A8A'}
+                      >
+                        {link}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          {/* Bottom strip — minimal */}
+          <div
+            className="flex flex-col sm:flex-row justify-between items-center pt-6 gap-3"
+            style={{ borderTop: '1px solid rgba(143,174,155,0.1)' }}
+          >
+            <span className="text-xs" style={{ color: '#ACACAC' }}>
+              © 2025 Calmify
+            </span>
+            <div className="flex items-center space-x-1.5 text-xs" style={{ color: '#ACACAC' }}>
+              <Lock className="w-3 h-3" strokeWidth={1.5} />
               <span>Your data is protected and never shared</span>
             </div>
           </div>
