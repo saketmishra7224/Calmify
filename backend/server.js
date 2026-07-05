@@ -85,8 +85,10 @@ const limiter = rateLimit({
     error: 'Too many requests from this IP, please try again later.'
   },
   skip: (req) => {
-    // Skip rate limiting for auth routes
-    return req.path.startsWith('/api/auth');
+    // Skip rate limiting for auth routes (login, register, anonymous)
+    return req.path.startsWith('/api/auth') || 
+           (req.originalUrl && req.originalUrl.startsWith('/api/auth')) || 
+           (req.url && req.url.includes('/api/auth'));
   }
 });
 
