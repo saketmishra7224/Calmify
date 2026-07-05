@@ -472,12 +472,7 @@ export default function NewHome() {
           {/* Brand + tagline — centered, breathing room */}
           <div className="text-center mb-16">
             <div className="flex items-center justify-center space-x-3 mb-4">
-              <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: sage }}
-              >
-                <Heart className="w-4 h-4 text-white" strokeWidth={2.5} />
-              </div>
+              <img src="/calmifylogo.png" alt="Calmify Logo" className="h-8 w-auto object-contain" />
               <span className="text-lg font-heading font-bold" style={{ color: '#3A3A3A' }}>
                 Calmify
               </span>
