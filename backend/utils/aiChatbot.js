@@ -1,32 +1,28 @@
 const { PHQ9_QUESTIONS, GAD7_QUESTIONS, calculatePHQ9Score, calculateGAD7Score } = require('./crisisDetection');
 const OpenAI = require('openai');
 
-// Initialize Azure OpenAI client
-const initializeAzureOpenAI = () => {
+// Initialize Groq client (OpenAI compatible)
+const initializeGroq = () => {
   try {
-    if (!process.env.AZURE_OPENAI_API_KEY || !process.env.AZURE_OPENAI_ENDPOINT || !process.env.AZURE_OPENAI_DEPLOYMENT_NAME) {
-      console.log('Azure OpenAI credentials not found, using fallback responses');
+    if (!process.env.GROQ_API_KEY) {
+      console.log('Groq API credentials not found, using fallback responses');
       return null;
     }
 
     const client = new OpenAI({
-      apiKey: process.env.AZURE_OPENAI_API_KEY,
-      baseURL: `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/${process.env.AZURE_OPENAI_DEPLOYMENT_NAME}`,
-      defaultQuery: { 'api-version': process.env.AZURE_OPENAI_API_VERSION || '2024-02-15-preview' },
-      defaultHeaders: {
-        'api-key': process.env.AZURE_OPENAI_API_KEY,
-      }
+      apiKey: process.env.GROQ_API_KEY,
+      baseURL: 'https://api.groq.com/openai/v1'
     });
 
-    console.log('✅ Azure OpenAI client initialized successfully');
+    console.log('✅ Groq AI client initialized successfully');
     return client;
   } catch (error) {
-    console.error('Failed to initialize Azure OpenAI client:', error.message);
+    console.error('Failed to initialize Groq client:', error.message);
     return null;
   }
 };
 
-const azureOpenAIClient = initializeAzureOpenAI();
+const groqClient = initializeGroq();
 
 /**
  * AI Chatbot System for Mental Health Support
@@ -353,8 +349,8 @@ class AIChatbot {
    * Generate AI-enhanced response using Azure OpenAI
    */
   async generateAIEnhancedResponse(intent, conversation, messageText) {
-    if (!azureOpenAIClient) {
-      // Fallback to rule-based response if Azure OpenAI is not available
+    if (!groqClient) {
+      // Fallback to rule-based response if Groq is not available
       return this.generateResponse(intent, conversation, messageText);
     }
 
@@ -397,14 +393,12 @@ class AIChatbot {
         }
       }
 
-      const response = await azureOpenAIClient.chat.completions.create({
-        model: process.env.AZURE_OPENAI_DEPLOYMENT_NAME,
+      const response = await groqClient.chat.completions.create({
+        model: process.env.GROQ_MODEL || 'llama-3.1-8b-instant',
         messages: messages,
         max_tokens: 300,
         temperature: 0.7,
-        top_p: 0.9,
-        frequency_penalty: 0.5,
-        presence_penalty: 0.5
+        top_p: 0.9
       });
 
       const aiResponse = response.choices[0]?.message?.content;
@@ -975,10 +969,10 @@ const INTENT_PATTERNS = {
   professional: /\b(therapist|counselor|professional|therapy|treatment|medication)\b/i
 };
 
-// Simple Azure OpenAI chat function for direct use
+// Simple Groq AI chat function for direct use
 const generateAzureOpenAIResponse = async (userMessage, context = {}) => {
-  if (!azureOpenAIClient) {
-    throw new Error('Azure OpenAI client not initialized');
+  if (!groqClient) {
+    throw new Error('Groq client not initialized');
   }
 
   try {
@@ -1001,8 +995,8 @@ const generateAzureOpenAIResponse = async (userMessage, context = {}) => {
       }
     ];
 
-    const response = await azureOpenAIClient.chat.completions.create({
-      model: process.env.AZURE_OPENAI_DEPLOYMENT_NAME,
+    const response = await groqClient.chat.completions.create({
+      model: process.env.GROQ_MODEL || 'llama-3.1-8b-instant',
       messages: messages,
       max_tokens: 200,
       temperature: 0.7,
@@ -1012,7 +1006,7 @@ const generateAzureOpenAIResponse = async (userMessage, context = {}) => {
     const aiResponse = response.choices[0]?.message?.content;
     
     if (!aiResponse) {
-      throw new Error('No response from Azure OpenAI');
+      throw new Error('No response from Groq');
     }
 
     return {

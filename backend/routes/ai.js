@@ -6,32 +6,28 @@ const OpenAI = require('openai');
 
 const router = express.Router();
 
-// Initialize Azure OpenAI client
-const initializeAzureOpenAI = () => {
+// Initialize Groq AI client (OpenAI compatible)
+const initializeGroq = () => {
   try {
-    if (!process.env.AZURE_OPENAI_API_KEY || !process.env.AZURE_OPENAI_ENDPOINT || !process.env.AZURE_OPENAI_DEPLOYMENT_NAME) {
-      console.log('Azure OpenAI credentials not found, using fallback responses');
+    if (!process.env.GROQ_API_KEY) {
+      console.log('Groq API Key not found, using fallback responses');
       return null;
     }
 
     const client = new OpenAI({
-      apiKey: process.env.AZURE_OPENAI_API_KEY,
-      baseURL: `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/${process.env.AZURE_OPENAI_DEPLOYMENT_NAME}`,
-      defaultQuery: { 'api-version': process.env.AZURE_OPENAI_API_VERSION || '2024-02-15-preview' },
-      defaultHeaders: {
-        'api-key': process.env.AZURE_OPENAI_API_KEY,
-      }
+      apiKey: process.env.GROQ_API_KEY,
+      baseURL: 'https://api.groq.com/openai/v1'
     });
 
-    console.log('✅ Azure OpenAI client initialized for chatbot');
+    console.log('✅ Groq AI client initialized for chatbot');
     return client;
   } catch (error) {
-    console.error('Failed to initialize Azure OpenAI client:', error.message);
+    console.error('Failed to initialize Groq AI client:', error.message);
     return null;
   }
 };
 
-const azureOpenAIClient = initializeAzureOpenAI();
+const groqClient = initializeGroq();
 
 // Database storage for conversations (replacing in-memory storage)
 
@@ -149,8 +145,8 @@ router.post('/chat',
       let responseText;
       let isAIGenerated = false;
 
-      // Try Azure OpenAI first
-      if (azureOpenAIClient) {
+      // Try Groq AI first
+      if (groqClient) {
         try {
           // Build messages for OpenAI
           const messages = [
@@ -169,21 +165,19 @@ router.post('/chat',
             });
           }
 
-          const response = await azureOpenAIClient.chat.completions.create({
-            model: process.env.AZURE_OPENAI_DEPLOYMENT_NAME,
+          const response = await groqClient.chat.completions.create({
+            model: process.env.GROQ_MODEL || 'llama-3.1-8b-instant',
             messages: messages,
             max_tokens: 400,
             temperature: 0.7,
-            top_p: 0.9,
-            frequency_penalty: 0.3,
-            presence_penalty: 0.3
+            top_p: 0.9
           });
 
           responseText = response.choices[0]?.message?.content;
           isAIGenerated = true;
 
         } catch (aiError) {
-          console.error('Azure OpenAI error:', aiError);
+          console.error('Groq AI error:', aiError);
           responseText = null;
         }
       }
