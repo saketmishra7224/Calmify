@@ -485,7 +485,7 @@ export default function SessionDetailsPage() {
                                 </div>
                                 <p className="text-sm">{message.message}</p>
                                 {message.crisisDetected && (
-                                  <div className="mt-2 px-2 py-1 bg-red-100 text-red-800 text-xs rounded">
+                                  <div className="mt-2 px-2.5 py-1 bg-red-50 text-red-600 border border-red-100 text-xs rounded-lg font-medium inline-block">
                                     Crisis indicators detected
                                   </div>
                                 )}

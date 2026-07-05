@@ -192,7 +192,7 @@ export function AppSidebar({ currentRole }: AppSidebarProps) {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-gray-200">
+      <SidebarFooter className="p-4 border-t border-border">
         {isAuthenticated ? (
           <div className="space-y-2">
             <Button

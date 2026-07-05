@@ -618,7 +618,7 @@ If you are experiencing thoughts of self-harm or suicide, please contact emergen
                 {Object.keys(existingAssessment.questionnaires).map(type => {
                   const questionnaire = existingAssessment.questionnaires[type];
                   return (
-                    <Card key={type} className="border-l-4 border-l-primary">
+                    <Card key={type}>
                       <CardContent className="p-4">
                         <div className="flex justify-between items-center">
                           <h3 className="font-semibold">{type}</h3>
@@ -714,7 +714,7 @@ If you are experiencing thoughts of self-harm or suicide, please contact emergen
 
               <div className="grid gap-4">
                 {Object.entries(questionnaires).map(([key, questionnaire]) => (
-                  <Card key={key} className="border-l-4 border-l-primary">
+                  <Card key={key}>
                     <CardContent className="p-4">
                       <h3 className="font-semibold text-lg mb-2">{questionnaire.title}</h3>
                       <p className="text-sm text-muted-foreground">{questionnaire.description}</p>
@@ -807,7 +807,7 @@ If you are experiencing thoughts of self-harm or suicide, please contact emergen
 
                 {/* Functional impact */}
                 {impactAnswer !== null && (
-                  <Card className="border-l-4 border-l-blue-500">
+                  <Card>
                     <CardContent className="p-4">
                       <h4 className="font-semibold mb-2">Functional Impact</h4>
                       <p className="text-sm">

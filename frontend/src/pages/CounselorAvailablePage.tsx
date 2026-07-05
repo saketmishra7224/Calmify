@@ -148,7 +148,7 @@ const CounselorAvailablePage: React.FC = () => {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {sessions.map((session) => (
-              <Card key={session._id} className="hover:shadow-lg transition-shadow border-l-4 border-l-blue-500">
+              <Card key={session._id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg flex items-center gap-2">

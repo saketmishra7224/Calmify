@@ -522,13 +522,13 @@ export default function ChatbotPage() {
 
           {/* Crisis Alert */}
           {crisisDetected && (
-            <div className="bg-destructive/10 border-l-4 border-destructive p-4 mx-4 mt-4 rounded flex-shrink-0">
+            <div className="bg-destructive/10 border border-destructive/20 p-4 mx-4 mt-4 rounded-2xl flex-shrink-0">
               <div className="flex items-start gap-2">
                 <AlertTriangle className="h-5 w-5 text-destructive mt-0.5" />
                 <div>
                   <p className="text-sm font-medium text-destructive">Crisis Support Resources</p>
                   <p className="text-sm text-destructive/80">
-                    If you're in immediate danger, please call 911. For crisis support: National Suicide Prevention Lifeline at 988, or Crisis Text Line by texting HOME to 741741.
+                    If you're in immediate danger, please call 112. For crisis support: Tele-MANAS Helpline at 1800-891-4416, or KIRAN Helpline at 1800-599-0019.
                   </p>
                 </div>
               </div>
@@ -537,7 +537,7 @@ export default function ChatbotPage() {
 
           {/* Crisis Escalation Alert */}
           {crisisEscalated && (
-            <div className="bg-orange-50 border-l-4 border-orange-500 p-4 mx-4 mt-2 rounded flex-shrink-0">
+            <div className="bg-orange-50 border border-orange-200 p-4 mx-4 mt-2 rounded-2xl flex-shrink-0">
               <div className="flex items-start gap-2">
                 <MessageCircle className="h-5 w-5 text-orange-600 mt-0.5" />
                 <div>
@@ -558,19 +558,19 @@ export default function ChatbotPage() {
                   <div key={message.id} className={`flex ${message.isBot ? 'justify-start' : 'justify-end'}`}>
                     <div className={`flex gap-3 max-w-[80%] ${message.isBot ? 'flex-row' : 'flex-row-reverse'}`}>
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        message.isBot ? 'bg-primary/15 border border-primary/20' : 'bg-blue-100 border border-blue-200'
+                        message.isBot ? 'bg-primary/15 border border-primary/20' : 'bg-secondary/15 border border-secondary/25'
                       }`}>
                         {message.isBot ? (
-                          <Bot className="h-4 w-4 text-primary" />
+                          <Bot className="h-4 w-4 text-primary" strokeWidth={1.5} />
                         ) : (
-                          <User className="h-4 w-4 text-blue-600" />
+                          <User className="h-4 w-4 text-secondary" strokeWidth={1.5} />
                         )}
                       </div>
                       <Card className={`p-3 ${
                         message.isBot 
                           ? 'bg-white/90 backdrop-blur-sm border border-primary/10 shadow-sm' 
                           : 'bg-primary text-primary-foreground border border-primary shadow-sm'
-                      } ${message.crisisDetected ? 'border-l-4 border-l-destructive' : ''}`}>
+                      } ${message.crisisDetected ? 'border-red-200 bg-red-50/50' : ''}`}>
                         <p className="text-sm whitespace-pre-wrap">{message.text}</p>
                         
                         {/* Crisis Counselor Booking Button */}
@@ -649,7 +649,7 @@ export default function ChatbotPage() {
             disabled={isTyping || currentSessionId !== "current" || loadingActiveChat}
             isLoading={isTyping}
             helpText={currentSessionId === "current" 
-              ? "This is an AI psychology expert. For emergencies, call 911 or crisis helplines."
+              ? "This is an AI psychology expert. For emergencies, call 112 or crisis helplines."
               : "Viewing past session - switch to current session to continue chatting"
             }
           />

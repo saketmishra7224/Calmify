@@ -228,7 +228,7 @@ const PeerResourcesPage: React.FC = () => {
       {/* Quick Reference Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {quickReference.map((section, index) => (
-          <Card key={index} className="border-l-4 border-l-red-500">
+          <Card key={index}>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <AlertTriangle className="h-5 w-5 text-red-600" />

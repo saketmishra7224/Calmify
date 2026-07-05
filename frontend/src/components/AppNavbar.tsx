@@ -158,7 +158,7 @@ export function AppNavbar({ currentRole }: AppNavbarProps) {
   };
 
   return (
-    <nav className="bg-primary/5 backdrop-blur-sm border-b border-primary/20 px-4 py-3 sticky top-0 z-50">
+    <nav className="bg-card border-b border-border px-4 py-3 sticky top-0 z-50">
       <div className="flex items-center justify-between">
         {/* Left side - Logo/Brand */}
         <button
@@ -202,9 +202,9 @@ export function AppNavbar({ currentRole }: AppNavbarProps) {
             size="sm"
             asChild
           >
-            <a href="tel:988" className="flex items-center">
+            <a href="tel:112" className="flex items-center">
               <AlertTriangle className="h-3 w-3 mr-2" />
-              Crisis Line: 988
+              Crisis Line: 112
             </a>
           </Button>
         </div>
@@ -248,9 +248,9 @@ export function AppNavbar({ currentRole }: AppNavbarProps) {
                   </NavLink>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="tel:988" className="flex items-center gap-3 w-full">
+                  <a href="tel:112" className="flex items-center gap-3 w-full">
                     <AlertTriangle className="h-3 w-3" />
-                    <span>Crisis Line: 988</span>
+                    <span>Crisis Line: 112</span>
                   </a>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

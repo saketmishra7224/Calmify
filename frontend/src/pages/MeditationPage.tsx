@@ -484,7 +484,7 @@ export default function MeditationPage() {
     <Layout>
       <div className="min-h-screen bg-background">
         {/* Header */}
-        <div className="bg-white border-b px-6 py-4">
+        <div className="bg-card/40 border-b border-border/60 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-semibold flex items-center gap-2">

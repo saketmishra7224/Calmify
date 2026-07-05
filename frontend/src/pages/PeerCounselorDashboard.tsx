@@ -196,7 +196,7 @@ const PeerCounselorDashboard: React.FC = () => {
               <Activity className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{stats.active}</div>
+              <div className="text-2xl font-bold text-primary">{stats.active}</div>
               <p className="text-xs text-muted-foreground">
                 Currently active
               </p>
@@ -209,7 +209,7 @@ const PeerCounselorDashboard: React.FC = () => {
               <CheckCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">{stats.completed}</div>
+              <div className="text-2xl font-bold text-secondary">{stats.completed}</div>
               <p className="text-xs text-muted-foreground">
                 Successfully completed
               </p>

@@ -281,12 +281,12 @@ Please proceed with this counselor request for immediate professional support.`)
                   </RadioGroup>
                 </div>
 
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                 <div className="bg-secondary/8 border border-secondary/15 rounded-2xl p-4">
                   <div className="flex gap-3">
-                    <Shield className="h-5 w-5 text-blue-600 mt-0.5" />
+                    <Shield className="h-5 w-5 text-secondary mt-0.5" strokeWidth={1.5} />
                     <div>
-                      <h4 className="font-medium text-blue-900">What to expect</h4>
-                      <ul className="text-sm text-blue-800 mt-2 space-y-1">
+                      <h4 className="font-heading font-semibold text-secondary">What to expect</h4>
+                      <ul className="text-sm text-muted-foreground mt-2 space-y-1.5 leading-relaxed">
                         <li>• You'll be matched with a licensed mental health professional</li>
                         <li>• Response time is typically 10-30 minutes during business hours</li>
                         <li>• Sessions follow professional ethical guidelines</li>
