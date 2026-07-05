@@ -28,6 +28,7 @@ function useFadeInOnScroll() {
    Design tokens used inline (Tailwind arbitrary values)
    ────────────────────────────────────────────────────────────── */
 const sage   = '#A398C9';
+const sageHover = '#8B7FB8';
 const dusty  = '#7A9BB0';
 const cream  = '#FAF8F5';
 const warmGray = '#4A4750';
@@ -132,9 +133,9 @@ export default function NewHome() {
               <button
                 onClick={() => navigate('/register')}
                 className="px-6 py-2.5 text-sm font-semibold text-white rounded-full transition-all duration-300 hover:shadow-lg active:scale-[0.97]"
-                style={{ backgroundColor: coral }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = coralHover}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = coral}
+                style={{ backgroundColor: sage }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = sageHover}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = sage}
               >
                 Get Started
               </button>
@@ -189,9 +190,9 @@ export default function NewHome() {
               <button
                 onClick={() => navigate('/register')}
                 className="px-8 py-4 text-white text-base font-semibold rounded-full transition-all duration-300 hover:shadow-xl active:scale-[0.97] flex items-center space-x-2"
-                style={{ backgroundColor: coral }}
-                onMouseEnter={e => { e.currentTarget.style.backgroundColor = coralHover; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                onMouseLeave={e => { e.currentTarget.style.backgroundColor = coral; e.currentTarget.style.transform = 'translateY(0)'; }}
+                style={{ backgroundColor: sage }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = sageHover; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = sage; e.currentTarget.style.transform = 'translateY(0)'; }}
               >
                 <span>Start Your Journey</span>
                 <ArrowRight className="w-5 h-5" />
@@ -433,9 +434,9 @@ export default function NewHome() {
                 <button
                   onClick={() => navigate('/register')}
                   className="w-full px-8 py-4 text-white text-base font-semibold rounded-full transition-all duration-300 hover:shadow-lg active:scale-[0.98]"
-                  style={{ backgroundColor: coral }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = coralHover}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = coral}
+                  style={{ backgroundColor: sage }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = sageHover}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = sage}
                 >
                   Start Free Assessment
                 </button>

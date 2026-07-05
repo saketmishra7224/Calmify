@@ -455,7 +455,7 @@ export default function RegisterPage() {
               <button 
                 type="submit" 
                 className="w-full px-8 py-4 text-white text-lg font-semibold rounded-full transition-all duration-300 ease-out hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ backgroundColor: submitHovered ? '#BAA182' : '#C9B398' }}
+                style={{ backgroundColor: submitHovered ? '#8B7FB8' : '#A398C9' }}
                 onMouseEnter={() => setSubmitHovered(true)}
                 onMouseLeave={() => setSubmitHovered(false)}
                 disabled={isLoading}
