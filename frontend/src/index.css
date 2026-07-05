@@ -6,18 +6,18 @@
 
 @layer base {
   :root {
-    /* Warm cream background (#FAF7F2) — H:37 S:47% L:96% */
-    --background: 37 47% 96%;
-    /* Warm dark gray text (#4A4A4A) — H:0 S:0% L:29% */
-    --foreground: 0 0% 29%;
+    /* Warm off-white background (#FAF8F5) — H:36 S:33% L:97% */
+    --background: 36 33% 97%;
+    /* Warm dark gray text (#4A4750) — H:260 S:6% L:30% */
+    --foreground: 260 6% 30%;
 
-    /* Card — slightly lighter cream on cream */
-    --card: 40 33% 98%;
-    --card-foreground: 0 0% 29%;
+    /* Card — slightly lighter off-white on cream */
+    --card: 36 33% 99%;
+    --card-foreground: 260 6% 30%;
 
     /* Popover */
-    --popover: 40 33% 98%;
-    --popover-foreground: 0 0% 29%;
+    --popover: 36 33% 99%;
+    --popover-foreground: 260 6% 30%;
 
     /* Primary — warm lavender/muted purple (#A398C9) — H:253 S:31% L:69% */
     --primary: 253 31% 69%;
@@ -27,35 +27,35 @@
     --secondary: 204 24% 58%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Muted backgrounds — warm light beige */
-    --muted: 37 25% 92%;
-    --muted-foreground: 0 0% 42%;
+    /* Muted backgrounds */
+    --muted: 36 15% 92%;
+    --muted-foreground: 260 6% 45%;
 
-    /* Accent — soft coral (#E08E6D) — H:18 S:65% L:65% */
-    --accent: 18 65% 65%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent — muted gold/mustard (#C9B398) — H:33 S:31% L:69% */
+    --accent: 33 31% 69%;
+    --accent-foreground: 260 6% 20%;
 
     /* Emergency red — kept for crisis buttons */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     /* Borders — warm tone */
-    --border: 37 18% 88%;
-    --input: 37 18% 88%;
-    --ring: 147 16% 62%;
+    --border: 36 18% 88%;
+    --input: 36 18% 88%;
+    --ring: 253 31% 69%;
 
     /* Rounded corners — larger for calm feel */
     --radius: 0.75rem;
 
     /* Sidebar — warm neutral */
-    --sidebar-background: 37 20% 94%;
-    --sidebar-foreground: 0 0% 22%;
-    --sidebar-primary: 147 16% 62%;
+    --sidebar-background: 36 20% 94%;
+    --sidebar-foreground: 260 6% 25%;
+    --sidebar-primary: 253 31% 69%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 37 18% 88%;
-    --sidebar-accent-foreground: 0 0% 18%;
-    --sidebar-border: 37 15% 85%;
-    --sidebar-ring: 147 16% 62%;
+    --sidebar-accent: 36 18% 88%;
+    --sidebar-accent-foreground: 260 6% 20%;
+    --sidebar-border: 36 15% 85%;
+    --sidebar-ring: 253 31% 69%;
   }
 }
 

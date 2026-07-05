@@ -122,7 +122,7 @@ export default function RegisterPage() {
   // Show loading state while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FAF7F2' }}>
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FAF8F5' }}>
         <div className="flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#A398C9' }} />
           <span className="ml-2" style={{ color: '#6B6B6B' }}>Loading...</span>
@@ -132,7 +132,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FAF7F2' }}>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FAF8F5' }}>
       <div className="w-full max-w-2xl">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
@@ -166,7 +166,7 @@ export default function RegisterPage() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="username" className="font-medium" style={{ color: '#4A4A4A' }}>Username *</Label>
+                    <Label htmlFor="username" className="font-medium" style={{ color: '#4A4750' }}>Username *</Label>
                     <Input
                       id="username"
                       name="username"
@@ -181,7 +181,7 @@ export default function RegisterPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="font-medium" style={{ color: '#4A4A4A' }}>Email *</Label>
+                    <Label htmlFor="email" className="font-medium" style={{ color: '#4A4750' }}>Email *</Label>
                     <Input
                       id="email"
                       name="email"
@@ -199,7 +199,7 @@ export default function RegisterPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="password" className="font-medium" style={{ color: '#4A4A4A' }}>Password *</Label>
+                    <Label htmlFor="password" className="font-medium" style={{ color: '#4A4750' }}>Password *</Label>
                     <div className="relative">
                       <Input
                         id="password"
@@ -227,7 +227,7 @@ export default function RegisterPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword" className="font-medium" style={{ color: '#4A4A4A' }}>Confirm Password *</Label>
+                    <Label htmlFor="confirmPassword" className="font-medium" style={{ color: '#4A4750' }}>Confirm Password *</Label>
                     <div className="relative">
                       <Input
                         id="confirmPassword"
@@ -256,7 +256,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="role" className="font-medium" style={{ color: '#4A4A4A' }}>Role *</Label>
+                  <Label htmlFor="role" className="font-medium" style={{ color: '#4A4750' }}>Role *</Label>
                   <Select 
                     value={formData.role} 
                     onValueChange={handleRoleChange} 
@@ -289,7 +289,7 @@ export default function RegisterPage() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="profile.firstName" className="font-medium" style={{ color: '#4A4A4A' }}>First Name</Label>
+                    <Label htmlFor="profile.firstName" className="font-medium" style={{ color: '#4A4750' }}>First Name</Label>
                     <Input
                       id="profile.firstName"
                       name="profile.firstName"
@@ -303,7 +303,7 @@ export default function RegisterPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="profile.lastName" className="font-medium" style={{ color: '#4A4A4A' }}>Last Name</Label>
+                    <Label htmlFor="profile.lastName" className="font-medium" style={{ color: '#4A4750' }}>Last Name</Label>
                     <Input
                       id="profile.lastName"
                       name="profile.lastName"
@@ -319,7 +319,7 @@ export default function RegisterPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="profile.preferredName" className="font-medium" style={{ color: '#4A4A4A' }}>Preferred Name</Label>
+                    <Label htmlFor="profile.preferredName" className="font-medium" style={{ color: '#4A4750' }}>Preferred Name</Label>
                     <Input
                       id="profile.preferredName"
                       name="profile.preferredName"
@@ -333,7 +333,7 @@ export default function RegisterPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="profile.age" className="font-medium" style={{ color: '#4A4A4A' }}>Age</Label>
+                    <Label htmlFor="profile.age" className="font-medium" style={{ color: '#4A4750' }}>Age</Label>
                     <Input
                       id="profile.age"
                       name="profile.age"
@@ -363,7 +363,7 @@ export default function RegisterPage() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="profile.emergencyContact.name" className="font-medium" style={{ color: '#4A4A4A' }}>Contact Name</Label>
+                    <Label htmlFor="profile.emergencyContact.name" className="font-medium" style={{ color: '#4A4750' }}>Contact Name</Label>
                     <Input
                       id="profile.emergencyContact.name"
                       name="profile.emergencyContact.name"
@@ -377,7 +377,7 @@ export default function RegisterPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="profile.emergencyContact.relationship" className="font-medium" style={{ color: '#4A4A4A' }}>Relationship</Label>
+                    <Label htmlFor="profile.emergencyContact.relationship" className="font-medium" style={{ color: '#4A4750' }}>Relationship</Label>
                     <Input
                       id="profile.emergencyContact.relationship"
                       name="profile.emergencyContact.relationship"
@@ -392,7 +392,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="profile.emergencyContact.phone" className="font-medium" style={{ color: '#4A4A4A' }}>Contact Phone</Label>
+                  <Label htmlFor="profile.emergencyContact.phone" className="font-medium" style={{ color: '#4A4750' }}>Contact Phone</Label>
                   <Input
                     id="profile.emergencyContact.phone"
                     name="profile.emergencyContact.phone"
@@ -455,7 +455,7 @@ export default function RegisterPage() {
               <button 
                 type="submit" 
                 className="w-full px-8 py-4 text-white text-lg font-semibold rounded-full transition-all duration-300 ease-out hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ backgroundColor: submitHovered ? '#D57A57' : '#E08E6D' }}
+                style={{ backgroundColor: submitHovered ? '#BAA182' : '#C9B398' }}
                 onMouseEnter={() => setSubmitHovered(true)}
                 onMouseLeave={() => setSubmitHovered(false)}
                 disabled={isLoading}

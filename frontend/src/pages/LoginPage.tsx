@@ -73,7 +73,7 @@ export default function LoginPage() {
   // Show loading state while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FAF7F2' }}>
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FAF8F5' }}>
         <div className="flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#A398C9' }} />
           <span className="ml-2" style={{ color: '#6B6B6B' }}>Loading...</span>
@@ -83,7 +83,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FAF7F2' }}>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FAF8F5' }}>
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
@@ -113,7 +113,7 @@ export default function LoginPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="font-medium" style={{ color: '#4A4A4A' }}>Email</Label>
+                <Label htmlFor="email" className="font-medium" style={{ color: '#4A4750' }}>Email</Label>
                 <Input
                   id="email"
                   name="email"
@@ -131,7 +131,7 @@ export default function LoginPage() {
 
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="font-medium" style={{ color: '#4A4A4A' }}>Password</Label>
+                <Label htmlFor="password" className="font-medium" style={{ color: '#4A4750' }}>Password</Label>
                 <div className="relative">
                   <Input
                     id="password"
@@ -183,7 +183,7 @@ export default function LoginPage() {
               <button 
                 type="submit" 
                 className="w-full px-8 py-4 text-white text-lg font-semibold rounded-full transition-all duration-300 ease-out hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ backgroundColor: submitHovered ? '#D57A57' : '#E08E6D' }}
+                style={{ backgroundColor: submitHovered ? '#BAA182' : '#C9B398' }}
                 onMouseEnter={() => setSubmitHovered(true)}
                 onMouseLeave={() => setSubmitHovered(false)}
                 disabled={isLoading}
@@ -203,7 +203,7 @@ export default function LoginPage() {
                   <span className="w-full" style={{ borderTop: '1px solid rgba(143,174,155,0.15)' }} />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="px-2" style={{ backgroundColor: '#FAF7F2', color: '#8A8A8A' }}>
+                  <span className="px-2" style={{ backgroundColor: '#FAF8F5', color: '#8A8A8A' }}>
                     Or continue with
                   </span>
                 </div>
@@ -215,7 +215,7 @@ export default function LoginPage() {
                 style={{
                   backgroundColor: anonHovered ? 'rgba(143,174,155,0.14)' : 'rgba(143,174,155,0.08)',
                   border: '2px solid rgba(143,174,155,0.2)',
-                  color: '#4A4A4A'
+                  color: '#4A4750'
                 }}
                 onMouseEnter={() => setAnonHovered(true)}
                 onMouseLeave={() => setAnonHovered(false)}

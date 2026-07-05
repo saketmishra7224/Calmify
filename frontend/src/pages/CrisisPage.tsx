@@ -10,9 +10,9 @@ import { useNavigate } from "react-router-dom";
 
 const sage = '#A398C9';
 const dusty = '#7A9BB0';
-const cream = '#FAF7F2';
-const warmGray = '#4A4A4A';
-const coral = '#E08E6D';
+const cream = '#FAF8F5';
+const warmGray = '#4A4750';
+const coral = '#C9B398';
 
 const CRISIS_HOTLINES = [
   {
@@ -113,7 +113,7 @@ export default function CrisisPage() {
               <div className="rounded-full p-2.5 flex-shrink-0" style={{ backgroundColor: coral }}>
                 <AlertTriangle className="h-5 w-5 text-white" strokeWidth={1.5} />
               </div>
-              <AlertDescription className="font-medium text-base flex-1" style={{ color: '#4A4A4A' }}>
+              <AlertDescription className="font-medium text-base flex-1" style={{ color: '#4A4750' }}>
                 <strong className="block text-lg mb-1 font-heading" style={{ color: '#3A3A3A' }}>Crisis Support Resources Available Now</strong>
                 <p style={{ color: '#5A5A5A', lineHeight: '1.6' }}>If you're having thoughts of hurting yourself or others, please reach out for immediate help. You are not alone, and support is available 24/7.</p>
               </AlertDescription>
@@ -229,7 +229,7 @@ export default function CrisisPage() {
                       onClick={() => handleCallNumber(hotline.number)} 
                       className="text-white shadow-sm transition-all duration-300 rounded-full px-6 py-2 h-auto text-sm font-semibold"
                       style={{ backgroundColor: coral }}
-                      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#D57A57'}
+                      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#BAA182'}
                       onMouseLeave={e => e.currentTarget.style.backgroundColor = coral}
                     >
                       <Phone className="h-4 w-4 mr-2" strokeWidth={1.5} />
@@ -276,7 +276,7 @@ export default function CrisisPage() {
                         className="w-full transition-all duration-300 font-semibold rounded-full border"
                         style={{ 
                           borderColor: 'rgba(143,174,155,0.3)',
-                          color: '#4A4A4A',
+                          color: '#4A4750',
                         }}
                         onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(143,174,155,0.08)'; }}
                         onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
@@ -363,7 +363,7 @@ export default function CrisisPage() {
                 onClick={() => navigate('/chatbot')} 
                 variant="outline"
                 className="transition-all duration-300 px-6 py-2.5 h-auto text-sm font-semibold rounded-full border"
-                style={{ borderColor: 'rgba(143,174,155,0.3)', backgroundColor: 'transparent', color: '#4A4A4A' }}
+                style={{ borderColor: 'rgba(143,174,155,0.3)', backgroundColor: 'transparent', color: '#4A4750' }}
                 onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.6)'}
                 onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
               >
@@ -384,7 +384,7 @@ export default function CrisisPage() {
                 onClick={() => navigate('/counselor/request')}
                 className="text-white shadow-sm transition-all duration-300 px-6 py-2.5 h-auto text-sm font-semibold rounded-full border-0"
                 style={{ backgroundColor: coral }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#D57A57'}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#BAA182'}
                 onMouseLeave={e => e.currentTarget.style.backgroundColor = coral}
               >
                 <Stethoscope className="h-4 w-4 mr-2" strokeWidth={1.5} />

@@ -29,10 +29,10 @@ function useFadeInOnScroll() {
    ────────────────────────────────────────────────────────────── */
 const sage   = '#A398C9';
 const dusty  = '#7A9BB0';
-const cream  = '#FAF7F2';
-const warmGray = '#4A4A4A';
-const coral   = '#E08E6D';
-const coralHover = '#D57A57';
+const cream  = '#FAF8F5';
+const warmGray = '#4A4750';
+const coral   = '#C9B398';
+const coralHover = '#BAA182';
 
 export default function NewHome() {
   const navigate = useNavigate();
