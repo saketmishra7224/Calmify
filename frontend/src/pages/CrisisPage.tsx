@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Phone, MessageCircle, ExternalLink, MapPin, Clock, AlertTriangle, Heart, Shield, Users, Stethoscope, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const sage = '#8FAE9B';
+const sage = '#A398C9';
 const dusty = '#7A9BB0';
 const cream = '#FAF7F2';
 const warmGray = '#4A4A4A';
@@ -217,7 +217,7 @@ export default function CrisisPage() {
                         className="px-3 py-1 font-semibold rounded-full border-0 text-xs"
                         style={{
                           backgroundColor: hotline.available.includes('24/7') ? 'rgba(143,174,155,0.12)' : 'rgba(122,155,176,0.12)',
-                          color: hotline.available.includes('24/7') ? '#6B8775' : '#5E798B',
+                          color: hotline.available.includes('24/7') ? '#8175B5' : '#5E798B',
                         }}
                       >
                         {hotline.available.includes('24/7') ? '24/7 Available' : 'Limited Hours'}

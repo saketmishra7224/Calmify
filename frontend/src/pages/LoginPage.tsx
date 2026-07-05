@@ -75,7 +75,7 @@ export default function LoginPage() {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FAF7F2' }}>
         <div className="flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#8FAE9B' }} />
+          <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#A398C9' }} />
           <span className="ml-2" style={{ color: '#6B6B6B' }}>Loading...</span>
         </div>
       </div>
@@ -123,7 +123,7 @@ export default function LoginPage() {
                   onChange={handleInputChange}
                   required
                   disabled={isLoading}
-                  className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]"
+                  className="focus:border-[#A398C9] focus:ring-[#A398C9]"
                   style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                 />
               </div>
@@ -142,7 +142,7 @@ export default function LoginPage() {
                     onChange={handleInputChange}
                     required
                     disabled={isLoading}
-                    className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B] pr-10"
+                    className="focus:border-[#A398C9] focus:ring-[#A398C9] pr-10"
                     style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                   />
                   <Button
@@ -169,7 +169,7 @@ export default function LoginPage() {
                   type="checkbox"
                   checked={formData.rememberMe}
                   onChange={handleInputChange}
-                  className="rounded text-[#8FAE9B] focus:ring-[#8FAE9B]"
+                  className="rounded text-[#A398C9] focus:ring-[#A398C9]"
                   style={{ borderColor: 'rgba(143,174,155,0.3)' }}
                   disabled={isLoading}
                 />
@@ -236,7 +236,7 @@ export default function LoginPage() {
                 Don't have an account?{' '}
                 <Link 
                   to="/register" 
-                  className="text-[#8FAE9B] hover:text-[#7A9B89] hover:underline font-medium"
+                  className="text-[#A398C9] hover:text-[#8B7FB8] hover:underline font-medium"
                 >
                   Sign up
                 </Link>

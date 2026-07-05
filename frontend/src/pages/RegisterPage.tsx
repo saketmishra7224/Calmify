@@ -124,7 +124,7 @@ export default function RegisterPage() {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FAF7F2' }}>
         <div className="flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#8FAE9B' }} />
+          <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#A398C9' }} />
           <span className="ml-2" style={{ color: '#6B6B6B' }}>Loading...</span>
         </div>
       </div>
@@ -175,7 +175,7 @@ export default function RegisterPage() {
                       onChange={handleInputChange}
                       required
                       disabled={isLoading}
-                      className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]"
+                      className="focus:border-[#A398C9] focus:ring-[#A398C9]"
                       style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                     />
                   </div>
@@ -191,7 +191,7 @@ export default function RegisterPage() {
                       onChange={handleInputChange}
                       required
                       disabled={isLoading}
-                      className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]"
+                      className="focus:border-[#A398C9] focus:ring-[#A398C9]"
                       style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                     />
                   </div>
@@ -210,7 +210,7 @@ export default function RegisterPage() {
                         onChange={handleInputChange}
                         required
                         disabled={isLoading}
-                        className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B] pr-10"
+                        className="focus:border-[#A398C9] focus:ring-[#A398C9] pr-10"
                         style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                       />
                       <Button
@@ -238,7 +238,7 @@ export default function RegisterPage() {
                         onChange={handleInputChange}
                         required
                         disabled={isLoading}
-                        className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B] pr-10"
+                        className="focus:border-[#A398C9] focus:ring-[#A398C9] pr-10"
                         style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                       />
                       <Button
@@ -262,7 +262,7 @@ export default function RegisterPage() {
                     onValueChange={handleRoleChange} 
                     disabled={isLoading}
                   >
-                    <SelectTrigger className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]" style={{ borderColor: 'rgba(143,174,155,0.15)' }}>
+                    <SelectTrigger className="focus:border-[#A398C9] focus:ring-[#A398C9]" style={{ borderColor: 'rgba(143,174,155,0.15)' }}>
                       <SelectValue placeholder="Select your role" />
                     </SelectTrigger>
                     <SelectContent>
@@ -297,7 +297,7 @@ export default function RegisterPage() {
                       value={formData.profile.firstName}
                       onChange={handleInputChange}
                       disabled={isLoading}
-                      className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]"
+                      className="focus:border-[#A398C9] focus:ring-[#A398C9]"
                       style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                     />
                   </div>
@@ -311,7 +311,7 @@ export default function RegisterPage() {
                       value={formData.profile.lastName}
                       onChange={handleInputChange}
                       disabled={isLoading}
-                      className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]"
+                      className="focus:border-[#A398C9] focus:ring-[#A398C9]"
                       style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                     />
                   </div>
@@ -327,7 +327,7 @@ export default function RegisterPage() {
                       value={formData.profile.preferredName}
                       onChange={handleInputChange}
                       disabled={isLoading}
-                      className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]"
+                      className="focus:border-[#A398C9] focus:ring-[#A398C9]"
                       style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                     />
                   </div>
@@ -344,7 +344,7 @@ export default function RegisterPage() {
                       value={formData.profile.age}
                       onChange={handleInputChange}
                       disabled={isLoading}
-                      className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]"
+                      className="focus:border-[#A398C9] focus:ring-[#A398C9]"
                       style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                     />
                   </div>
@@ -371,7 +371,7 @@ export default function RegisterPage() {
                       value={formData.profile.emergencyContact.name}
                       onChange={handleInputChange}
                       disabled={isLoading}
-                      className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]"
+                      className="focus:border-[#A398C9] focus:ring-[#A398C9]"
                       style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                     />
                   </div>
@@ -385,7 +385,7 @@ export default function RegisterPage() {
                       value={formData.profile.emergencyContact.relationship}
                       onChange={handleInputChange}
                       disabled={isLoading}
-                      className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]"
+                      className="focus:border-[#A398C9] focus:ring-[#A398C9]"
                       style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                     />
                   </div>
@@ -401,7 +401,7 @@ export default function RegisterPage() {
                     value={formData.profile.emergencyContact.phone}
                     onChange={handleInputChange}
                     disabled={isLoading}
-                    className="focus:border-[#8FAE9B] focus:ring-[#8FAE9B]"
+                    className="focus:border-[#A398C9] focus:ring-[#A398C9]"
                     style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                   />
                 </div>
@@ -417,13 +417,13 @@ export default function RegisterPage() {
                       type="checkbox"
                       checked={formData.agreedToTerms}
                       onChange={handleInputChange}
-                      className="rounded border-gray-300 text-[#8FAE9B] focus:ring-[#8FAE9B]"
+                      className="rounded border-gray-300 text-[#A398C9] focus:ring-[#A398C9]"
                       disabled={isLoading}
                       required
                     />
                     <Label htmlFor="agreedToTerms" className="text-sm" style={{ color: '#6B6B6B' }}>
                       I agree to the{' '}
-                      <Link to="/terms" className="text-[#8FAE9B] hover:text-[#7A9B89] hover:underline">
+                      <Link to="/terms" className="text-[#A398C9] hover:text-[#8B7FB8] hover:underline">
                         Terms of Service
                       </Link>
                     </Label>
@@ -436,13 +436,13 @@ export default function RegisterPage() {
                       type="checkbox"
                       checked={formData.agreedToPrivacy}
                       onChange={handleInputChange}
-                      className="rounded border-gray-300 text-[#8FAE9B] focus:ring-[#8FAE9B]"
+                      className="rounded border-gray-300 text-[#A398C9] focus:ring-[#A398C9]"
                       disabled={isLoading}
                       required
                     />
                     <Label htmlFor="agreedToPrivacy" className="text-sm" style={{ color: '#6B6B6B' }}>
                       I agree to the{' '}
-                      <Link to="/privacy" className="text-[#8FAE9B] hover:text-[#7A9B89] hover:underline">
+                      <Link to="/privacy" className="text-[#A398C9] hover:text-[#8B7FB8] hover:underline">
                         Privacy Policy
                       </Link>
                     </Label>
@@ -474,7 +474,7 @@ export default function RegisterPage() {
                 Already have an account?{' '}
                 <Link 
                   to="/login" 
-                  className="text-[#8FAE9B] hover:text-[#7A9B89] hover:underline font-medium"
+                  className="text-[#A398C9] hover:text-[#8B7FB8] hover:underline font-medium"
                 >
                   Sign in
                 </Link>

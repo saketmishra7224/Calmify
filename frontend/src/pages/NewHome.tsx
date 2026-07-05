@@ -27,7 +27,7 @@ function useFadeInOnScroll() {
 /* ──────────────────────────────────────────────────────────────
    Design tokens used inline (Tailwind arbitrary values)
    ────────────────────────────────────────────────────────────── */
-const sage   = '#8FAE9B';
+const sage   = '#A398C9';
 const dusty  = '#7A9BB0';
 const cream  = '#FAF7F2';
 const warmGray = '#4A4A4A';
