@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 interface ErrorResponse {
   message: string;
 }
-import { Loader2, Heart, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -87,10 +87,8 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style={{ backgroundColor: '#8FAE9B' }}>
-              <Heart className="w-6 h-6 text-white" strokeWidth={1.5} />
-            </div>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <img src="/calmifylogo.png" alt="Calmify Logo" className="h-12 w-auto object-contain" />
             <h1 className="text-3xl font-heading font-bold" style={{ color: '#3A3A3A' }}>Calmify</h1>
           </div>
           <p style={{ color: '#6B6B6B' }}>

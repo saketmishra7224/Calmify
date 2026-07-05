@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Heart, Eye, EyeOff, Info } from "lucide-react";
+import { Loader2, Eye, EyeOff, Info } from "lucide-react";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -134,12 +134,9 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FAF7F2' }}>
       <div className="w-full max-w-2xl">
-        {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style={{ backgroundColor: '#8FAE9B' }}>
-              <Heart className="w-6 h-6 text-white" strokeWidth={1.5} />
-            </div>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <img src="/calmifylogo.png" alt="Calmify Logo" className="h-12 w-auto object-contain" />
             <h1 className="text-3xl font-heading font-bold" style={{ color: '#3A3A3A' }}>Calmify</h1>
           </div>
           <p style={{ color: '#6B6B6B' }}>

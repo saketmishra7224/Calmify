@@ -99,14 +99,8 @@ export default function NewHome() {
       >
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
-            {/* Logo */}
             <div className="flex items-center space-x-3">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
-                style={{ backgroundColor: sage }}
-              >
-                <Heart className="w-5 h-5 text-white" strokeWidth={2.5} />
-              </div>
+              <img src="/calmifylogo.png" alt="Calmify Logo" className="h-8 w-auto object-contain" />
               <span className="text-xl font-heading font-bold" style={{ color: '#3A3A3A' }}>
                 Calmify
               </span>
