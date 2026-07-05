@@ -8,36 +8,42 @@ import { Badge } from "@/components/ui/badge";
 import { Phone, MessageCircle, ExternalLink, MapPin, Clock, AlertTriangle, Heart, Shield, Users, Stethoscope, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+const sage = '#8FAE9B';
+const dusty = '#7A9BB0';
+const cream = '#FAF7F2';
+const warmGray = '#4A4A4A';
+const coral = '#E08E6D';
+
 const CRISIS_HOTLINES = [
   {
-    name: "National Suicide Prevention Lifeline",
-    number: "988",
-    description: "Free and confidential emotional support 24/7",
+    name: "Tele-MANAS Helpline (Govt of India)",
+    number: "1800-891-4416",
+    description: "Free, 24/7 mental health counseling and support",
     available: "24/7"
   },
   {
-    name: "Crisis Text Line",
-    number: "Text HOME to 741741",
-    description: "Free, 24/7 crisis support via text",
+    name: "KIRAN Mental Health Helpline (Govt of India)",
+    number: "1800-599-0019",
+    description: "Professional rehabilitation & cognitive support",
     available: "24/7"
   },
   {
-    name: "National Alliance on Mental Illness",
-    number: "1-800-950-NAMI (6264)",
-    description: "Information, referrals and support",
-    available: "M-F 10am-8pm ET"
+    name: "Vandrevala Foundation Helpline",
+    number: "+91 9999 666 555",
+    description: "Free and confidential emotional support for distress",
+    available: "24/7"
   },
   {
-    name: "SAMHSA National Helpline",
-    number: "1-800-662-4357",
-    description: "Treatment referral and information service",
+    name: "AASRA Helpline",
+    number: "+91 98204 66726",
+    description: "Confidential suicide prevention support",
     available: "24/7"
   }
 ];
 
 const EMERGENCY_ACTIONS = [
   {
-    title: "Call 911",
+    title: "Call 112 / 100",
     description: "If you are in immediate physical danger",
     urgent: true
   },
@@ -90,53 +96,55 @@ export default function CrisisPage() {
     window.location.href = `tel:${number.replace(/\D/g, '')}`;
   };
 
-  const handleTextCrisis = () => {
-    // For mobile devices with messaging apps
-    window.location.href = 'sms:741741?body=HOME';
-  };
-
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-red-50/30 via-white to-orange-50/30 p-4 md:p-6 lg:p-8">
-        <div className="max-w-5xl mx-auto space-y-8">
-          {/* Emergency Alert - Enhanced */}
-          <Alert className="border-2 border-red-500 bg-gradient-to-r from-red-50 to-orange-50 shadow-lg animate-in fade-in duration-500">
-            <div className="flex items-start gap-3">
-              <div className="rounded-full bg-red-500 p-2 animate-pulse">
-                <AlertTriangle className="h-5 w-5 text-white" />
+      <div className="min-h-screen p-4 md:p-6 lg:p-8 transition-colors duration-500" style={{ backgroundColor: cream, color: warmGray }}>
+        <div className="max-w-4xl mx-auto space-y-8">
+          
+          {/* Emergency Alert - Softened & Calm */}
+          <Alert 
+            className="border shadow-md duration-500 rounded-3xl"
+            style={{ 
+              backgroundColor: 'rgba(224,142,109,0.08)', 
+              borderColor: 'rgba(224,142,109,0.25)', 
+            }}
+          >
+            <div className="flex items-start gap-4 p-2">
+              <div className="rounded-full p-2.5 flex-shrink-0" style={{ backgroundColor: coral }}>
+                <AlertTriangle className="h-5 w-5 text-white" strokeWidth={1.5} />
               </div>
-              <AlertDescription className="text-red-900 font-medium text-base flex-1">
-                <strong className="block text-lg mb-1">Crisis Support Resources Available Now</strong>
-                <p className="text-red-800">If you're having thoughts of hurting yourself or others, please reach out for immediate help. You are not alone, and support is available 24/7.</p>
+              <AlertDescription className="font-medium text-base flex-1" style={{ color: '#4A4A4A' }}>
+                <strong className="block text-lg mb-1 font-heading" style={{ color: '#3A3A3A' }}>Crisis Support Resources Available Now</strong>
+                <p style={{ color: '#5A5A5A', lineHeight: '1.6' }}>If you're having thoughts of hurting yourself or others, please reach out for immediate help. You are not alone, and support is available 24/7.</p>
               </AlertDescription>
             </div>
           </Alert>
 
-          {/* Header - Enhanced */}
-          <div className="text-center space-y-4 animate-in slide-in-from-top duration-700">
+          {/* Header - Centered & Calm */}
+          <div className="text-center space-y-4">
             <div className="flex items-center justify-center gap-3 mb-2">
-              <div className="rounded-2xl bg-gradient-to-br from-red-500 to-orange-500 p-3 shadow-lg">
-                <Heart className="h-10 w-10 text-white" />
+              <div className="rounded-2xl p-3 shadow-md" style={{ backgroundColor: `${sage}20` }}>
+                <Heart className="h-9 w-9" style={{ color: sage }} strokeWidth={1.5} />
               </div>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-5xl font-heading font-extrabold" style={{ color: '#3A3A3A' }}>
               Crisis Support
             </h1>
-            <p className="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: '#6B6B6B' }}>
               You matter. Your life has value. Help is available 24/7, and trained professionals are ready to support you right now.
             </p>
           </div>
 
-          {/* Immediate Actions - Enhanced */}
-          <Card className="border-2 shadow-xl hover:shadow-2xl transition-all duration-300 animate-in slide-in-from-bottom duration-700">
-            <CardHeader className="bg-gradient-to-r from-red-50 to-orange-50 border-b">
-              <CardTitle className="flex items-center gap-2 text-2xl text-red-700">
-                <div className="rounded-lg bg-red-500 p-2">
-                  <AlertTriangle className="h-6 w-6 text-white" />
+          {/* Immediate Actions */}
+          <Card className="rounded-3xl shadow-lg border-0" style={{ backgroundColor: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(10px)' }}>
+            <CardHeader className="border-b" style={{ borderColor: 'rgba(143,174,155,0.12)', backgroundColor: 'rgba(143,174,155,0.03)' }}>
+              <CardTitle className="flex items-center gap-3 text-xl font-heading font-bold" style={{ color: '#3A3A3A' }}>
+                <div className="rounded-xl p-2.5" style={{ backgroundColor: `${coral}18` }}>
+                  <AlertTriangle className="h-5 w-5" style={{ color: coral }} strokeWidth={1.5} />
                 </div>
                 Immediate Actions
               </CardTitle>
-              <CardDescription className="text-base text-gray-600 mt-2">
+              <CardDescription className="text-sm mt-1" style={{ color: '#8A8A8A' }}>
                 If you're in crisis, here are your immediate options for getting help
               </CardDescription>
             </CardHeader>
@@ -145,26 +153,24 @@ export default function CrisisPage() {
                 {EMERGENCY_ACTIONS.map((action, index) => (
                   <Card 
                     key={index} 
-                    className={`
-                      ${action.urgent 
-                        ? 'border-2 border-red-400 bg-gradient-to-br from-red-50 to-orange-50 shadow-md hover:shadow-xl' 
-                        : 'border border-gray-200 hover:border-[#2BD4BD] hover:shadow-lg bg-white'
-                      }
-                      transition-all duration-300 transform hover:-translate-y-1 cursor-pointer
-                    `}
+                    className="transition-all duration-300 rounded-2xl hover:shadow-md hover:-translate-y-0.5 cursor-pointer bg-white/60"
+                    style={{ 
+                      borderColor: action.urgent ? 'rgba(224,142,109,0.3)' : 'rgba(143,174,155,0.15)',
+                      borderWidth: action.urgent ? '2px' : '1px',
+                    }}
                   >
                     <CardContent className="p-5">
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1">
-                          <h3 className={`font-bold text-lg mb-2 ${action.urgent ? 'text-red-700' : 'text-gray-800'}`}>
+                          <h3 className="font-heading font-bold text-base mb-2" style={{ color: action.urgent ? '#C0554A' : '#3A3A3A' }}>
                             {action.title}
                           </h3>
-                          <p className="text-sm text-gray-600 leading-relaxed">
+                          <p className="text-sm leading-relaxed" style={{ color: '#6B6B6B' }}>
                             {action.description}
                           </p>
                         </div>
                         {action.urgent && (
-                          <Badge variant="destructive" className="ml-2 px-3 py-1 text-xs font-semibold animate-pulse">
+                          <Badge className="ml-2 px-2.5 py-0.5 text-xs font-semibold rounded-full border-0 bg-red-100 text-red-700 animate-pulse">
                             URGENT
                           </Badge>
                         )}
@@ -176,16 +182,16 @@ export default function CrisisPage() {
             </CardContent>
           </Card>
 
-          {/* Crisis Hotlines - Enhanced */}
-          <Card className="border-2 shadow-xl hover:shadow-2xl transition-all duration-300 animate-in slide-in-from-bottom delay-150 duration-700">
-            <CardHeader className="bg-gradient-to-r from-[#2BD4BD]/10 to-blue-50 border-b">
-              <CardTitle className="flex items-center gap-2 text-2xl">
-                <div className="rounded-lg bg-[#2BD4BD] p-2">
-                  <Phone className="h-6 w-6 text-white" />
+          {/* Crisis Hotlines */}
+          <Card className="rounded-3xl shadow-lg border-0" style={{ backgroundColor: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(10px)' }}>
+            <CardHeader className="border-b" style={{ borderColor: 'rgba(143,174,155,0.12)', backgroundColor: 'rgba(122,155,176,0.03)' }}>
+              <CardTitle className="flex items-center gap-3 text-xl font-heading font-bold" style={{ color: '#3A3A3A' }}>
+                <div className="rounded-xl p-2.5" style={{ backgroundColor: `${dusty}18` }}>
+                  <Phone className="h-5 w-5" style={{ color: dusty }} strokeWidth={1.5} />
                 </div>
                 Crisis Hotlines
               </CardTitle>
-              <CardDescription className="text-base text-gray-600 mt-2">
+              <CardDescription className="text-sm mt-1" style={{ color: '#8A8A8A' }}>
                 Free, confidential support available now - you can call or text anytime
               </CardDescription>
             </CardHeader>
@@ -193,61 +199,58 @@ export default function CrisisPage() {
               {CRISIS_HOTLINES.map((hotline, index) => (
                 <div 
                   key={index} 
-                  className="border-2 border-gray-200 hover:border-[#2BD4BD] rounded-xl p-5 space-y-4 bg-white hover:bg-gradient-to-r hover:from-[#2BD4BD]/5 hover:to-blue-50/30 transition-all duration-300 transform hover:-translate-y-1 shadow-sm hover:shadow-lg"
+                  className="border rounded-2xl p-5 space-y-4 bg-white/60 hover:bg-white transition-all duration-300 shadow-sm hover:shadow-md"
+                  style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 space-y-2">
-                      <h3 className="font-bold text-lg text-gray-900">{hotline.name}</h3>
-                      <p className="text-sm text-gray-600 leading-relaxed">{hotline.description}</p>
-                      <div className="flex items-center gap-2 pt-1">
-                        <Clock className="h-4 w-4 text-[#2BD4BD]" />
-                        <span className="text-sm font-medium text-gray-700">{hotline.available}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                    <div className="flex-1 space-y-1.5">
+                      <h3 className="font-heading font-bold text-base" style={{ color: '#3A3A3A' }}>{hotline.name}</h3>
+                      <p className="text-sm" style={{ color: '#6B6B6B', lineHeight: '1.6' }}>{hotline.description}</p>
+                      <div className="flex items-center gap-2 pt-1 text-[#8A8A8A]">
+                        <Clock className="h-4 w-4" strokeWidth={1.5} />
+                        <span className="text-xs font-medium">{hotline.available}</span>
                       </div>
                     </div>
-                    <Badge 
-                      variant="outline" 
-                      className={`
-                        ${hotline.available.includes('24/7') 
-                          ? 'bg-green-50 text-green-700 border-green-300' 
-                          : 'bg-blue-50 text-blue-700 border-blue-300'
-                        } px-3 py-1 font-semibold
-                      `}
-                    >
-                      {hotline.available.includes('24/7') ? '24/7 Available' : 'Limited Hours'}
-                    </Badge>
+                    <div>
+                      <Badge 
+                        variant="outline" 
+                        className="px-3 py-1 font-semibold rounded-full border-0 text-xs"
+                        style={{
+                          backgroundColor: hotline.available.includes('24/7') ? 'rgba(143,174,155,0.12)' : 'rgba(122,155,176,0.12)',
+                          color: hotline.available.includes('24/7') ? '#6B8775' : '#5E798B',
+                        }}
+                      >
+                        {hotline.available.includes('24/7') ? '24/7 Available' : 'Limited Hours'}
+                      </Badge>
+                    </div>
                   </div>
                   <div className="flex gap-3 pt-2">
-                    {hotline.number.includes('Text') ? (
-                      <Button 
-                        onClick={handleTextCrisis} 
-                        className="bg-[#2BD4BD] hover:bg-[#25BFB0] text-white shadow-md hover:shadow-lg transition-all duration-200 px-6"
-                      >
-                        <MessageCircle className="h-5 w-5 mr-2" />
-                        {hotline.number}
-                      </Button>
-                    ) : (
-                      <Button 
-                        onClick={() => handleCallNumber(hotline.number)} 
-                        className="bg-[#2BD4BD] hover:bg-[#25BFB0] text-white shadow-md hover:shadow-lg transition-all duration-200 px-6"
-                      >
-                        <Phone className="h-5 w-5 mr-2" />
-                        Call {hotline.number}
-                      </Button>
-                    )}
+                    <Button 
+                      onClick={() => handleCallNumber(hotline.number)} 
+                      className="text-white shadow-sm transition-all duration-300 rounded-full px-6 py-2 h-auto text-sm font-semibold"
+                      style={{ backgroundColor: coral }}
+                      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#D57A57'}
+                      onMouseLeave={e => e.currentTarget.style.backgroundColor = coral}
+                    >
+                      <Phone className="h-4 w-4 mr-2" strokeWidth={1.5} />
+                      Call {hotline.number}
+                    </Button>
                   </div>
                 </div>
               ))}
             </CardContent>
           </Card>
 
-          {/* Immediate Resources - Enhanced */}
-          <Card className="border-2 shadow-xl hover:shadow-2xl transition-all duration-300 animate-in slide-in-from-bottom delay-300 duration-700">
-            <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b">
-              <CardTitle className="text-2xl flex items-center gap-2">
-                <Sparkles className="h-6 w-6 text-purple-600" />
+          {/* Immediate Resources */}
+          <Card className="rounded-3xl shadow-lg border-0" style={{ backgroundColor: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(10px)' }}>
+            <CardHeader className="border-b" style={{ borderColor: 'rgba(143,174,155,0.12)', backgroundColor: 'rgba(143,174,155,0.03)' }}>
+              <CardTitle className="text-xl font-heading font-bold flex items-center gap-3" style={{ color: '#3A3A3A' }}>
+                <div className="rounded-xl p-2.5" style={{ backgroundColor: `${sage}18` }}>
+                  <Sparkles className="h-5 w-5" style={{ color: sage }} strokeWidth={1.5} />
+                </div>
                 Immediate Resources
               </CardTitle>
-              <CardDescription className="text-base text-gray-600 mt-2">
+              <CardDescription className="text-sm mt-1" style={{ color: '#8A8A8A' }}>
                 Tools and resources to help you right now
               </CardDescription>
             </CardHeader>
@@ -256,25 +259,31 @@ export default function CrisisPage() {
                 {IMMEDIATE_RESOURCES.map((resource, index) => (
                   <Card 
                     key={index} 
-                    className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer border-2 border-gray-200 hover:border-purple-400 bg-gradient-to-br from-white to-purple-50/30 overflow-hidden"
+                    className="group transition-all duration-300 rounded-2xl hover:shadow-md bg-white/60 hover:bg-white"
+                    style={{ borderColor: 'rgba(143,174,155,0.15)' }}
                   >
-                    <CardContent className="p-6 text-center relative">
-                      <div className="absolute inset-0 bg-gradient-to-br from-purple-100/0 via-pink-100/0 to-purple-100/0 group-hover:from-purple-100/30 group-hover:via-pink-100/20 group-hover:to-purple-100/30 transition-all duration-500"></div>
-                      <div className="relative">
-                        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                          <ExternalLink className="h-8 w-8 text-white" />
+                    <CardContent className="p-6 text-center relative flex flex-col justify-between h-full min-h-[220px]">
+                      <div>
+                        <div className="w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center shadow-sm" style={{ backgroundColor: `${sage}15` }}>
+                          <ExternalLink className="h-5 w-5" style={{ color: sage }} strokeWidth={1.5} />
                         </div>
-                        <h3 className="font-bold text-lg text-gray-900 mb-3">{resource.title}</h3>
-                        <p className="text-sm text-gray-600 mb-5 leading-relaxed">{resource.description}</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="w-full group-hover:bg-purple-600 group-hover:text-white group-hover:border-purple-600 transition-all duration-300 font-semibold"
-                        >
-                          {resource.action}
-                          <ExternalLink className="h-4 w-4 ml-2" />
-                        </Button>
+                        <h3 className="font-heading font-bold text-base mb-2" style={{ color: '#3A3A3A' }}>{resource.title}</h3>
+                        <p className="text-xs mb-5 leading-relaxed" style={{ color: '#6B6B6B' }}>{resource.description}</p>
                       </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full transition-all duration-300 font-semibold rounded-full border"
+                        style={{ 
+                          borderColor: 'rgba(143,174,155,0.3)',
+                          color: '#4A4A4A',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(143,174,155,0.08)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                      >
+                        {resource.action}
+                        <ExternalLink className="h-3 w-3 ml-1.5" strokeWidth={1.5} />
+                      </Button>
                     </CardContent>
                   </Card>
                 ))}
@@ -282,129 +291,116 @@ export default function CrisisPage() {
             </CardContent>
           </Card>
 
-          {/* Local Resources - Enhanced */}
-          <Card className="border-2 shadow-xl hover:shadow-2xl transition-all duration-300 animate-in slide-in-from-bottom delay-500 duration-700">
-            <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b">
-              <CardTitle className="flex items-center gap-2 text-2xl">
-                <div className="rounded-lg bg-blue-600 p-2">
-                  <MapPin className="h-6 w-6 text-white" />
+          {/* Local Resources */}
+          <Card className="rounded-3xl shadow-lg border-0" style={{ backgroundColor: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(10px)' }}>
+            <CardHeader className="border-b" style={{ borderColor: 'rgba(143,174,155,0.12)', backgroundColor: 'rgba(122,155,176,0.03)' }}>
+              <CardTitle className="flex items-center gap-3 text-xl font-heading font-bold" style={{ color: '#3A3A3A' }}>
+                <div className="rounded-xl p-2.5" style={{ backgroundColor: `${dusty}18` }}>
+                  <MapPin className="h-5 w-5" style={{ color: dusty }} strokeWidth={1.5} />
                 </div>
                 Find Local Help
               </CardTitle>
-              <CardDescription className="text-base text-gray-600 mt-2">
+              <CardDescription className="text-sm mt-1" style={{ color: '#8A8A8A' }}>
                 Locate mental health services and emergency resources near you
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="grid sm:grid-cols-2 gap-4">
-                <Button 
-                  variant="outline" 
-                  className="h-auto p-5 justify-start border-2 hover:border-blue-500 hover:bg-blue-50 transition-all duration-300 group"
-                >
-                  <div className="text-left flex items-center gap-4 w-full">
-                    <div className="rounded-lg bg-blue-100 p-3 group-hover:bg-blue-500 group-hover:scale-110 transition-all duration-300">
-                      <AlertTriangle className="h-6 w-6 text-blue-600 group-hover:text-white transition-colors duration-300" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-bold text-base text-gray-900 mb-1">Emergency Rooms</div>
-                      <div className="text-sm text-gray-600">Find the nearest hospital</div>
-                    </div>
-                  </div>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="h-auto p-5 justify-start border-2 hover:border-[#2BD4BD] hover:bg-[#2BD4BD]/10 transition-all duration-300 group"
-                >
-                  <div className="text-left flex items-center gap-4 w-full">
-                    <div className="rounded-lg bg-[#2BD4BD]/20 p-3 group-hover:bg-[#2BD4BD] group-hover:scale-110 transition-all duration-300">
-                      <Stethoscope className="h-6 w-6 text-[#2BD4BD] group-hover:text-white transition-colors duration-300" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-bold text-base text-gray-900 mb-1">Mental Health Centers</div>
-                      <div className="text-sm text-gray-600">Community mental health services</div>
-                    </div>
-                  </div>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="h-auto p-5 justify-start border-2 hover:border-red-500 hover:bg-red-50 transition-all duration-300 group"
-                >
-                  <div className="text-left flex items-center gap-4 w-full">
-                    <div className="rounded-lg bg-red-100 p-3 group-hover:bg-red-500 group-hover:scale-110 transition-all duration-300">
-                      <Shield className="h-6 w-6 text-red-600 group-hover:text-white transition-colors duration-300" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-bold text-base text-gray-900 mb-1">Crisis Centers</div>
-                      <div className="text-sm text-gray-600">Local crisis intervention</div>
-                    </div>
-                  </div>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="h-auto p-5 justify-start border-2 hover:border-purple-500 hover:bg-purple-50 transition-all duration-300 group"
-                >
-                  <div className="text-left flex items-center gap-4 w-full">
-                    <div className="rounded-lg bg-purple-100 p-3 group-hover:bg-purple-500 group-hover:scale-110 transition-all duration-300">
-                      <Users className="h-6 w-6 text-purple-600 group-hover:text-white transition-colors duration-300" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-bold text-base text-gray-900 mb-1">Support Groups</div>
-                      <div className="text-sm text-gray-600">Peer support meetings</div>
-                    </div>
-                  </div>
-                </Button>
+                {[
+                  { title: "Emergency Rooms", text: "Find the nearest hospital", icon: AlertTriangle, color: coral },
+                  { title: "Mental Health Centers", text: "Community mental health services", icon: Stethoscope, color: sage },
+                  { title: "Crisis Centers", text: "Local crisis intervention", icon: Shield, color: '#C0554A' },
+                  { title: "Support Groups", text: "Peer support meetings", icon: Users, color: dusty },
+                ].map((item, idx) => {
+                  const Icon = item.icon;
+                  return (
+                    <Button 
+                      key={idx}
+                      variant="outline" 
+                      className="h-auto p-5 justify-start border transition-all duration-300 group rounded-2xl bg-white/60 hover:bg-white"
+                      style={{ borderColor: 'rgba(143,174,155,0.15)' }}
+                      onMouseEnter={e => { e.currentTarget.style.borderColor = sage; }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(143,174,155,0.15)'; }}
+                    >
+                      <div className="text-left flex items-center gap-4 w-full">
+                        <div className="rounded-xl p-3 transition-all duration-300" style={{ backgroundColor: 'rgba(143,174,155,0.08)' }}>
+                          <Icon className="h-5 w-5" style={{ color: item.color }} strokeWidth={1.5} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-heading font-bold text-sm mb-0.5" style={{ color: '#3A3A3A' }}>{item.title}</div>
+                          <div className="text-xs truncate" style={{ color: '#8A8A8A' }}>{item.text}</div>
+                        </div>
+                      </div>
+                    </Button>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
 
-          {/* Return to Safety - Enhanced */}
-          <div className="text-center space-y-6 p-8 bg-gradient-to-br from-[#2BD4BD]/10 via-blue-50/50 to-purple-50/30 rounded-2xl border-2 border-[#2BD4BD]/30 shadow-lg animate-in fade-in delay-700 duration-700">
-            <div className="flex justify-center mb-4">
-              <div className="rounded-full bg-gradient-to-br from-[#2BD4BD] to-blue-500 p-4 shadow-lg">
-                <Heart className="h-10 w-10 text-white" />
+          {/* Return to Safety - Soft & Beautiful */}
+          <div 
+            className="text-center space-y-6 p-8 rounded-3xl border shadow-md"
+            style={{ 
+              backgroundColor: 'rgba(143,174,155,0.08)',
+              borderColor: 'rgba(143,174,155,0.2)',
+            }}
+          >
+            <div className="flex justify-center">
+              <div className="rounded-full p-4 shadow-sm bg-white">
+                <Heart className="h-8 w-8" style={{ color: sage }} strokeWidth={1.5} />
               </div>
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#2BD4BD] to-blue-600 bg-clip-text text-transparent">
+            <h2 className="text-2xl md:text-3xl font-heading font-bold" style={{ color: '#3A3A3A' }}>
               Remember: This Will Pass
             </h2>
-            <p className="text-gray-700 max-w-3xl mx-auto text-base md:text-lg leading-relaxed">
+            <p className="max-w-2xl mx-auto text-sm md:text-base leading-relaxed" style={{ color: '#6B6B6B' }}>
               Crisis feelings are temporary. With support and time, things can and do get better. 
               You've taken a brave step by seeking help. We're here for you.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+            <div className="flex flex-wrap gap-4 justify-center pt-2">
               <Button 
                 onClick={() => navigate('/chatbot')} 
                 variant="outline"
-                className="border-2 hover:border-[#2BD4BD] hover:bg-[#2BD4BD]/10 transition-all duration-300 px-6 py-3 text-base font-semibold group"
+                className="transition-all duration-300 px-6 py-2.5 h-auto text-sm font-semibold rounded-full border"
+                style={{ borderColor: 'rgba(143,174,155,0.3)', backgroundColor: 'transparent', color: '#4A4A4A' }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.6)'}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
               >
-                <MessageCircle className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform duration-300" />
+                <MessageCircle className="h-4 w-4 mr-2" strokeWidth={1.5} />
                 Continue AI Support
               </Button>
               <Button 
-                onClick={() => navigate('/peer/available')}
-                className="bg-gradient-to-r from-[#2BD4BD] to-blue-500 hover:from-[#25BFB0] hover:to-blue-600 text-white shadow-md hover:shadow-xl transition-all duration-300 px-6 py-3 text-base font-semibold"
+                onClick={() => navigate('/peer/request')}
+                className="text-white shadow-sm transition-all duration-300 px-6 py-2.5 h-auto text-sm font-semibold rounded-full border-0"
+                style={{ backgroundColor: sage }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#7D9C89'}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = sage}
               >
-                <Users className="h-5 w-5 mr-2" />
+                <Users className="h-4 w-4 mr-2" strokeWidth={1.5} />
                 Talk to Peer Support
               </Button>
               <Button 
                 onClick={() => navigate('/counselor/request')}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-md hover:shadow-xl transition-all duration-300 px-6 py-3 text-base font-semibold"
+                className="text-white shadow-sm transition-all duration-300 px-6 py-2.5 h-auto text-sm font-semibold rounded-full border-0"
+                style={{ backgroundColor: coral }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#D57A57'}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = coral}
               >
-                <Stethoscope className="h-5 w-5 mr-2" />
+                <Stethoscope className="h-4 w-4 mr-2" strokeWidth={1.5} />
                 Find Professional Help
               </Button>
             </div>
           </div>
 
-          {/* Footer Message - Enhanced */}
-          <div className="text-center text-sm text-gray-600 p-6 border-t-2 border-gray-200 bg-gray-50 rounded-lg">
+          {/* Footer Message */}
+          <div className="text-center text-xs p-6 border rounded-2xl" style={{ borderColor: 'rgba(143,174,155,0.12)', backgroundColor: 'rgba(143,174,155,0.03)' }}>
             <div className="flex items-center justify-center gap-2 mb-2">
-              <Shield className="h-5 w-5 text-gray-500" />
-              <p className="font-semibold text-gray-700">Important Safety Information</p>
+              <Shield className="h-4 w-4" style={{ color: '#8A8A8A' }} strokeWidth={1.5} />
+              <p className="font-semibold" style={{ color: '#3A3A3A' }}>Important Safety Information</p>
             </div>
-            <p className="max-w-3xl mx-auto leading-relaxed">
-              If you're experiencing a medical emergency, call <strong className="text-red-600">911</strong> immediately. 
+            <p className="max-w-2xl mx-auto leading-relaxed" style={{ color: '#8A8A8A' }}>
+              If you're experiencing a medical emergency, call <strong style={{ color: '#C0554A' }}>112</strong> immediately. 
               This platform provides support but is not a substitute for professional emergency services.
             </p>
           </div>
