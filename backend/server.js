@@ -63,7 +63,7 @@ const io = socketIo(server, {
 
 // Environment variables
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/saneyar-mental-health';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/calmify-mental-health';
 
 // Security middleware
 app.use(helmet({

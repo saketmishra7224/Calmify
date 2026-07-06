@@ -109,7 +109,7 @@ export function AppNavbar({ currentRole }: AppNavbarProps) {
   };
 
   const getRoleDisplayName = () => {
-    if (!isAuthenticated || !user) return 'SANEYAR';
+    if (!isAuthenticated || !user) return 'CALMIFY';
     
     switch (user.role) {
       case 'patient':
@@ -121,7 +121,7 @@ export function AppNavbar({ currentRole }: AppNavbarProps) {
       case 'admin':
         return 'ADMIN';
       default:
-        return 'SANEYAR';
+        return 'CALMIFY';
     }
   };
 

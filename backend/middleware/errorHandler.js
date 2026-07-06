@@ -74,7 +74,7 @@ const logger = winston.createLogger({
     winston.format.errors({ stack: true }),
     winston.format.json()
   ),
-  defaultMeta: { service: 'saneyar-backend' },
+  defaultMeta: { service: 'calmify-backend' },
   transports: [
     new winston.transports.File({ 
       filename: 'logs/error.log', 

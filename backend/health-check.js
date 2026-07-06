@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
 /**
- * Saneyar Health Check Script
+ * Calmify Health Check Script
  * Verifies that all components are properly configured and running
  */
 
 const fs = require('fs');
 const path = require('path');
 
-console.log('🏥 Saneyar Mental Health Platform - Health Check');
+console.log('🏥 Calmify Mental Health Platform - Health Check');
 console.log('===============================================\n');
 
 let healthStatus = {

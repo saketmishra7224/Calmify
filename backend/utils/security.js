@@ -91,8 +91,8 @@ function generateAccessToken(payload, expiresIn = '1h') {
   
   return jwt.sign(tokenPayload, process.env.JWT_SECRET, { 
     expiresIn,
-    issuer: 'saneyar-platform',
-    audience: 'saneyar-users'
+    issuer: 'calmify-platform',
+    audience: 'calmify-users'
   });
 }
 
@@ -115,8 +115,8 @@ function generateRefreshToken(payload) {
   
   return jwt.sign(tokenPayload, process.env.JWT_REFRESH_SECRET, { 
     expiresIn: '30d',
-    issuer: 'saneyar-platform',
-    audience: 'saneyar-users'
+    issuer: 'calmify-platform',
+    audience: 'calmify-users'
   });
 }
 
@@ -139,8 +139,8 @@ function verifyToken(token, type = 'access') {
   
   try {
     const decoded = jwt.verify(token, secret, {
-      issuer: 'saneyar-platform',
-      audience: 'saneyar-users'
+      issuer: 'calmify-platform',
+      audience: 'calmify-users'
     });
     
     if (decoded.type !== type) {
@@ -238,7 +238,7 @@ function encryptMessage(text, key = null) {
   
   const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipher(ENCRYPTION_ALGORITHM, encryptionKey);
-  cipher.setAAD(Buffer.from('saneyar-message'));
+  cipher.setAAD(Buffer.from('calmify-message'));
   
   let encrypted = cipher.update(text, 'utf8', 'hex');
   encrypted += cipher.final('hex');
@@ -282,7 +282,7 @@ function decryptMessage(encryptedData, key = null) {
   try {
     const decipher = crypto.createDecipher(ENCRYPTION_ALGORITHM, decryptionKey);
     decipher.setAuthTag(Buffer.from(authTag, 'hex'));
-    decipher.setAAD(Buffer.from('saneyar-message'));
+    decipher.setAAD(Buffer.from('calmify-message'));
     
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
@@ -331,7 +331,7 @@ function generateSessionId() {
  * @param {string} prefix - Key prefix (e.g., 'sk_live_', 'sk_test_')
  * @returns {string} API key
  */
-function generateApiKey(prefix = 'sk_saneyar_') {
+function generateApiKey(prefix = 'sk_calmify_') {
   const randomPart = generateSecureRandomString(40);
   return `${prefix}${randomPart}`;
 }

@@ -436,7 +436,7 @@ class AIChatbot {
    * Build system prompt for Azure OpenAI based on intent
    */
   buildSystemPrompt(intentType, conversation) {
-    const basePrompt = `You are a compassionate AI mental health support assistant for the Saneyar platform. Your primary goals are:
+    const basePrompt = `You are a compassionate AI mental health support assistant for the Calmify platform. Your primary goals are:
     1. Provide empathetic, non-judgmental support
     2. Validate feelings and experiences
     3. Offer practical coping strategies

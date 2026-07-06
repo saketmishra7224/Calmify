@@ -1,5 +1,5 @@
 {
-  "name": "saneyar-backend",
+  "name": "calmify-backend",
   "version": "1.0.0",
   "description": "Mental health support platform backend with crisis detection and AI chatbot",
   "main": "server.js",
@@ -13,9 +13,9 @@
     "lint:fix": "eslint . --ext .js --fix",
     "seed": "node scripts/seedDatabase.js",
     "db:migrate": "node scripts/migrate.js",
-    "docker:build": "docker build -t saneyar-backend .",
-    "docker:run": "docker run -p 3000:3000 --env-file .env saneyar-backend",
-    "prepare": "node -e \"try { require('husky').install() } catch (e) { if (e.code !== 'MODULE_NOT_FOUND') throw e }\"",
+    "docker:build": "docker build -t calmify-backend .",
+    "docker:run": "docker run -p 3000:3000 --env-file .env calmify-backend",
+    "prepare": "node -e \"if (process.env.NODE_ENV !== 'production' && !process.env.CI) { try { require('husky').install() } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' && !e.message.includes('.git')) throw e } }\"",
     "setup": "./setup.sh",
     "health-check": "node health-check.js",
     "health": "node health-check.js",
@@ -31,7 +31,7 @@
     "socket.io",
     "mongodb"
   ],
-  "author": "Saneyar Team",
+  "author": "Calmify Team",
   "license": "MIT",
   "dependencies": {
     "@azure/core-auth": "^1.10.1",
@@ -87,12 +87,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/saneyar-backend.git"
+    "url": "https://github.com/yourusername/calmify-backend.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/saneyar-backend/issues"
+    "url": "https://github.com/yourusername/calmify-backend/issues"
   },
-  "homepage": "https://github.com/yourusername/saneyar-backend#readme",
+  "homepage": "https://github.com/yourusername/calmify-backend#readme",
   "lint-staged": {
     "*.js": [
       "eslint --fix",
